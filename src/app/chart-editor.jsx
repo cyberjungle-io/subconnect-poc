@@ -1,5 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
+import { ApolloClient, InMemoryCache, gql, useQuery } from "@apollo/client";
+
 import {
   ComposedChart,
   Line,
@@ -40,7 +42,42 @@ import {
   FontSizeControl,
 } from "@/components/custom/controls";
 
+const GET_DATA = gql`
+  query {
+    globalStateSnapshots(
+      limit: 1000
+      orderBy: updatedTime_ASC
+      where: { updatedTime_gt: "2024-02-01T22:00:00.000000Z" }
+    ) {
+      averageApr
+      averageBlockTime
+      delegatorCount
+      totalValue
+      updatedTime
+    }
+  }
+`;
+
 const ChartEditor = () => {
+  const [data, setData] = useState(null);
+
+  const fetchData = async () => {
+    const client = new ApolloClient({
+      uri: "https://khala-computation.cyberjungle.io/graphql",
+      cache: new InMemoryCache(),
+    });
+    try {
+      const result = await client.query({ query: GET_DATA });
+      setData(result.data.globalStateSnapshots);
+      console.log(data)
+      // rest of your code
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
   // Add state for the form
   const [form, setForm] = useState({
     title: {
@@ -186,7 +223,7 @@ const ChartEditor = () => {
       },
     }));
   }
-  
+
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
@@ -196,7 +233,8 @@ const ChartEditor = () => {
         )}`
       : null;
   }
-  const data = [
+
+  /* const data = [
     {
       name: "Page A",
       uv: 4000,
@@ -239,7 +277,7 @@ const ChartEditor = () => {
       pv: 4300,
       amt: 2100,
     },
-  ];
+  ]; */
   // Render the chart elements and their customization sections
   const renderElements = () => {
     return elements.map((element, index) => {
@@ -443,7 +481,7 @@ const ChartEditor = () => {
               <ComposedChart width={500} height={300} data={data}>
                 {form.chart.showXAxis && (
                   <XAxis
-                    dataKey="name"
+                    dataKey="updatedTime"
                     label={form.chart.xAxisLabel}
                     tick={{ fontSize: form.axis.xAxisFontSize }}
                   />
@@ -698,8 +736,6 @@ const ChartEditor = () => {
                 </div>
               </div>
             )}
-            
-              
           </div>
         </div>
         {renderElements()}
