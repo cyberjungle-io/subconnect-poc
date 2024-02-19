@@ -186,6 +186,7 @@ const ChartEditor = () => {
       },
     }));
   }
+  
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
@@ -440,8 +441,19 @@ const ChartEditor = () => {
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart width={500} height={300} data={data}>
-                {form.chart.showXAxis && <XAxis dataKey="name" />}
-                {form.chart.showYAxis && <YAxis />}
+                {form.chart.showXAxis && (
+                  <XAxis
+                    dataKey="name"
+                    label={form.chart.xAxisLabel}
+                    tick={{ fontSize: form.axis.xAxisFontSize }}
+                  />
+                )}
+                {form.chart.showYAxis && (
+                  <YAxis
+                    label={form.chart.yAxisLabel}
+                    tick={{ fontSize: form.axis.yAxisFontSize }}
+                  />
+                )}
                 <Tooltip
                   contentStyle={{
                     display: form.tooltip.show ? "block" : "none",
@@ -686,100 +698,8 @@ const ChartEditor = () => {
                 </div>
               </div>
             )}
-            <div>
-              <Toggle onClick={() => handleToggleElement("showXAxis")}>
-                {form.chart.showXAxis ? "Hide X Axis" : "Show X Axis"}
-              </Toggle>
-              {form.chart.showXAxis && (
-                <div className="flex space-x-2">
-                  <ColorControl
-                    label="X Axis Color"
-                    value={form.chart.xAxisColor}
-                    onChange={(newValue) =>
-                      handleInputChange("chart", "xAxisColor", newValue)
-                    }
-                  />
-                  <FontSizeControl
-                    label="X Axis Font Size"
-                    value={form.chart.xAxisFontSize}
-                    onChange={(newValue) =>
-                      handleInputChange("chart", "xAxisFontSize", newValue)
-                    }
-                    onDecrease={() =>
-                      handleInputChange(
-                        "chart",
-                        "xAxisFontSize",
-                        Math.max(0, form.chart.xAxisFontSize - 1)
-                      )
-                    }
-                    onIncrease={() =>
-                      handleInputChange(
-                        "chart",
-                        "xAxisFontSize",
-                        form.chart.xAxisFontSize + 1
-                      )
-                    }
-                  />
-                  <Input
-                    label="X Axis Label"
-                    value={form.chart.xAxisLabel}
-                    onChange={(event) =>
-                      handleInputChange(
-                        "chart",
-                        "xAxisLabel",
-                        event.target.value
-                      )
-                    }
-                  />
-                </div>
-              )}
-              <Toggle onClick={() => handleToggleElement("showYAxis")}>
-                {form.chart.showYAxis ? "Hide Y Axis" : "Show Y Axis"}
-              </Toggle>
-              {form.chart.showYAxis && (
-                <div className="flex space-x-2">
-                  <ColorControl
-                    label="Y Axis Color"
-                    value={form.chart.yAxisColor}
-                    onChange={(newValue) =>
-                      handleInputChange("chart", "yAxisColor", newValue)
-                    }
-                  />
-                  <FontSizeControl
-                    label="Y Axis Font Size"
-                    value={form.chart.yAxisFontSize}
-                    onChange={(newValue) =>
-                      handleInputChange("chart", "yAxisFontSize", newValue)
-                    }
-                    onDecrease={() =>
-                      handleInputChange(
-                        "chart",
-                        "yAxisFontSize",
-                        Math.max(0, form.chart.yAxisFontSize - 1)
-                      )
-                    }
-                    onIncrease={() =>
-                      handleInputChange(
-                        "chart",
-                        "yAxisFontSize",
-                        form.chart.yAxisFontSize + 1
-                      )
-                    }
-                  />
-                  <Input
-                    label="Y Axis Label"
-                    value={form.chart.yAxisLabel}
-                    onChange={(event) =>
-                      handleInputChange(
-                        "chart",
-                        "yAxisLabel",
-                        event.target.value
-                      )
-                    }
-                  />
-                </div>
-              )}
-            </div>
+            
+              
           </div>
         </div>
         {renderElements()}

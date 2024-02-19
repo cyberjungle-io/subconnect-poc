@@ -228,8 +228,8 @@ export const WidthControl = ({ label, value, onDecrease, onIncrease, onChange })
           value={value || ""}
           onChange={(e) => {
             const newValue = parseFloat(e.target.value);
-            if (!isNaN(newValue) && newValue >= 0 && newValue <= 1) {
-              onChange(newValue.toFixed(1));
+            if (!isNaN(newValue) && newValue >= 0) {
+              onChange(newValue.toString());
             }
           }}
         />
