@@ -222,7 +222,7 @@ const ChartEditor = () => {
         [property]: value,
       },
     }));
-  }
+  };
 
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -232,14 +232,14 @@ const ChartEditor = () => {
           16
         )}`
       : null;
-  }
-  // Save to local storage
-  // Save to local storage
-  const saveChartPreferences = (chartId) => {
-    const timestamp = Date.now();
-    localStorage.setItem(`chartPreferences-${chartId}`, JSON.stringify(form));
-    localStorage.setItem(`chartElements-${chartId}`, JSON.stringify(elements));
   };
+  // Save to local storage
+// Save to local storage
+const saveChartPreferences = (chartId) => {
+  
+  localStorage.setItem(`chartPreferences-${chartId}`, JSON.stringify(form));
+  localStorage.setItem(`chartElements-${chartId}`, JSON.stringify(elements));
+};
   const handleSaveClick = () => {
     saveChartPreferences();
   };
@@ -427,8 +427,9 @@ const ChartEditor = () => {
   };
   return (
     <>
-      <Button onClick={handleSaveClick}>Save</Button>
+    <Button  onClick={handleSaveClick}>Save</Button>
       <section className="w-2/3 mx-auto">
+        
         <Card className="h-[350px]">
           <CardHeader>
             <CardTitle>
