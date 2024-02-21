@@ -13,6 +13,17 @@ const reorder = (list, startIndex, endIndex) => {
   return result;
 };
 
+ const getColSpanClass = (colSpan) => {
+        switch (colSpan) {
+          case 2: return "w-2/12";
+          case 4: return "w-4/12";
+          case 6: return "w-6/12";
+          case 8: return "w-8/12";
+          case 10: return "w-10/12";
+          case 12: return "w-full";
+          default: return "w-1/12";
+        }
+      };
 const NewDashboard = () => {
   const [rows, setRows] = useState([
     { id: uniqueId(), charts: [{ id: uniqueId(), colSpan: 2 }] },
@@ -22,52 +33,73 @@ const NewDashboard = () => {
     if (!result.destination) {
       return;
     }
-
+    
+   
+      
     const { source, destination } = result;
 
-    if (source.droppableId === destination.droppableId) {
-      const row = rows.find((row) => row.id === parseInt(source.droppableId));
-      const charts = reorder(row.charts, source.index, destination.index);
+    // Find the source and destination rows by ID
+  const sourceRow = rows.find(row => row.id === parseInt(source.droppableId));
+  const destinationRow = rows.find(row => row.id === parseInt(destination.droppableId));
 
-      setRows(
-        rows.map((row) => {
-          if (row.id === parseInt(source.droppableId)) {
-            return { ...row, charts };
-          }
-          return row;
-        })
-      );
-    } else {
-      // Handle dragging between different rows if needed
-    }
-  };
+  if (source.droppableId === destination.droppableId) {
+    // Moving within the same row
+    const newRowCharts = reorder(sourceRow.charts, source.index, destination.index);
+    const newRows = rows.map(row => {
+      if (row.id === sourceRow.id) {
+        return { ...row, charts: newRowCharts };
+      }
+      return row;
+    });
+    setRows(newRows);
+  } else {
+    // Moving to a different row
+    const sourceCharts = Array.from(sourceRow.charts);
+    const [removed] = sourceCharts.splice(source.index, 1);
+    const destinationCharts = Array.from(destinationRow.charts);
+    destinationCharts.splice(destination.index, 0, removed);
 
-  const addChart = () => {
+    const newRows = rows.map(row => {
+      if (row.id === sourceRow.id) {
+        return { ...row, charts: sourceCharts };
+      } else if (row.id === destinationRow.id) {
+        return { ...row, charts: destinationCharts };
+      }
+      return row;
+    });
+
+    setRows(newRows);
+  }
+};
+
+const addChart = (event) => {
+    event.stopPropagation();
+    console.log("Adding chart..."); // Diagnostic log
     setRows((currentRows) => {
+      console.log("Current rows before adding:", currentRows); // Log current state before adding
       const newRows = [...currentRows];
       const lastRow = newRows[newRows.length - 1];
-      const totalColSpan = lastRow.charts.reduce(
-        (sum, chart) => sum + chart.colSpan,
-        0
-      );
-
+      const totalColSpan = lastRow.charts.reduce((sum, chart) => sum + chart.colSpan, 0);
+  
       if (totalColSpan + 2 <= 12) {
         lastRow.charts.push({ id: uniqueId(), colSpan: 2 });
       } else {
-        newRows.push({
-          id: uniqueId(),
-          charts: [{ id: uniqueId(), colSpan: 2 }],
-        });
+        newRows.push({ id: uniqueId(), charts: [{ id: uniqueId(), colSpan: 2 }] });
       }
-
+  
+      console.log("New rows after adding:", newRows); // Log new state after adding
       return newRows;
     });
   };
+  
 
   const addRow = () => {
-    setRows((currentRows) => [...currentRows, { id: uniqueId(), charts: [] }]);
+    setRows((currentRows) => [
+      ...currentRows,
+      { id: uniqueId(), charts: [] },
+    ]);
   };
-  // This function is responsible for extending a chart's column span by 2, up to a maximum of 10.
+
   const extendChart = (rowId, chartId) => {
     setRows((currentRows) => {
       return currentRows.map((row) => {
@@ -76,7 +108,8 @@ const NewDashboard = () => {
             ...row,
             charts: row.charts.map((chart) => {
               if (chart.id === chartId && chart.colSpan < 10) {
-                return { ...chart, colSpan: chart.colSpan + 2 };
+                const newColSpan = chart.colSpan + 2;
+                return { ...chart, colSpan: newColSpan };
               }
               return chart;
             }),
@@ -90,47 +123,16 @@ const NewDashboard = () => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {rows.map((row, rowIndex) => (
-        <Droppable
-          key={row.id}
-          droppableId={String(row.id)}
-          direction="horizontal"
-        >
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="flex flex-wrap -mx-3 mb-4"
-              style={{
-                backgroundColor: snapshot.isDraggingOver
-                  ? "lightblue"
-                  : "inherit",
-              }}
-            >
-              {row.charts.map((chart, index) => (
-                <Draggable
-                  key={chart.id}
-                  draggableId={String(chart.id)}
-                  index={index}
-                >
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className={`px-3 mb-6 md:w-1/${Math.ceil(
-                        12 / chart.colSpan
-                      )} flex justify-center items-center`}
-                      style={{
-                        ...provided.draggableProps.style,
-                        opacity: snapshot.isDragging ? 0.5 : 1,
-                      }}
-                    >
+        <Droppable key={row.id} droppableId={`${row.id}`} direction="horizontal">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-wrap mb-4">
+              {row.charts.map((chart, chartIndex) => (
+                <Draggable key={chart.id} draggableId={`${chart.id}`} index={chartIndex}>
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`px-3 mb-6 flex justify-center items-center ${getColSpanClass(chart.colSpan)}`}>
                       <div className="border rounded flex justify-between items-center p-4 w-full">
                         <span>Chart {chart.id}</span>
-                        <button
-                          onClick={() => extendChart(row.id, chart.id)}
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                        >
+                        <button onClick={() => extendChart(row.id, chart.id)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
                           Extend
                         </button>
                       </div>
@@ -143,16 +145,11 @@ const NewDashboard = () => {
           )}
         </Droppable>
       ))}
-      <button
-        onClick={addChart}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Add Chart
-      </button>
-      <button
-        onClick={addRow}
-        className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-      >
+      <button onClick={(event) => addChart(event)} type="button" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+  Add Chart
+</button>
+     
+      <button onClick={addRow} className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
         Add Row
       </button>
     </DragDropContext>
