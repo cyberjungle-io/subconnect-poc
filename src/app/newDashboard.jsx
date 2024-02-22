@@ -89,33 +89,27 @@ const NewDashboard = () => {
 
   const addChart = (event) => {
     console.log("Adding chart..."); // Diagnostic log
- 
-    
 
-    
-      const currentRows = rows;
-        console.log("Current rows before adding:", currentRows); // Log current state before adding
-        const newRows = [...currentRows];
-        const lastRow = newRows[newRows.length - 1];
-        const totalColSpan = lastRow.charts.reduce(
-          (sum, chart) => sum + chart.colSpan,
-          0
-        );
+    const currentRows = rows;
+    console.log("Current rows before adding:", currentRows); // Log current state before adding
+    const newRows = [...currentRows];
+    const lastRow = newRows[newRows.length - 1];
+    const totalColSpan = lastRow.charts.reduce(
+      (sum, chart) => sum + chart.colSpan,
+      0
+    );
 
-        if (totalColSpan + 2 <= 12) {
-          lastRow.charts.push({ id: uniqueId(), colSpan: 2 });
-        } else {
-          newRows.push({
-            id: uniqueId(),
-            charts: [{ id: uniqueId(), colSpan: 2 }],
-          });
-        }
+    if (totalColSpan + 2 <= 12) {
+      lastRow.charts.push({ id: uniqueId(), colSpan: 2 });
+    } else {
+      newRows.push({
+        id: uniqueId(),
+        charts: [{ id: uniqueId(), colSpan: 2 }],
+      });
+    }
 
-        console.log("New rows after adding:", newRows); // Log new state after adding
-        setRows(newRows);
-      
-    
-    
+    console.log("New rows after adding:", newRows); // Log new state after adding
+    setRows(newRows);
 
     console.log("Chart added."); // Diagnostic log
   };
@@ -133,7 +127,7 @@ const NewDashboard = () => {
           return {
             ...row,
             charts: row.charts.map((chart) => {
-              if (chart.id === chartId && chart.colSpan < 10) {
+              if (chart.id === chartId && chart.colSpan < 12) {
                 const newColSpan = chart.colSpan + 2;
                 return { ...chart, colSpan: newColSpan };
               }
@@ -145,7 +139,48 @@ const NewDashboard = () => {
       });
     });
   };
+  const addChartToRow = (rowId) => {
+    const newRows = rows.map((row) => {
+      if (row.id === rowId) {
+        const totalColSpan = row.charts.reduce((sum, chart) => sum + chart.colSpan, 0);
+        if (totalColSpan + 2 <= 12) {
+          return { ...row, charts: [...row.charts, { id: uniqueId(), colSpan: 2 }] };
+        }
+      }
+      return row;
+    });
+    setRows(newRows);
+  };
+  
+  const shrinkChart = (rowId, chartId) => {
+    setRows(currentRows => currentRows.map(row => {
+      if (row.id === rowId) {
+        return {
+          ...row,
+          charts: row.charts.map(chart => {
+            if (chart.id === chartId && chart.colSpan > 2) {
+              return { ...chart, colSpan: chart.colSpan - 2 };
+            }
+            return chart;
+          }),
+        };
+      }
+      return row;
+    }));
+  };
 
+  
+  const deleteChart = (rowId, chartId) => {
+    setRows(currentRows => currentRows.map(row => {
+      if (row.id === rowId) {
+        return {
+          ...row,
+          charts: row.charts.filter(chart => chart.id !== chartId),
+        };
+      }
+      return row;
+    }));
+  };
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       {rows.map((row, rowIndex) => (
@@ -177,29 +212,50 @@ const NewDashboard = () => {
                     >
                       <div className="border rounded flex justify-between items-center p-4 w-full">
                         <span>Chart {chart.id}</span>
-                        <button
-                          onClick={() => extendChart(row.id, chart.id)}
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                        >
-                          Extend
-                        </button>
+                        <div className="flex flex-col space-y-2">
+            {chart.colSpan < 12 && (
+              <button
+                onClick={() => extendChart(row.id, chart.id)}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+              >
+                Extend
+              </button>
+            )}
+            {chart.colSpan > 2 && (
+              <button
+                onClick={() => shrinkChart(row.id, chart.id)}
+                className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
+              >
+                Shrink
+              </button>
+            )}
+            <button
+              onClick={() => deleteChart(row.id, chart.id)}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+            >
+              Delete
+            </button>
+          </div>
                       </div>
                     </div>
                   )}
                 </Draggable>
               ))}
+              {row.charts.reduce((sum, chart) => sum + chart.colSpan, 0) <= 10 && (
+              <button
+                onClick={() => addChartToRow(row.id)} // Modify this function to add a chart to the specific row
+                type="button"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Add Chart
+              </button>
+            )}
               {provided.placeholder}
             </div>
           )}
         </Droppable>
       ))}
-      <button
-        onClick={(event) => addChart(event)}
-        type="button"
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Add Chart
-      </button>
+      
 
       <button
         onClick={addRow}
