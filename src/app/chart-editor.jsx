@@ -41,6 +41,7 @@ import {
   BorderStyleSelect,
   FontSizeControl,
 } from "@/components/custom/controls";
+import { fetchGraphData } from "@/lib/graphdata";
 
 const GET_DATA = gql`
   query {
@@ -77,6 +78,7 @@ const ChartEditor = () => {
   };
   useEffect(() => {
     fetchData();
+    fetchGraphData();
   }, []);
   // Add state for the form
   const [form, setForm] = useState({
