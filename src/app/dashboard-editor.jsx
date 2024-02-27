@@ -23,7 +23,7 @@ const DashboardEditor = () => {
         const elements = JSON.parse(
           localStorage.getItem(`chartElements-${chartId}`)
         );
-  
+          console.log(elements)
         loadedCharts.push({ chartId, form, elements });
       }
     }

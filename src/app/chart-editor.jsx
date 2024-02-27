@@ -41,7 +41,7 @@ import {
   BorderStyleSelect,
   FontSizeControl,
 } from "@/components/custom/controls";
-import { fetchGraphData } from "@/lib/graphdata";
+import { fetchGraphDataDateSeries,graphArray } from "@/lib/graphdata";
 
 const GET_DATA = gql`
   query {
@@ -78,7 +78,7 @@ const ChartEditor = () => {
   };
   useEffect(() => {
     fetchData();
-    fetchGraphData();
+    fetchGraphDataDateSeries("apr","MM/DD/YYYY");
   }, []);
   // Add state for the form
   const [form, setForm] = useState({
@@ -126,6 +126,7 @@ const ChartEditor = () => {
       dataKey: "",
       opacity: 1,
       seriesText: "New Series",
+      data:{}
     },
   ]);
 
@@ -140,6 +141,7 @@ const ChartEditor = () => {
         dataKey: "",
         opacity: 1,
         seriesText: "New Series",
+        data:{}
       },
     ]);
   };
@@ -158,11 +160,18 @@ const ChartEditor = () => {
     });
   };
   // Add a handler for the element inputs
-  const handleElementChange = (index, property) => (e) => {
-    const newElements = [...elements];
-    newElements[index][property] = e.target.value;
-    setElements(newElements);
+  const handleElementChange = (index, field) => (event) => {
+    console.log(event.target.value)
+    const newValue = event.target.value;
+    // Assuming `elements` is an array in your component's state that contains the configurations,
+    // and you have a method `setElements` to update this state.
+    setElements((prevElements) => {
+      const newElements = [...prevElements];
+      newElements[index][field] = newValue;
+      return newElements;
+    });
   };
+  
   const handleSelectChange = (index, property) => (value) => {
     const newElements = [...elements];
     newElements[index][property] = value;
@@ -238,8 +247,9 @@ const ChartEditor = () => {
   // Save to local storage
 // Save to local storage
 const saveChartPreferences = (chartId) => {
-  
+  console.log(form);
   localStorage.setItem(`chartPreferences-${chartId}`, JSON.stringify(form));
+  console.log(elements);
   localStorage.setItem(`chartElements-${chartId}`, JSON.stringify(elements));
 };
   const handleSaveClick = () => {
@@ -325,14 +335,20 @@ const saveChartPreferences = (chartId) => {
               />
             </div>
             <div className="flex flex-col space-y-1">
-              <Label>Data Key:</Label>
-              <Input
-                className="w-80"
-                type="text"
-                value={element.dataKey}
-                onChange={handleElementChange(index, "dataKey")}
-              />
-            </div>
+  <Label>Data Key:</Label>
+  <select
+    className="w-80 form-select"
+    value={element.dataKey} // Ensure this is set to the currently selected data key
+    onChange={handleElementChange(index, "dataKey")}
+  >
+    {graphArray.map((item, idx) => (
+      <option key={idx} value={item.yAxis}>
+        {item.name}
+      </option>
+    ))}
+  </select>
+</div>
+
             <div className="flex flex-col space-y-1">
               <Label>Opacity:</Label>
               <div className="flex items-center ms-4">
