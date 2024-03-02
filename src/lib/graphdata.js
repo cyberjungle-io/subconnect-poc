@@ -1,8 +1,10 @@
 import { ApolloClient, InMemoryCache, gql, useQuery } from "@apollo/client";
+import { data } from "autoprefixer";
 import moment from 'moment';
 
 export const graphArray = [
-    {"name": "Phala Average Apr",
+    {"id" : "1",
+    "name": "Phala Average Apr",
     "chain": "Khala",
     "URI": ["https://khala-computation.cyberjungle.io/graphql"],
     "queryType": "time",
@@ -22,8 +24,10 @@ export const graphArray = [
     "owner": "Cyber Jungle",
     "xAxis": "updatedTime",
     "yAxis": "averageApr",
+    "postProcess": [{"multiplyBy": 100}, {"round": 2}]
     },
-    {"name": "Phala Average Block Time",
+    {"id" : "2",
+    "name": "Phala Average Block Time",
     "chain": "Khala",
     "URI": ["https://khala-computation.cyberjungle.io/graphql"],
     "queryType": "time",
@@ -43,8 +47,10 @@ export const graphArray = [
     "owner": "Cyber Jungle",
     "xAxis": "updatedTime",
     "yAxis": "averageBlockTime",
+    "postProcess": [{"devideBy": 1000}, {"round": 2}]
     },
-    {"name": "Phala Delegator Count",
+    {"id" : "3",
+    "name": "Phala Delegator Count",
     "chain": "Khala",
     "URI": ["https://khala-computation.cyberjungle.io/graphql"],
     "queryType": "time",
@@ -64,8 +70,10 @@ export const graphArray = [
     "owner": "Cyber Jungle",
     "xAxis": "updatedTime",
     "yAxis": "delegatorCount",
+    "postProcess": []
     },
-    {"name": "Phala Total Value",
+    {"id" : "4",
+    "name": "Phala Total Value",
     "chain": "Khala",
     "URI": ["https://khala-computation.cyberjungle.io/graphql"],
     "queryType": "time",
@@ -85,27 +93,60 @@ export const graphArray = [
     "owner": "Cyber Jungle",
     "xAxis": "updatedTime",
     "yAxis": "totalValue",
+    "postProcess": []
     }
 
 ]
 
-export const fetchGraphDataDateSeries = async (graphName,dateformat) => {
-    const dt = daysFromNow(7);
+export const fetchGraphDataDateSeries = async (id,dateformat,days) => {
+    //find the index of the graphArray with the id
+    const index = graphArray.findIndex(x => x.id === id);
+    const dt = daysFromNow(days);
     console.log(dt);
     const client = new ApolloClient({
-        uri: graphArray[0].URI[0],
+        uri: graphArray[index].URI[0],
         cache: new InMemoryCache()
     });
 
     const { data } = await client.query({
-        query: gql(graphArray[0].query.replace("<<datetime>>", dt))
+        query: gql(graphArray[index].query.replace("<<datetime>>", dt))
     });
-
-    let newdata = formatDatesInArray(data.globalStateSnapshots, "updatedTime", dateformat);
-    console.log(newdata);
-    return newdata;
+    let newArray = [];
+    for (let i = 0; i < data.globalStateSnapshots.length; i++) {
+        let record = data.globalStateSnapshots[i];
+        console.log(graphArray[index].yAxis);
+        record = { ...record, [graphArray[index].yAxis]: postProcess(record[graphArray[index].yAxis], graphArray[index].postProcess) };
+        newArray.push(record);
+    }
+    
+    return newArray;
+}
+function postProcess(data, processArray  ) {
+    for (let c = 0; c < processArray.length; c++) {
+        let p = processArray[c];
+        // condition off the element name of p
+        if (p.hasOwnProperty("multiplyBy")) {
+            data = multiplyBy(data, p.multiplyBy);
+        }
+        if (p.hasOwnProperty("devideBy")) {
+            data = devideBy(data, p.devideBy);
+        }
+        if (p.hasOwnProperty("round")) {
+            data = round(data, p.round);
+        }
+    }
+    return data;
 }
 
+function devideBy(data, value) {
+    return data / value;
+}
+function multiplyBy(data, value) {
+    return data * value;
+}   
+function round(data, value) {
+    return data.toFixed(value);
+}
 
 //generate a datetime in the format of "2024-02-01T22:00:00.000000Z". 
 // input the number of days from today to generate the datetime.
@@ -125,3 +166,45 @@ function formatDatesInArray(array, property, format) {
     });
 }
    
+export const fetchElementData = async (elements) => {
+    // Fetch all data concurrently
+    console.log(elements);
+    const dataPromises = elements.map(element => 
+        fetchGraphDataDateSeries(element.id, "MM/DD/YYYY", 7)
+    );
+    const results = await Promise.all(dataPromises);
+
+    // Combine all arrays into a single array
+    let combinedData = [].concat(...results);
+
+    // Sort the combined array by updatedTime
+    combinedData.sort((a, b) => moment(a.updatedTime, "MM/DD/YYYY").diff(moment(b.updatedTime, "MM/DD/YYYY")));
+
+    // Merge entries with the same updatedTime
+    let mergedData = combinedData.reduce((acc, data) => {
+        // Find if there's already an entry with the same updatedTime
+        let existingEntryIndex = acc.findIndex(entry => entry.updatedTime === data.updatedTime);
+        if (existingEntryIndex > -1) {
+            // If found, merge this data into the existing entry without overwriting existing fields
+            acc[existingEntryIndex] = {
+                ...acc[existingEntryIndex],
+                ...data,
+                // Ensure that no existing metrics are overwritten by only adding non-existing properties
+                ...Object.keys(data).reduce((props, key) => {
+                    if (!acc[existingEntryIndex].hasOwnProperty(key)) {
+                        props[key] = data[key];
+                    }
+                    return props;
+                }, {})
+            };
+        } else {
+            // If not found, add this unique updatedTime data to the accumulator array
+            acc.push(data);
+        }
+        return acc;
+    }, []);
+
+    console.log(mergedData);
+    mergedData = formatDatesInArray(mergedData, "updatedTime", "MM/DD/YYYY hh:mm A");
+    return mergedData;
+}

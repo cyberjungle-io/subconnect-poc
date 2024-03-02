@@ -41,9 +41,9 @@ import {
   BorderStyleSelect,
   FontSizeControl,
 } from "@/components/custom/controls";
-import { fetchGraphDataDateSeries,graphArray } from "@/lib/graphdata";
+import { fetchGraphDataDateSeries,graphArray,fetchElementData } from "@/lib/graphdata";
 
-const GET_DATA = gql`
+/* const GET_DATA = gql`
   query {
     globalStateSnapshots(
       limit: 1000
@@ -58,11 +58,11 @@ const GET_DATA = gql`
     }
   }
 `;
-
+ */
 const ChartEditor = () => {
   const [data, setData] = useState(null);
 
-  const fetchData = async () => {
+  /* const fetchData = async () => {
     const client = new ApolloClient({
       uri: "https://khala-computation.cyberjungle.io/graphql",
       cache: new InMemoryCache(),
@@ -75,12 +75,18 @@ const ChartEditor = () => {
     } catch (error) {
       console.error(error);
     }
-  };
-  useEffect(() => {
+  }; */
+  /* useEffect(() => {
     fetchData();
-    fetchGraphDataDateSeries("apr","MM/DD/YYYY");
-  }, []);
+    //fetchGraphDataDateSeries("apr","MM/DD/YYYY");
+  }, []); */
   // Add state for the form
+  
+  const fetchData = async (elementsArray) => {
+    const dta = await fetchElementData(elementsArray);
+    setData(dta);
+    console.log(dta);
+  }
   const [form, setForm] = useState({
     title: {
       text: "",
@@ -126,9 +132,10 @@ const ChartEditor = () => {
       dataKey: "",
       opacity: 1,
       seriesText: "New Series",
-      data:{}
+      data:[]
     },
   ]);
+  
 
   // Add a handler for the button click
   const handleAddElement = () => {
@@ -141,7 +148,7 @@ const ChartEditor = () => {
         dataKey: "",
         opacity: 1,
         seriesText: "New Series",
-        data:{}
+        data:[]
       },
     ]);
   };
@@ -170,6 +177,36 @@ const ChartEditor = () => {
       newElements[index][field] = newValue;
       return newElements;
     });
+  };
+  const handleGraphElementChange = (index, field) => async (event) => {
+    const selectedValue = event.target.value;
+    // Find the selected object based on the `yAxis` value that matches the selected value
+    const selectedObject = graphArray.find((item) => item.yAxis === selectedValue);
+    console.log(" handleGraphElementChange selectedObject");
+    console.log(selectedObject);
+    if (!selectedObject) {
+      console.error('Selected object not found in graphArray');
+      return;
+    }
+    
+    // Assuming `elements` is an array in your component's state that contains the configurations,
+    // and you have a method `setElements` to update this state.
+    setElements((prevElements) => {
+      const newElements = [...prevElements];
+      newElements[index][field] = selectedObject.yAxis;
+      newElements[index].URI = selectedObject.URI;
+      newElements[index].query = selectedObject.query;
+      newElements[index].id = selectedObject.id;
+      newElements[index].xAxis = selectedObject.xAxis;
+      newElements[index].yAxis = selectedObject.yAxis;
+
+      
+      console.log(newElements);
+      
+      return newElements;
+    });
+    await fetchData(elements)
+    console.log("after fetch data")
   };
   
   const handleSelectChange = (index, property) => (value) => {
@@ -339,7 +376,7 @@ const saveChartPreferences = (chartId) => {
   <select
     className="w-80 form-select"
     value={element.dataKey} // Ensure this is set to the currently selected data key
-    onChange={handleElementChange(index, "dataKey")}
+    onChange={handleGraphElementChange(index, "dataKey")}
   >
     {graphArray.map((item, idx) => (
       <option key={idx} value={item.yAxis}>
@@ -468,6 +505,7 @@ const saveChartPreferences = (chartId) => {
                 {form.chart.showXAxis && (
                   <XAxis
                     dataKey="updatedTime"
+                    
                     label={form.chart.xAxisLabel}
                     tick={{ fontSize: form.axis.xAxisFontSize }}
                   />
@@ -503,6 +541,7 @@ const saveChartPreferences = (chartId) => {
                   return (
                     <ChartComponent
                       key={index}
+                      
                       dataKey={element.dataKey}
                       fill={element.color}
                       fillOpacity={element.opacity}

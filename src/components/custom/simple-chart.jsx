@@ -13,6 +13,8 @@ import {
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // replace with your actual import
 import { ApolloClient, InMemoryCache, gql, useQuery } from "@apollo/client";
+import { fetchElementData } from "@/lib/graphdata";
+
 const GET_DATA = gql`
   query {
     globalStateSnapshots(
@@ -46,9 +48,9 @@ const SimpleChart = ({ chart }) => {
       console.error(error);
     }
   };
-  useEffect(() => {
+  /* useEffect(() => {
     fetchData();
-  }, []);
+  }, []); */
   console.log(chart);
   // Load from local storage
   const loadChartPreferences = () => {
@@ -71,14 +73,32 @@ const SimpleChart = ({ chart }) => {
         loadedCharts.push({ chartId, form, elements });
       }
     }
-
+    console.log('loadedCharts');
+    
     setCharts(loadedCharts);
+    console.log(charts);
+    return loadedCharts;
   };
 
   // Call loadChartPreferences in a useEffect hook to load the preferences when the component mounts
   useEffect(() => {
-    loadChartPreferences();
-  }, []);
+    let newchart = loadChartPreferences();
+    console.log('useEffect loadedCharts');
+    console.log(newchart);
+    const loadAndFetchData = async () => {
+       // Assuming this is synchronous or its async nature is handled internally
+      console.log("charts.elements")
+      console.log(newchart[0].elements); // Ensure `charts` is defined and contains `elements`
+  
+      const dta = await fetchElementData(newchart[0].elements);
+      console.log(dta); // This will log the fetched data
+  
+      setData(dta); // This updates the state, but remember the update is asynchronous
+    };
+  
+    loadAndFetchData();
+  }, []); // Ensure any external dependencies used inside useEffect are listed here
+  
   const defaultFontSize = 14; // Define a default font size
 
   function hexToRgb(hex) {
