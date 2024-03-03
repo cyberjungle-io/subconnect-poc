@@ -34,23 +34,8 @@ const GET_DATA = gql`
 const SimpleChart = ({ chart }) => {
   const [charts, setCharts] = useState([]);
   const [data, setData] = useState(null);
-  const fetchData = async () => {
-    const client = new ApolloClient({
-      uri: "https://khala-computation.cyberjungle.io/graphql",
-      cache: new InMemoryCache(),
-    });
-    try {
-      const result = await client.query({ query: GET_DATA });
-      setData(result.data.globalStateSnapshots);
-      console.log(data);
-      // rest of your code
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  /* useEffect(() => {
-    fetchData();
-  }, []); */
+  
+ 
   console.log(chart);
   // Load from local storage
   const loadChartPreferences = () => {

@@ -45,7 +45,10 @@ const DashboardEditor = () => {
   return (
     <div>
       {charts.map((chart) => (
+        <>
+        <h1>{chart.elements[0].xAxis}</h1>
         <SimpleChart key={chart.chartId} chart={chart} />
+        </>
       ))}
     </div>
   );

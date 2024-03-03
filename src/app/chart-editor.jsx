@@ -284,6 +284,7 @@ const ChartEditor = () => {
   // Save to local storage
 // Save to local storage
 const saveChartPreferences = (chartId) => {
+  console.log("ChartId: " + chartId)
   console.log(form);
   localStorage.setItem(`chartPreferences-${chartId}`, JSON.stringify(form));
   console.log(elements);
