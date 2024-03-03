@@ -14,7 +14,7 @@ export const graphArray = [
                 globalStateSnapshots(
                     limit: 1000
                     orderBy: updatedTime_ASC
-                    where: { updatedTime_gt: "2024-02-01T22:00:00.000000Z" }
+                    where: { updatedTime_gt: "<<datetime>>" }
                 ) {
                     averageApr
                     updatedTime
@@ -37,7 +37,7 @@ export const graphArray = [
                 globalStateSnapshots(
                     limit: 1000
                     orderBy: updatedTime_ASC
-                    where: { updatedTime_gt: "2024-02-01T22:00:00.000000Z" }
+                    where: { updatedTime_gt: "<<datetime>>" }
                 ) {
                     averageBlockTime
                     updatedTime
@@ -83,7 +83,7 @@ export const graphArray = [
                 globalStateSnapshots(
                     limit: 1000
                     orderBy: updatedTime_ASC
-                    where: { updatedTime_gt: "2024-02-01T22:00:00.000000Z" }
+                    where: { updatedTime_gt: "<<datetime>>" }
                 ) {
                     totalValue
                     updatedTime
@@ -205,6 +205,6 @@ export const fetchElementData = async (elements) => {
     }, []);
 
     console.log(mergedData);
-    mergedData = formatDatesInArray(mergedData, "updatedTime", "MM/DD/YYYY hh:mm A");
+    mergedData = formatDatesInArray(mergedData, "updatedTime", "MM/DD/YYYY hh A");
     return mergedData;
 }
