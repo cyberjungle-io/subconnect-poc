@@ -168,6 +168,7 @@ function formatDatesInArray(array, property, format) {
    
 export const fetchElementData = async (elements) => {
     // Fetch all data concurrently
+    console.log("fetchElementData")
     console.log(elements);
     const dataPromises = elements.map(element => 
         fetchGraphDataDateSeries(element.id, "MM/DD/YYYY", 7)

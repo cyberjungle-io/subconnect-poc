@@ -42,6 +42,7 @@ import {
   FontSizeControl,
 } from "@/components/custom/controls";
 import { fetchGraphDataDateSeries,graphArray,fetchElementData } from "@/lib/graphdata";
+import { stringify } from "postcss";
 
 /* const GET_DATA = gql`
   query {
@@ -59,8 +60,38 @@ import { fetchGraphDataDateSeries,graphArray,fetchElementData } from "@/lib/grap
   }
 `;
  */
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 flex justify-center items-center">
+      <div className="relative bg-white p-4 md:p-6 lg:p-8 rounded-lg shadow-lg max-w-md max-h-full overflow-y-auto z-50">
+        <button onClick={onClose} className="absolute top-0 right-0 mt-4 mr-4 text-gray-700 hover:text-gray-900">
+          <svg className="h-6 w-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        {/* Title */}
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Select Content</h2>
+        <div className="mt-4">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+
 const ChartEditor = () => {
   const [data, setData] = useState(null);
+  const [content, setContent] = useState([]);
+  const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   /* const fetchData = async () => {
     const client = new ApolloClient({
@@ -76,10 +107,12 @@ const ChartEditor = () => {
       console.error(error);
     }
   }; */
-  /* useEffect(() => {
-    fetchData();
+   useEffect(() => {
+    getLocalStorage()
     //fetchGraphDataDateSeries("apr","MM/DD/YYYY");
-  }, []); */
+  }, []); 
+
+  
   // Add state for the form
   
   const fetchData = async (elementsArray) => {
@@ -136,6 +169,17 @@ const ChartEditor = () => {
     },
   ]);
   
+  useEffect(() => {
+    const asyncFunction = async () => {
+        try {
+        await fetchData(elements);
+        }
+      catch (error) { console.error(error);}
+    };
+
+    asyncFunction();
+}, [elements]);
+
 
   // Add a handler for the button click
   const handleAddElement = () => {
@@ -148,7 +192,7 @@ const ChartEditor = () => {
         dataKey: "",
         opacity: 1,
         seriesText: "New Series",
-        data:[]
+        
       },
     ]);
   };
@@ -281,18 +325,100 @@ const ChartEditor = () => {
         )}`
       : null;
   };
-  // Save to local storage
+const getLocalStorage =   () => {
+  console.log("getLocalStorage");
+  if (localStorage.getItem("subconnect-content")) {
+    const savedContent = JSON.parse(localStorage.getItem("subconnect-content"));
+    console.log(savedContent);
+    setContent(savedContent);
+    setCurrentContentIndex(0)
+    setForm(savedContent[0].form);
+    
+    setElements(savedContent[0].elements);
+    
+    
+  }
+};
+
 // Save to local storage
-const saveChartPreferences = (chartId) => {
+const saveChartPreferences = () => {
+  console.log("saveChartPreferencesss");
+  // save the form and elements to local storage at the currentContentIndex
+  const tcontent = {form : form, elements: elements};
+  console.log(JSON.stringify(tcontent));
+  let newContent = [...content];
+  newContent[currentContentIndex] = tcontent;
+
+  localStorage.setItem("subconnect-content", JSON.stringify(newContent));
+};
+
+/* 
+
+
   console.log("ChartId: " + chartId)
   console.log(form);
   localStorage.setItem(`chartPreferences-${chartId}`, JSON.stringify(form));
   console.log(elements);
   localStorage.setItem(`chartElements-${chartId}`, JSON.stringify(elements));
-};
+}; */
   const handleSaveClick = () => {
     saveChartPreferences();
   };
+  const handleNewClick = () => {
+    // append to content and add one to currentContentIndex
+    console.log("handleNewClick");
+    const newContent = [...content];
+    setForm({
+      title: {
+        text: "",
+        color: "#000000",
+        fontSize: 20,
+      },
+      chart: {
+        CartesianGrid: true,
+        showXAxis: true,
+        showYAxis: true,
+      },
+      tooltip: {
+        show: true,
+        color: "#000000",
+        backgroundColor: "#ffffff",
+        backgroundOpacity: 1,
+        textOpacity: 1,
+        borderRadius: 1, // Store as number
+        borderColor: "#000000",
+        borderStyle: "solid",
+        borderWidth: 1, // Store as number
+        borderOpacity: 1,
+        titlefontsize: 20,
+      },
+      axis: {
+        XAxisLabel: "",
+        YAxisLabel: "",
+        xAxisColor: "#000000",
+        yAxisColor: "#000000",
+        xAxisFontSize: 20,
+        yAxisFontSize: 20,
+        xAxisOrientation: "bottom",
+        yAxisOrientation: "left",
+      },
+    }); // clear the form
+    setElements([
+      {
+        isEditingTitle: false,
+        type: "",
+        color: "",
+        dataKey: "",
+        opacity: 1,
+        seriesText: "New Series",
+        data:[]
+      },
+    ]); // clear the elements
+    newContent.push({form : form, elements: elements});
+    setContent(newContent);
+    setCurrentContentIndex(content.length);
+    console.log(content);
+    };
 
   // Render the chart elements and their customization sections
   const renderElements = () => {
@@ -481,9 +607,28 @@ const saveChartPreferences = (chartId) => {
       );
     });
   };
+  const handleSelectContent = (selectedIndex) => {
+    setCurrentContentIndex(selectedIndex);
+    setForm(content[selectedIndex].form);
+    setElements(content[selectedIndex].elements);
+    setIsModalOpen(false); // Close the modal
+  };
   return (
     <>
     <Button  onClick={handleSaveClick}>Save</Button>
+    <Button  onClick={handleNewClick}>New</Button>
+    <Button onClick={() => setIsModalOpen(true)}>Select Content</Button>
+    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <ul>
+        {content.map((item, index) => (
+          <li key={index}>
+            <button onClick={() => handleSelectContent(index)}>
+              {item.form.title.text}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Modal>
       <section className="w-2/3 mx-auto">
         
         <Card className="h-[350px]">
