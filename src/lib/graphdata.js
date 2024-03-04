@@ -102,7 +102,7 @@ export const fetchGraphDataDateSeries = async (id,dateformat,days) => {
     //find the index of the graphArray with the id
     const index = graphArray.findIndex(x => x.id === id);
     const dt = daysFromNow(days);
-    console.log(dt);
+    //console.log(dt);
     const client = new ApolloClient({
         uri: graphArray[index].URI[0],
         cache: new InMemoryCache()
@@ -114,7 +114,7 @@ export const fetchGraphDataDateSeries = async (id,dateformat,days) => {
     let newArray = [];
     for (let i = 0; i < data.globalStateSnapshots.length; i++) {
         let record = data.globalStateSnapshots[i];
-        console.log(graphArray[index].yAxis);
+        //console.log(graphArray[index].yAxis);
         record = { ...record, [graphArray[index].yAxis]: postProcess(record[graphArray[index].yAxis], graphArray[index].postProcess) };
         newArray.push(record);
     }
@@ -168,8 +168,8 @@ function formatDatesInArray(array, property, format) {
    
 export const fetchElementData = async (elements) => {
     // Fetch all data concurrently
-    console.log("fetchElementData")
-    console.log(elements);
+    //console.log("fetchElementData")
+    //console.log(elements);
     const dataPromises = elements.map(element => 
         fetchGraphDataDateSeries(element.id, "MM/DD/YYYY", 7)
     );
@@ -205,7 +205,7 @@ export const fetchElementData = async (elements) => {
         return acc;
     }, []);
 
-    console.log(mergedData);
+    //console.log(mergedData);
     mergedData = formatDatesInArray(mergedData, "updatedTime", "MM/DD/YYYY hh A");
     return mergedData;
 }

@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { ApolloClient, InMemoryCache, gql, useQuery } from "@apollo/client";
 import SimpleChart from "../components/custom/simple-chart.jsx";
+import ShowChart from "../components/custom/showChart.jsx";
 
 
 const DashboardEditor = () => {
@@ -40,14 +41,18 @@ const DashboardEditor = () => {
       chartId: index, // or generate a unique ID here
     }));
     setCharts(chartsWithId);
+    //console.log(chartsWithId)
+    console.log(charts)
   }, []);
-
+useEffect(() => {
+  console.log(charts)
+} , [charts])
   return (
     <div>
       {charts.map((chart) => (
         <>
         <h1>{chart.elements[0].xAxis}</h1>
-        <SimpleChart key={chart.chartId} chart={chart} />
+        <ShowChart  chart={chart} />
         </>
       ))}
     </div>

@@ -15,72 +15,38 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 import { fetchElementData } from "@/lib/graphdata";
 
-
-
-const SimpleChart = ({ chart }) => {
-  const [charts, setCharts] = useState([]);
+const ShowChart = ({ chart }) => {
   const [data, setData] = useState(null);
-  
- 
-  console.log(chart);
-  // Load from local storage
-  const loadChartPreferences = () => {
-    const loadedCharts = [];
-
-    // Get all keys from local storage
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-
-      // If the key is for a chart preference, load it
-      if (key.startsWith("chartPreferences-")) {
-        const chartId = key.split("-")[1];
-        const form = JSON.parse(
-          localStorage.getItem(`chartPreferences-${chartId}`)
-        );
-        const elements = JSON.parse(
-          localStorage.getItem(`chartElements-${chartId}`)
-        );
-
-        loadedCharts.push({ chartId, form, elements });
-      }
+    if (!chart) {
+        return null;
     }
-    console.log('loadedCharts');
-    
-    setCharts(loadedCharts);
-    console.log(charts);
-    return loadedCharts;
-  };
-
-  // Call loadChartPreferences in a useEffect hook to load the preferences when the component mounts
   useEffect(() => {
-    let newchart = loadChartPreferences();
-    console.log('useEffect loadedCharts');
-    console.log(newchart);
+    console.log(chart);
     const loadAndFetchData = async () => {
-       // Assuming this is synchronous or its async nature is handled internally
-      console.log("charts.elements")
-      console.log(newchart[0].elements); // Ensure `charts` is defined and contains `elements`
-  
-      const dta = await fetchElementData(newchart[0].elements);
-      console.log(dta); // This will log the fetched data
-  
-      setData(dta); // This updates the state, but remember the update is asynchronous
+
+      if (chart && chart.elements) {
+        console.log("charts.elements")
+        console.log(chart.elements); // Log to ensure `chart.elements` is defined
+
+        const dta = await fetchElementData(chart.elements);
+        console.log(dta); // This will log the fetched data
+
+        setData(dta); // This updates the state, but remember the update is asynchronous
+      }
     };
-  
+
     loadAndFetchData();
-  }, []); // Ensure any external dependencies used inside useEffect are listed here
-  
+  }, [chart]); // Depend on `chart` prop to re-run this effect if `chart` changes
+
   const defaultFontSize = 14; // Define a default font size
 
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
-      ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(
-          result[3],
-          16
-        )}`
+      ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
       : null;
   }
+
   return (
     <Card className="h-[350px]">
       <CardHeader>
@@ -115,27 +81,19 @@ const SimpleChart = ({ chart }) => {
             <Tooltip
               contentStyle={{
                 display: chart?.form?.tooltip?.show ? "block" : "none",
-                color: `rgba(${hexToRgb(chart?.form?.tooltip?.color)}, ${
-                  chart?.form?.tooltip?.textOpacity
-                })`,
+                color: `rgba(${hexToRgb(chart?.form?.tooltip?.color)}, ${chart?.form?.tooltip?.textOpacity})`,
 
-                backgroundColor: `rgba(${hexToRgb(
-                  chart?.form?.tooltip?.backgroundColor
-                )}, ${chart?.form?.tooltip?.backgroundOpacity})`,
+                backgroundColor: `rgba(${hexToRgb(chart?.form?.tooltip?.backgroundColor)}, ${chart?.form?.tooltip?.backgroundOpacity})`,
                 borderRadius: `${chart?.form?.tooltip?.borderRadius}px`,
-                border: `${chart?.form?.tooltip?.borderWidth}px ${
-                  chart?.form?.tooltip?.borderStyle
-                } rgba(${hexToRgb(chart?.form?.tooltip?.borderColor)}, ${
-                  chart?.form?.tooltip?.borderOpacity
-                })`,
-                fontSize: `${chart?.form?.tooltip?.titlefontsize}px`, // Add this line
+                border: `${chart?.form?.tooltip?.borderWidth}px ${chart?.form?.tooltip?.borderStyle} rgba(${hexToRgb(chart?.form?.tooltip?.borderColor)}, ${chart?.form?.tooltip?.borderOpacity})`,
+                fontSize: `${chart?.form?.tooltip?.titlefontsize}px`, // This line was added correctly
               }}
             />
             {chart?.form?.chart?.CartesianGrid && (
               <CartesianGrid stroke="#f5f5f5" />
             )}
             <Legend />
-            {chart?.elements?.map((element, index) => {
+            {chart.elements?.map((element, index) => {
               const ChartComponent = element.type === "Bar" ? Bar : Line;
               return (
                 <ChartComponent
@@ -153,4 +111,5 @@ const SimpleChart = ({ chart }) => {
   );
 };
 
-export default SimpleChart;
+export default ShowChart;
+``

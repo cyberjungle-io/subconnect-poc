@@ -42,7 +42,7 @@ import {
   FontSizeControl,
 } from "@/components/custom/controls";
 import { fetchGraphDataDateSeries,graphArray,fetchElementData } from "@/lib/graphdata";
-import { stringify } from "postcss";
+import { generateGUID } from "@/lib/utils";
 
 /* const GET_DATA = gql`
   query {
@@ -93,20 +93,7 @@ const ChartEditor = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
 
-  /* const fetchData = async () => {
-    const client = new ApolloClient({
-      uri: "https://khala-computation.cyberjungle.io/graphql",
-      cache: new InMemoryCache(),
-    });
-    try {
-      const result = await client.query({ query: GET_DATA });
-      setData(result.data.globalStateSnapshots);
-      console.log(data);
-      // rest of your code
-    } catch (error) {
-      console.error(error);
-    }
-  }; */
+  
    useEffect(() => {
     getLocalStorage()
     //fetchGraphDataDateSeries("apr","MM/DD/YYYY");
@@ -343,12 +330,32 @@ const getLocalStorage =   () => {
 // Save to local storage
 const saveChartPreferences = () => {
   console.log("saveChartPreferencesss");
+  // temporary load the content from the content array for the currentContentIndex
+  let tempContent = content[currentContentIndex];
+  //test if the tempContent has an element id
+  if (!tempContent) {
+  
+    tempContent = {id: generateGUID()};
+  }
   // save the form and elements to local storage at the currentContentIndex
-  const tcontent = {form : form, elements: elements};
+  const tcontent = {id: tempContent.id, form : form, elements: elements};
   console.log(JSON.stringify(tcontent));
   let newContent = [...content];
   newContent[currentContentIndex] = tcontent;
+  setContent(newContent);
 
+  localStorage.setItem("subconnect-content", JSON.stringify(newContent));
+};
+const handleDeleteContent = (indexToDelete) => {
+  const newContent = content.filter((_, index) => index !== indexToDelete);
+  setContent(newContent);
+  // Optionally, reset currentContentIndex or adjust it if the current content is being deleted
+  if (indexToDelete === currentContentIndex) {
+    setCurrentContentIndex(0); // Reset to first content or handle appropriately
+  } else if (indexToDelete < currentContentIndex) {
+    setCurrentContentIndex(currentContentIndex - 1); // Adjust the index accordingly
+  }
+  // Save the updated content array to local storage or perform any other cleanup
   localStorage.setItem("subconnect-content", JSON.stringify(newContent));
 };
 
@@ -414,7 +421,7 @@ const saveChartPreferences = () => {
         data:[]
       },
     ]); // clear the elements
-    newContent.push({form : form, elements: elements});
+    newContent.push({id : generateGUID(), form : form, elements: elements});
     setContent(newContent);
     setCurrentContentIndex(content.length);
     console.log(content);
@@ -619,16 +626,22 @@ const saveChartPreferences = () => {
     <Button  onClick={handleNewClick}>New</Button>
     <Button onClick={() => setIsModalOpen(true)}>Select Content</Button>
     <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-      <ul>
-        {content.map((item, index) => (
-          <li key={index}>
-            <button onClick={() => handleSelectContent(index)}>
-              {item.form.title.text}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </Modal>
+  <ul>
+    {content.map((item, index) => (
+      <li key={index} className="flex justify-between items-center">
+        <button onClick={() => handleSelectContent(index)}>
+          {item.form.title.text}
+        </button>
+        <button onClick={() => handleDeleteContent(index)} className="ml-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </li>
+    ))}
+  </ul>
+</Modal>
+
       <section className="w-2/3 mx-auto">
         
         <Card className="h-[350px]">

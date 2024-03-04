@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { use, useState,useEffect} from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-
+import { generateGUID } from "@/lib/utils";
+import ShowChart from "@/components/custom/showChart";
 const uniqueId = (() => {
   console.log("Generating unique ID..."); // Diagnostic log
   let count = 0;
@@ -32,11 +33,75 @@ const getColSpanClass = (colSpan) => {
       return "w-1/12";
   }
 };
+
 const NewDashboard = () => {
   const [rows, setRows] = useState([
-    { id: uniqueId(), charts: [{ id: uniqueId(), colSpan: 2 }] },
+    { id: generateGUID(), charts: [{ id: generateGUID(), colSpan: 2 ,content: {}}] },
   ]);
+  const [content, setContent] = useState([]);
+  const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+const [selectedChartId, setSelectedChartId] = useState(null);
+const openModal = (chartId) => {
+  setSelectedChartId(chartId);
+  setIsModalOpen(true);
+};
+const handleSelectContent = (contentId) => {
+  //get content record from the content array using the contentId
+  const selectedContent = content.find((item) => item.id === contentId);
+  console.log(selectedContent)
+  let newRows = rows;
+  for (let x = 0; x < newRows.length; x++) {
+    for (let y = 0; y < newRows[x].charts.length; y++) {
+      if (newRows[x].charts[y].id === selectedChartId) {
+        newRows[x].charts[y].content = selectedContent;
+      }
+    }
+  }
 
+  
+
+  setRows(newRows);
+  setIsModalOpen(false);
+  console.log("handleSelectContent")
+  console.log(newRows)
+};
+function ContentSelectModal({ isOpen, content, onSelect, onClose }) {
+  if (!isOpen) return null;
+console.log("ContentSelectModal")
+console.log(content)
+  return (
+    <div className="modal-backdrop">
+      <div className="modal">
+        <h2>Select Content</h2>
+        <ul>
+          {content.map((item) => (
+            <li key={item.id} onClick={() => onSelect(item.id)}>
+              {item.form.title.text} {/* Assuming each content has a title */}
+            </li>
+          ))}
+        </ul>
+        <button onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+}
+
+  const getLocalStorageContent =   () => {
+    //console.log("getLocalStorage");
+    if (localStorage.getItem("subconnect-content")) {
+      const savedContent = JSON.parse(localStorage.getItem("subconnect-content"));
+      console.log(savedContent);
+      setContent(savedContent);
+      setCurrentContentIndex(0)
+      //setForm(savedContent[0].form);
+      
+      //setElements(savedContent[0].elements);
+      
+      
+    }
+    
+  };
   const onDragEnd = (result) => {
     if (!result.destination) {
       return;
@@ -190,8 +255,26 @@ const NewDashboard = () => {
       })
     );
   };
+  useEffect(() => {
+    getLocalStorageContent();
+  }, []);
+  useEffect(() => {
+    console.log("content");
+    console.log(content);
+  }, [content]);
+  useEffect(() => {
+    console.log("rows");
+    console.log(rows);
+  }, [rows]);
   return (
     <DragDropContext onDragEnd={onDragEnd}>
+      <ContentSelectModal
+  isOpen={isModalOpen}
+  content={content}
+  onSelect={handleSelectContent}
+  onClose={() => setIsModalOpen(false)}
+/>
+
       {rows.map((row, rowIndex) => (
         <Droppable
           key={row.id}
@@ -220,8 +303,11 @@ const NewDashboard = () => {
                       )}`}
                     >
                       <div className="border rounded flex justify-between items-center p-4 w-full">
-                        <span>Chart {chart.id}</span>
+                        <ShowChart chart={chart.content} />
                         <div className="flex flex-col space-y-2">
+                          
+                        <button onClick={() => openModal(chart.id)}>Select Content</button>
+
                           {chart.colSpan < 12 && (
                             <button
                               onClick={() => extendChart(row.id, chart.id)}
