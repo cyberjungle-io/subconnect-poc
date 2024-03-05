@@ -11,34 +11,35 @@ import {
   Line,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // replace with your actual import
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Adjust the import paths as necessary
 
-import { fetchElementData } from "@/lib/graphdata";
+import { fetchElementData } from "@/lib/graphdata"; // Adjust the import path as necessary
 
 const ShowChart = ({ chart }) => {
   const [data, setData] = useState(null);
-    if (!chart) {
-        return null;
-    }
+
   useEffect(() => {
-    console.log(chart);
     const loadAndFetchData = async () => {
-
-      if (chart && chart.elements) {
-        console.log("charts.elements")
-        console.log(chart.elements); // Log to ensure `chart.elements` is defined
-
-        const dta = await fetchElementData(chart.elements);
-        console.log(dta); // This will log the fetched data
-
-        setData(dta); // This updates the state, but remember the update is asynchronous
+      if (!chart || !chart.elements) {
+        return; // Exit early if `chart` or `chart.elements` is not defined
       }
+      console.log("chart");
+      console.log(chart);
+      console.log("charts.elements");
+      console.log(chart.elements); // Log to ensure `chart.elements` is defined
+
+      const dta = await fetchElementData(chart.elements);
+      console.log(dta); // This will log the fetched data
+
+      setData(dta); // This updates the state, but remember the update is asynchronous
     };
 
     loadAndFetchData();
   }, [chart]); // Depend on `chart` prop to re-run this effect if `chart` changes
 
-  const defaultFontSize = 14; // Define a default font size
+  if (!chart) {
+    return null;
+  }
 
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -48,14 +49,14 @@ const ShowChart = ({ chart }) => {
   }
 
   return (
-    <Card className="h-[350px]">
+    <Card className="h-[350px] w-full">
       <CardHeader>
         <CardTitle>
           <div
             className="w-1/2"
             style={{
               color: chart?.form?.title?.color || "defaultColor",
-              fontSize: `${chart?.form?.title?.fontSize || defaultFontSize}px`,
+              fontSize: `${chart?.form?.title?.fontSize || 14}px`,
             }}
           >
             {chart?.form?.title?.text ? chart.form.title.text : "Title"}
@@ -67,29 +68,29 @@ const ShowChart = ({ chart }) => {
           <ComposedChart width={500} height={300} data={data}>
             {chart?.form?.chart?.showXAxis && (
               <XAxis
-                dataKey="updatedTime"
-                label={chart.form.chart.xAxisLabel}
-                tick={{ fontSize: chart.form.axis.xAxisFontSize }}
+                dataKey="name" // Adjust this as necessary to match your data structure
+                label={{ value: chart.form.chart.xAxisLabel, position: "insideBottomRight", offset: -20 }}
+                tick={{ fontSize: chart.form.axis?.xAxisFontSize || 10 }}
               />
             )}
             {chart?.form?.chart?.showYAxis && (
               <YAxis
-                label={chart.form.chart.yAxisLabel}
-                tick={{ fontSize: chart.form.axis.yAxisFontSize }}
+              type="number" domain={['dataMin', 'dataMax']}
+                label={{ value: chart.form.chart.yAxisLabel, angle: -90, position: "insideLeft" }}
+                tick={{ fontSize: chart.form.axis?.yAxisFontSize || 10 }}
               />
             )}
             <Tooltip
               contentStyle={{
                 display: chart?.form?.tooltip?.show ? "block" : "none",
                 color: `rgba(${hexToRgb(chart?.form?.tooltip?.color)}, ${chart?.form?.tooltip?.textOpacity})`,
-
                 backgroundColor: `rgba(${hexToRgb(chart?.form?.tooltip?.backgroundColor)}, ${chart?.form?.tooltip?.backgroundOpacity})`,
                 borderRadius: `${chart?.form?.tooltip?.borderRadius}px`,
                 border: `${chart?.form?.tooltip?.borderWidth}px ${chart?.form?.tooltip?.borderStyle} rgba(${hexToRgb(chart?.form?.tooltip?.borderColor)}, ${chart?.form?.tooltip?.borderOpacity})`,
-                fontSize: `${chart?.form?.tooltip?.titlefontsize}px`, // This line was added correctly
+                fontSize: `${chart?.form?.tooltip?.fontSize}px`,
               }}
             />
-            {chart?.form?.chart?.CartesianGrid && (
+            {chart?.form?.chart?.showCartesianGrid && (
               <CartesianGrid stroke="#f5f5f5" />
             )}
             <Legend />
@@ -112,4 +113,3 @@ const ShowChart = ({ chart }) => {
 };
 
 export default ShowChart;
-``

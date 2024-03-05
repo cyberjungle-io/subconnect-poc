@@ -1,7 +1,8 @@
-import React, { use, useState,useEffect} from "react";
+import React, { use, useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { generateGUID } from "@/lib/utils";
 import ShowChart from "@/components/custom/showChart";
+import { Button } from "@/components/ui/button";
 const uniqueId = (() => {
   console.log("Generating unique ID..."); // Diagnostic log
   let count = 0;
@@ -36,71 +37,89 @@ const getColSpanClass = (colSpan) => {
 
 const NewDashboard = () => {
   const [rows, setRows] = useState([
-    { id: generateGUID(), charts: [{ id: generateGUID(), colSpan: 2 ,content: {}}] },
+    {
+      id: generateGUID(),
+      charts: [{ id: generateGUID(), colSpan: 2, content: {} }],
+    },
   ]);
   const [content, setContent] = useState([]);
+  const [editMode, setEditMode] = useState(false);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-const [selectedChartId, setSelectedChartId] = useState(null);
-const openModal = (chartId) => {
-  setSelectedChartId(chartId);
-  setIsModalOpen(true);
-};
-const handleSelectContent = (contentId) => {
-  //get content record from the content array using the contentId
-  const selectedContent = content.find((item) => item.id === contentId);
-  console.log(selectedContent)
-  let newRows = rows;
-  for (let x = 0; x < newRows.length; x++) {
-    for (let y = 0; y < newRows[x].charts.length; y++) {
-      if (newRows[x].charts[y].id === selectedChartId) {
-        newRows[x].charts[y].content = selectedContent;
+  const [selectedChartId, setSelectedChartId] = useState(null);
+  const openModal = (chartId) => {
+    setSelectedChartId(chartId);
+    setIsModalOpen(true);
+  };
+  const handleSelectContent = (contentId) => {
+    //get content record from the content array using the contentId
+    const selectedContent = content.find((item) => item.id === contentId);
+    console.log(selectedContent);
+    let newRows = rows;
+    for (let x = 0; x < newRows.length; x++) {
+      for (let y = 0; y < newRows[x].charts.length; y++) {
+        if (newRows[x].charts[y].id === selectedChartId) {
+          newRows[x].charts[y].content = selectedContent;
+        }
       }
     }
-  }
 
-  
-
-  setRows(newRows);
-  setIsModalOpen(false);
-  console.log("handleSelectContent")
-  console.log(newRows)
-};
-function ContentSelectModal({ isOpen, content, onSelect, onClose }) {
-  if (!isOpen) return null;
-console.log("ContentSelectModal")
-console.log(content)
-  return (
-    <div className="modal-backdrop">
-      <div className="modal">
-        <h2>Select Content</h2>
-        <ul>
-          {content.map((item) => (
-            <li key={item.id} onClick={() => onSelect(item.id)}>
-              {item.form.title.text} {/* Assuming each content has a title */}
-            </li>
-          ))}
-        </ul>
-        <button onClick={onClose}>Close</button>
+    setRows(newRows);
+    setIsModalOpen(false);
+    console.log("handleSelectContent");
+    console.log(newRows);
+  };
+  function ContentSelectModal({ isOpen, content, onSelect, onClose }) {
+    if (!isOpen) return null;
+    console.log("ContentSelectModal");
+    console.log(content);
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="modal bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
+          <h2>Select Content</h2>
+          <ul>
+            {content.map((item) => (
+              <li key={item.id} onClick={() => onSelect(item.id)} className="cursor-pointer hover:bg-gray-100 p-2">
+                {item.form.title.text} {/* Assuming each content has a title */}
+              </li>
+            ))}
+          </ul>
+          <button onClick={onClose} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
+            Close
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+  const getLocalDashboard = () => {
+    //console.log("getLocalStorage");
+    if (localStorage.getItem("subconnect-dashboard")) {
+      const savedRows = JSON.parse(
+        localStorage.getItem("subconnect-dashboard")
+      );
+      setRows(savedRows);
+    }
+  };
+  // Save to local storage
+const saveLocalDashboard = () => {
+  console.log("saveLocalDashboard");
+  
+  localStorage.setItem("subconnect-dashboard", JSON.stringify(rows));
+};
 
-  const getLocalStorageContent =   () => {
+  const getLocalStorageContent = () => {
     //console.log("getLocalStorage");
     if (localStorage.getItem("subconnect-content")) {
-      const savedContent = JSON.parse(localStorage.getItem("subconnect-content"));
+      const savedContent = JSON.parse(
+        localStorage.getItem("subconnect-content")
+      );
       console.log(savedContent);
       setContent(savedContent);
-      setCurrentContentIndex(0)
+      setCurrentContentIndex(0);
       //setForm(savedContent[0].form);
-      
+
       //setElements(savedContent[0].elements);
-      
-      
     }
-    
   };
   const onDragEnd = (result) => {
     if (!result.destination) {
@@ -165,11 +184,11 @@ console.log(content)
     );
 
     if (totalColSpan + 2 <= 12) {
-      lastRow.charts.push({ id: uniqueId(), colSpan: 2 });
+      lastRow.charts.push({ id: generateGUID(), colSpan: 2, content: {} });
     } else {
       newRows.push({
         id: uniqueId(),
-        charts: [{ id: uniqueId(), colSpan: 2 }],
+        charts: [{ id: generateGUID(), colSpan: 2, content: {} }],
       });
     }
 
@@ -205,22 +224,30 @@ console.log(content)
     });
   };
   const addChartToRow = (rowId) => {
-    const newRows = rows.map((row) => {
-      if (row.id === rowId) {
-        const totalColSpan = row.charts.reduce(
-          (sum, chart) => sum + chart.colSpan,
-          0
-        );
-        if (totalColSpan + 2 <= 12) {
-          return {
-            ...row,
-            charts: [...row.charts, { id: uniqueId(), colSpan: 2 }],
-          };
+    setRows((currentRows) => {
+      return currentRows.map((row) => {
+        if (row.id === rowId) {
+          const totalColSpan = row.charts.reduce(
+            (sum, chart) => sum + chart.colSpan,
+            0
+          );
+          let newColSpan = 2; // Default new chart colSpan
+          // Check if adding a new chart exceeds the row limit
+          if (totalColSpan + newColSpan <= 12) {
+            return {
+              ...row,
+              charts: [
+                ...row.charts,
+                { id: generateGUID(), colSpan: newColSpan, content: {} },
+              ],
+            };
+          } else {
+            // Optional: Adjust existing charts or notify the user
+          }
         }
-      }
-      return row;
+        return row;
+      });
     });
-    setRows(newRows);
   };
 
   const shrinkChart = (rowId, chartId) => {
@@ -257,6 +284,7 @@ console.log(content)
   };
   useEffect(() => {
     getLocalStorageContent();
+    getLocalDashboard();
   }, []);
   useEffect(() => {
     console.log("content");
@@ -266,14 +294,27 @@ console.log(content)
     console.log("rows");
     console.log(rows);
   }, [rows]);
+
+  const handleSaveClick = () => {
+    saveLocalDashboard();
+    setEditMode(false);
+  };
+  const handleToggleEditMode = () => {
+    setEditMode(!editMode);
+  };
   return (
+    <>
+    {editMode ? <Button onClick={handleSaveClick}>Save</Button> : ""}
+    {editMode ? <Button onClick={handleToggleEditMode}>Cancel</Button> : <Button onClick={handleToggleEditMode}>Edit</Button>}
+    
+    
     <DragDropContext onDragEnd={onDragEnd}>
       <ContentSelectModal
-  isOpen={isModalOpen}
-  content={content}
-  onSelect={handleSelectContent}
-  onClose={() => setIsModalOpen(false)}
-/>
+        isOpen={isModalOpen}
+        content={content}
+        onSelect={handleSelectContent}
+        onClose={() => setIsModalOpen(false)}
+      />
 
       {rows.map((row, rowIndex) => (
         <Droppable
@@ -304,9 +345,13 @@ console.log(content)
                     >
                       <div className="border rounded flex justify-between items-center p-4 w-full">
                         <ShowChart chart={chart.content} />
+                        {editMode ?
                         <div className="flex flex-col space-y-2">
-                          
-                        <button onClick={() => openModal(chart.id)}>Select Content</button>
+                          <button 
+                          onClick={() => openModal(chart.id)}
+                          className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">
+                            Content
+                          </button>
 
                           {chart.colSpan < 12 && (
                             <button
@@ -331,13 +376,16 @@ console.log(content)
                             Delete
                           </button>
                         </div>
+                        : ""}
                       </div>
                     </div>
                   )}
                 </Draggable>
               ))}
-              {row.charts.reduce((sum, chart) => sum + chart.colSpan, 0) <=
+              
+              {editMode && row.charts.reduce((sum, chart) => sum + chart.colSpan, 0) <=
                 10 && (
+                  
                 <button
                   onClick={() => addChartToRow(row.id)} // Modify this function to add a chart to the specific row
                   type="button"
@@ -351,14 +399,14 @@ console.log(content)
           )}
         </Droppable>
       ))}
-
+      {editMode ? 
       <button
         onClick={addRow}
         className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
       >
         Add Row
-      </button>
-    </DragDropContext>
+      </button>: ""}
+    </DragDropContext></>
   );
 };
 
