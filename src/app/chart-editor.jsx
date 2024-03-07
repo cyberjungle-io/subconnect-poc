@@ -145,14 +145,15 @@ const ChartEditor = () => {
 
   // Add state for the chart elements
   const [elements, setElements] = useState([
-    {
+    { 
+      elementId: generateGUID(),
       isEditingTitle: false,
       type: "",
       color: "",
       dataKey: "",
       opacity: 1,
       seriesText: "New Series",
-      data:[]
+      
     },
   ]);
   
@@ -174,6 +175,7 @@ const ChartEditor = () => {
     setElements([
       ...elements,
       {
+        elementId: generateGUID(),
         type: "",
         color: "",
         dataKey: "",
@@ -211,8 +213,9 @@ const ChartEditor = () => {
   };
   const handleGraphElementChange = (index, field) => async (event) => {
     const selectedValue = event.target.value;
+    console.log(selectedValue)
     // Find the selected object based on the `yAxis` value that matches the selected value
-    const selectedObject = graphArray.find((item) => item.yAxis === selectedValue);
+    const selectedObject = graphArray.find((item) => item.id === selectedValue);
     console.log(" handleGraphElementChange selectedObject");
     console.log(selectedObject);
     if (!selectedObject) {
@@ -222,14 +225,34 @@ const ChartEditor = () => {
     
     // Assuming `elements` is an array in your component's state that contains the configurations,
     // and you have a method `setElements` to update this state.
+    let qry = selectedObject.query;
+    let seriesText = selectedObject.yAxis;
+    //input alert a string
+    for (let i = 0; i < selectedObject.variables.length; i++) {
+      let v = selectedObject.variables[i];
+      const prmpt = `please enter ${v}`;
+      let userInput = prompt(prmpt, "");
+      if (userInput == null || userInput == "") {
+        alert("User cancelled the prompt.");
+      } else {
+        seriesText = userInput;
+        let rplc = "<<" + selectedObject.variables[i] + ">>";
+        qry = qry.replace(rplc, userInput);
+      }
+    }
+    
     setElements((prevElements) => {
       const newElements = [...prevElements];
       newElements[index][field] = selectedObject.yAxis;
       newElements[index].URI = selectedObject.URI;
-      newElements[index].query = selectedObject.query;
+      newElements[index].query = qry;
       newElements[index].id = selectedObject.id;
       newElements[index].xAxis = selectedObject.xAxis;
       newElements[index].yAxis = selectedObject.yAxis;
+      newElements[index].basePath = selectedObject.basePath;
+      newElements[index].postProcess = selectedObject.postProcess;
+      newElements[index].seriesText = seriesText;
+      
 
       
       console.log(newElements);
@@ -315,7 +338,11 @@ const ChartEditor = () => {
 const getLocalStorage =   () => {
   console.log("getLocalStorage");
   if (localStorage.getItem("subconnect-content")) {
+    
     const savedContent = JSON.parse(localStorage.getItem("subconnect-content"));
+    if (savedContent.length === 0) {
+      return;
+    }
     console.log(savedContent);
     setContent(savedContent);
     setCurrentContentIndex(0)
@@ -412,6 +439,7 @@ const handleDeleteContent = (indexToDelete) => {
     }); // clear the form
     setElements([
       {
+        elementId: generateGUID(),
         isEditingTitle: false,
         type: "",
         color: "",
@@ -509,11 +537,11 @@ const handleDeleteContent = (indexToDelete) => {
   <Label>Data Key:</Label>
   <select
     className="w-80 form-select"
-    value={element.dataKey} // Ensure this is set to the currently selected data key
+    value={element.id} // Ensure this is set to the currently selected data key
     onChange={handleGraphElementChange(index, "dataKey")}
   >
     {graphArray.map((item, idx) => (
-      <option key={idx} value={item.yAxis}>
+      <option key={item.id} value={item.id}>
         {item.name}
       </option>
     ))}
@@ -697,13 +725,15 @@ const handleDeleteContent = (indexToDelete) => {
                 <Legend />
                 {elements.map((element, index) => {
                   const ChartComponent = element.type === "Bar" ? Bar : Line;
+                  const dk = element.yAxis + "_" + element.elementId;
                   return (
                     <ChartComponent
                       key={index}
-                      
-                      dataKey={element.dataKey}
+                      name={element.seriesText}
+                      dataKey={dk}
                       fill={element.color}
                       fillOpacity={element.opacity}
+                     
                     />
                   );
                 })}

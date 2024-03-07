@@ -65,47 +65,48 @@ const ShowChart = ({ chart }) => {
       </CardHeader>
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart width={500} height={300} data={data}>
-            {chart?.form?.chart?.showXAxis && (
-              <XAxis
-                dataKey="name" // Adjust this as necessary to match your data structure
-                label={{ value: chart.form.chart.xAxisLabel, position: "insideBottomRight", offset: -20 }}
-                tick={{ fontSize: chart.form.axis?.xAxisFontSize || 10 }}
-              />
-            )}
-            {chart?.form?.chart?.showYAxis && (
-              <YAxis
-              type="number" domain={['dataMin', 'dataMax']}
-                label={{ value: chart.form.chart.yAxisLabel, angle: -90, position: "insideLeft" }}
-                tick={{ fontSize: chart.form.axis?.yAxisFontSize || 10 }}
-              />
-            )}
-            <Tooltip
-              contentStyle={{
-                display: chart?.form?.tooltip?.show ? "block" : "none",
-                color: `rgba(${hexToRgb(chart?.form?.tooltip?.color)}, ${chart?.form?.tooltip?.textOpacity})`,
-                backgroundColor: `rgba(${hexToRgb(chart?.form?.tooltip?.backgroundColor)}, ${chart?.form?.tooltip?.backgroundOpacity})`,
-                borderRadius: `${chart?.form?.tooltip?.borderRadius}px`,
-                border: `${chart?.form?.tooltip?.borderWidth}px ${chart?.form?.tooltip?.borderStyle} rgba(${hexToRgb(chart?.form?.tooltip?.borderColor)}, ${chart?.form?.tooltip?.borderOpacity})`,
-                fontSize: `${chart?.form?.tooltip?.fontSize}px`,
-              }}
-            />
-            {chart?.form?.chart?.showCartesianGrid && (
-              <CartesianGrid stroke="#f5f5f5" />
-            )}
-            <Legend />
-            {chart.elements?.map((element, index) => {
-              const ChartComponent = element.type === "Bar" ? Bar : Line;
-              return (
-                <ChartComponent
-                  key={index}
-                  dataKey={element.dataKey}
-                  fill={element.color}
-                  fillOpacity={element.opacity}
-                />
-              );
-            })}
-          </ComposedChart>
+        <ComposedChart width={500} height={300} data={data}>
+  {chart?.form?.chart?.showXAxis && (
+    <XAxis
+      dataKey="updatedTime"
+      label={{ value: chart.form.chart.xAxisLabel, position: "insideBottomRight", offset: -20 }}
+      tick={{ fontSize: chart.form.axis?.xAxisFontSize || 10 }}
+    />
+  )}
+  {chart?.form?.chart?.showYAxis && chart.elements?.map((element, index) => (
+    <YAxis
+      yAxisId={element.elementId}
+      
+      domain={['dataMin', 'dataMax']} // You might want to specify these domains dynamically
+      
+    />
+  ))}
+  <Tooltip
+    contentStyle={{
+      display: chart?.form?.tooltip?.show ? "block" : "none",
+      // Tooltip style configuration
+    }}
+  />
+  {chart?.form?.chart?.showCartesianGrid && (
+    <CartesianGrid stroke="#f5f5f5" />
+  )}
+  <Legend />
+  {chart.elements?.map((element, index) => {
+    const ChartComponent = element.type === "Bar" ? Bar : Line;
+    const dtky = element.yAxis + "_" + element.elementId
+    return (
+      <ChartComponent
+        key={element.elementId} // Assuming elementId is unique
+        yAxisId={element.elementId} // Make sure each element has a yAxisId corresponding to its YAxis component
+        name={element.seriesText}
+        dataKey={dtky} // Ensure you have a dataKey property that matches the data structure
+        fill={element.color}
+        fillOpacity={element.opacity}
+      />
+    );
+  })}
+</ComposedChart>
+
         </ResponsiveContainer>
       </CardContent>
     </Card>

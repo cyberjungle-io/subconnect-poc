@@ -33,17 +33,7 @@ const DashboardEditor = () => {
     return loadedCharts;
   };
   // Call loadChartPreferences in a useEffect hook to load the preferences when the component mounts
-  useEffect(() => {
-    const loadedCharts = loadChartPreferences();
-    // Assign a unique chartId to each chart
-    const chartsWithId = loadedCharts.map((chart, index) => ({
-      ...chart,
-      chartId: index, // or generate a unique ID here
-    }));
-    setCharts(chartsWithId);
-    //console.log(chartsWithId)
-    console.log(charts)
-  }, []);
+  
 useEffect(() => {
   console.log(charts)
 } , [charts])
@@ -52,7 +42,7 @@ useEffect(() => {
       {charts.map((chart) => (
         <>
         <h1>{chart.elements[0].xAxis}</h1>
-        <ShowChart  chart={chart} />
+       
         </>
       ))}
     </div>

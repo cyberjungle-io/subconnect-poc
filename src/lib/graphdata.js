@@ -22,9 +22,11 @@ export const graphArray = [
                 }
             `,
     "owner": "Cyber Jungle",
+    "basePath": "globalStateSnapshots",
     "xAxis": "updatedTime",
     "yAxis": "averageApr",
-    "postProcess": [{"multiplyBy": 100}, {"round": 2}]
+    "postProcess": [{"multiplyBy": 100}, {"round": 2}],
+    "variables": []
     },
     {"id" : "2",
     "name": "Phala Average Block Time",
@@ -45,9 +47,11 @@ export const graphArray = [
                 }
             `,
     "owner": "Cyber Jungle",
+    "basePath": "globalStateSnapshots",
     "xAxis": "updatedTime",
     "yAxis": "averageBlockTime",
-    "postProcess": [{"devideBy": 1000}, {"round": 2}]
+    "postProcess": [{"devideBy": 1000}, {"round": 2}],
+    "variables": []
     },
     {"id" : "3",
     "name": "Phala Delegator Count",
@@ -68,9 +72,11 @@ export const graphArray = [
                 }
             `,
     "owner": "Cyber Jungle",
+    "basePath": "globalStateSnapshots",
     "xAxis": "updatedTime",
     "yAxis": "delegatorCount",
-    "postProcess": []
+    "postProcess": [],
+    "variables": []
     },
     {"id" : "4",
     "name": "Phala Total Value",
@@ -91,31 +97,94 @@ export const graphArray = [
                 }
             `,
     "owner": "Cyber Jungle",
+    "basePath": "globalStateSnapshots",
     "xAxis": "updatedTime",
     "yAxis": "totalValue",
-    "postProcess": []
+    "postProcess": [],
+    "variables": []
+    },
+    {"id" : "5",
+    "name": "Khala Pool Total Value",
+    "chain": "Khala",
+    "URI": ["https://khala-computation.cyberjungle.io/graphql"],
+    "queryType": "time",
+    "queryVars": [{"Update Time":"String"}, {"Limit":"Int"}],
+    "query": `query {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}, updatedTime_gt: "<<datetime>>"}, limit: 1000) {
+                      updatedTime
+                      totalValue
+                    }
+                  }`,
+    "owner": "Cyber Jungle",
+    "basePath": "basePoolSnapshots",
+    "xAxis": "updatedTime",
+    "yAxis": "totalValue",
+    "postProcess": [],
+    "variables": ["pool number"]
+    },
+    {"id" : "6",
+    "name": "Khala Pool Idle Worker Count",
+    "chain": "Khala",
+    "URI": ["https://khala-computation.cyberjungle.io/graphql"],
+    "queryType": "time",
+    "queryVars": [{"Update Time":"String"}, {"Limit":"Int"}],
+    "query": `
+                query {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                      updatedTime
+                      idleWorkerCount
+                    }
+                  }
+            `,
+    "owner": "Cyber Jungle",
+    "basePath": "basePoolSnapshots",
+    "xAxis": "updatedTime",
+    "yAxis": "idleWorkerCount",
+    "postProcess": [],
+    "variables": ["pool number"]
+    },
+    {"id" : "7",
+    "name": "Khala PoolWorker Count",
+    "chain": "Khala",
+    "URI": ["https://khala-computation.cyberjungle.io/graphql"],
+    "queryType": "time",
+    "queryVars": [{"Update Time":"String"}, {"Limit":"Int"}],
+    "query": `
+                query {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                      updatedTime
+                      workerCount
+                    }
+                  }
+            `,
+    "owner": "Cyber Jungle",
+    "basePath": "basePoolSnapshots",
+    "xAxis": "updatedTime",
+    "yAxis": "idleWorkerCount",
+    "postProcess": [],
+    "variables": ["pool number"]
     }
 
 ]
 
-export const fetchGraphDataDateSeries = async (id,dateformat,days) => {
+export const fetchGraphDataDateSeries = async (element,dateformat,days) => {
     //find the index of the graphArray with the id
-    const index = graphArray.findIndex(x => x.id === id);
+    
     const dt = daysFromNow(days);
-    //console.log(dt);
+    console.log(element.query);
     const client = new ApolloClient({
-        uri: graphArray[index].URI[0],
+        uri: element.URI[0],
         cache: new InMemoryCache()
     });
 
     const { data } = await client.query({
-        query: gql(graphArray[index].query.replace("<<datetime>>", dt))
+        query: gql(element.query.replace("<<datetime>>", dt))
     });
     let newArray = [];
-    for (let i = 0; i < data.globalStateSnapshots.length; i++) {
-        let record = data.globalStateSnapshots[i];
-        //console.log(graphArray[index].yAxis);
-        record = { ...record, [graphArray[index].yAxis]: postProcess(record[graphArray[index].yAxis], graphArray[index].postProcess) };
+    for (let i = 0; i < data[element.basePath].length; i++) {
+        let record = data[element.basePath][i];
+       
+        record = { ...record, [element.yAxis]: postProcess(record[element.yAxis], element.postProcess) };
         newArray.push(record);
     }
     
@@ -167,45 +236,62 @@ function formatDatesInArray(array, property, format) {
 }
    
 export const fetchElementData = async (elements) => {
-    // Fetch all data concurrently
-    //console.log("fetchElementData")
-    //console.log(elements);
-    const dataPromises = elements.map(element => 
-        fetchGraphDataDateSeries(element.id, "MM/DD/YYYY", 7)
+    console.log(elements);
+    const dataPromises = elements.map(element =>
+        fetchGraphDataDateSeries(element, "MM/DD/YYYY", 7).then(data => {
+            return data.map(item => ({
+                ...item,
+                elementId: element.elementId, // Assuming each element has an identifier 'id'
+                yAxis: element.yAxis // Preserving the 'yAxis' property from the element
+            }));
+        })
     );
     const results = await Promise.all(dataPromises);
 
-    // Combine all arrays into a single array
     let combinedData = [].concat(...results);
 
-    // Sort the combined array by updatedTime
     combinedData.sort((a, b) => moment(a.updatedTime, "MM/DD/YYYY").diff(moment(b.updatedTime, "MM/DD/YYYY")));
 
-    // Merge entries with the same updatedTime
     let mergedData = combinedData.reduce((acc, data) => {
-        // Find if there's already an entry with the same updatedTime
         let existingEntryIndex = acc.findIndex(entry => entry.updatedTime === data.updatedTime);
         if (existingEntryIndex > -1) {
-            // If found, merge this data into the existing entry without overwriting existing fields
-            acc[existingEntryIndex] = {
-                ...acc[existingEntryIndex],
-                ...data,
-                // Ensure that no existing metrics are overwritten by only adding non-existing properties
-                ...Object.keys(data).reduce((props, key) => {
-                    if (!acc[existingEntryIndex].hasOwnProperty(key)) {
-                        props[key] = data[key];
+            Object.keys(data).forEach(key => {
+                // Only process if key is not 'elementId' or 'yAxis' to avoid duplicating these properties
+                if (key !== 'elementId' && key !== 'yAxis') {
+                    if (key === data.yAxis) {
+                        const uniqueKeyName = `${data.yAxis}_${data.elementId}`;
+                        acc[existingEntryIndex][uniqueKeyName] = data[key];
+                    } else {
+                        // For properties other than yAxis, copy them if they don't exist in the acc entry
+                        if (!acc[existingEntryIndex].hasOwnProperty(key)) {
+                            acc[existingEntryIndex][key] = data[key];
+                        }
                     }
-                    return props;
-                }, {})
-            };
+                }
+            });
         } else {
-            // If not found, add this unique updatedTime data to the accumulator array
-            acc.push(data);
+            // Constructing new data entry for unique updatedTime
+            const newData = Object.fromEntries(Object.keys(data).map(key => {
+                if (key !== 'elementId' && key !== 'yAxis') {
+                    if (key === data.yAxis) {
+                        const uniqueKeyName = `${data.yAxis}_${data.elementId}`;
+                        return [uniqueKeyName, data[key]];
+                    } else {
+                        return [key, data[key]];
+                    }
+                }
+                // Skip 'elementId' and 'yAxis' keys to avoid adding them directly to newData
+                return null;
+            }).filter(entry => entry !== null));
+
+            newData.updatedTime = data.updatedTime; // Ensure updatedTime is always added
+
+            acc.push(newData);
         }
         return acc;
     }, []);
 
-    //console.log(mergedData);
     mergedData = formatDatesInArray(mergedData, "updatedTime", "MM/DD/YYYY hh A");
+    console.log(mergedData);
     return mergedData;
-}
+};
