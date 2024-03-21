@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { generateGUID } from "@/lib/utils";
 import ShowChart from "@/components/custom/showChart";
 import { Button } from "@/components/ui/button";
+import ShowTile from "@/components/tiles/showTile";
 const uniqueId = (() => {
   console.log("Generating unique ID..."); // Diagnostic log
   let count = 0;
@@ -39,44 +40,95 @@ const NewDashboard = () => {
   const [rows, setRows] = useState([
     {
       id: generateGUID(),
-      charts: [{ id: generateGUID(), colSpan: 2, content: {} }],
+      cells: [{ id: generateGUID(), colSpan: 2, content: {} }],
     },
   ]);
   const [content, setContent] = useState([]);
+  const [tileContent, setTileContent] = useState([]);
+  const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
   const [editMode, setEditMode] = useState(false);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+  const [isTileModalOpen, setIsTileModalOpen] = useState(false);
   const [selectedChartId, setSelectedChartId] = useState(null);
-  const openModal = (chartId) => {
+  const [selectedTileId, setSelectedTileId] = useState(null);
+  const openChartModal = (chartId) => {
     setSelectedChartId(chartId);
-    setIsModalOpen(true);
+    setIsChartModalOpen(true);
   };
-  const handleSelectContent = (contentId) => {
+  const openTileModal = (chartId) => {
+    setSelectedTileId(chartId);
+    setIsTileModalOpen(true);
+  };
+  const handleSelectChart = (contentId) => {
     //get content record from the content array using the contentId
     const selectedContent = content.find((item) => item.id === contentId);
     console.log(selectedContent);
     let newRows = rows;
     for (let x = 0; x < newRows.length; x++) {
-      for (let y = 0; y < newRows[x].charts.length; y++) {
-        if (newRows[x].charts[y].id === selectedChartId) {
-          newRows[x].charts[y].content = selectedContent;
+      for (let y = 0; y < newRows[x].cells.length; y++) {
+        if (newRows[x].cells[y].id === selectedChartId) {
+          newRows[x].cells[y].contentType = "chart";
+          newRows[x].cells[y].content = selectedContent;
         }
       }
     }
 
     setRows(newRows);
-    setIsModalOpen(false);
-    console.log("handleSelectContent");
+    setIsChartModalOpen(false);
+    console.log("handleSelectChart");
     console.log(newRows);
   };
-  function ContentSelectModal({ isOpen, content, onSelect, onClose }) {
+  const handleSelectTile = (contentId) => {
+    //get content record from the content array using the contentId
+    const selectedTileContent = tileContent.find((item) => item.id === contentId);
+    console.log("selected Tile:" , selectedTileContent);
+    let newRows = rows;
+    for (let x = 0; x < newRows.length; x++) {
+      for (let y = 0; y < newRows[x].cells.length; y++) {
+        if (newRows[x].cells[y].id === selectedTileId) {
+          newRows[x].cells[y].contentType = "tile";
+          newRows[x].cells[y].content = selectedTileContent;
+        }
+      }
+    }
+    console.log("newRows", newRows);
+    setRows(newRows);
+    setIsTileModalOpen(false);
+    console.log("handleSelectTile");
+    console.log(newRows);
+  };
+  function ChartSelectModal({ isOpen, content, onSelect, onClose }) {
     if (!isOpen) return null;
-    console.log("ContentSelectModal");
+    console.log("ChartSelectModal");
     console.log(content);
     return (
       <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
         <div className="modal bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
           <h2>Select Content</h2>
+          <ul>
+            {content.map((item) => (
+              <li key={item.id} onClick={() => onSelect(item.id)} className="cursor-pointer hover:bg-gray-100 p-2">
+                {item.form.title.text} {/* Assuming each content has a title */}
+              </li>
+            ))}
+          </ul>
+          <button onClick={onClose} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  function TileSelectModal({ isOpen, content, onSelect, onClose }) {
+    if (!isOpen) return null;
+    console.log("ChartSelectModal");
+    console.log(content);
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="modal bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
+          <h2>Select Tiles</h2>
           <ul>
             {content.map((item) => (
               <li key={item.id} onClick={() => onSelect(item.id)} className="cursor-pointer hover:bg-gray-100 p-2">
@@ -116,9 +168,16 @@ const saveLocalDashboard = () => {
       console.log(savedContent);
       setContent(savedContent);
       setCurrentContentIndex(0);
-      //setForm(savedContent[0].form);
+      }
+      if (localStorage.getItem("subconnect-tiles")) {
+        const savedTileContent = JSON.parse(
+          localStorage.getItem("subconnect-tiles")
+        );
+        console.log("tile Content:" ,savedTileContent);
+        setTileContent(savedTileContent);
+        setCurrentTileContentIndex(0);
 
-      //setElements(savedContent[0].elements);
+      
     }
   };
   const onDragEnd = (result) => {
@@ -138,31 +197,31 @@ const saveLocalDashboard = () => {
 
     if (source.droppableId === destination.droppableId) {
       // Moving within the same row
-      const newRowCharts = reorder(
-        sourceRow.charts,
+      const newRowcells = reorder(
+        sourceRow.cells,
         source.index,
         destination.index
       );
       const newRows = rows.map((row) => {
         if (row.id === sourceRow.id) {
-          return { ...row, charts: newRowCharts };
+          return { ...row, cells: newRowcells };
         }
         return row;
       });
       setRows(newRows);
     } else {
       // Moving to a different row
-      const sourceCharts = Array.from(sourceRow.charts);
-      const [removed] = sourceCharts.splice(source.index, 1);
-      const destinationCharts = Array.from(destinationRow.charts);
-      destinationCharts.splice(destination.index, 0, removed);
+      const sourcecells = Array.from(sourceRow.cells);
+      const [removed] = sourcecells.splice(source.index, 1);
+      const destinationcells = Array.from(destinationRow.cells);
+      destinationcells.splice(destination.index, 0, removed);
 
       const newRows = rows.map((row) => {
         console.log("Row:", row); // Diagnostic log
         if (row.id === sourceRow.id) {
-          return { ...row, charts: sourceCharts };
+          return { ...row, cells: sourcecells };
         } else if (row.id === destinationRow.id) {
-          return { ...row, charts: destinationCharts };
+          return { ...row, cells: destinationcells };
         }
         return row;
       });
@@ -178,17 +237,17 @@ const saveLocalDashboard = () => {
     console.log("Current rows before adding:", currentRows); // Log current state before adding
     const newRows = [...currentRows];
     const lastRow = newRows[newRows.length - 1];
-    const totalColSpan = lastRow.charts.reduce(
+    const totalColSpan = lastRow.cells.reduce(
       (sum, chart) => sum + chart.colSpan,
       0
     );
 
     if (totalColSpan + 2 <= 12) {
-      lastRow.charts.push({ id: generateGUID(), colSpan: 2, content: {} });
+      lastRow.cells.push({ id: generateGUID(), colSpan: 2, content: {} });
     } else {
       newRows.push({
         id: uniqueId(),
-        charts: [{ id: generateGUID(), colSpan: 2, content: {} }],
+        cells: [{ id: generateGUID(), colSpan: 2, content: {} }],
       });
     }
 
@@ -200,7 +259,7 @@ const saveLocalDashboard = () => {
 
   const addRow = () => {
     console.log("Adding row..."); // Diagnostic log
-    setRows((currentRows) => [...currentRows, { id: uniqueId(), charts: [] }]);
+    setRows((currentRows) => [...currentRows, { id: uniqueId(), cells: [] }]);
   };
 
   const extendChart = (rowId, chartId) => {
@@ -210,7 +269,7 @@ const saveLocalDashboard = () => {
         if (row.id === rowId) {
           return {
             ...row,
-            charts: row.charts.map((chart) => {
+            cells: row.cells.map((chart) => {
               if (chart.id === chartId && chart.colSpan < 12) {
                 const newColSpan = chart.colSpan + 2;
                 return { ...chart, colSpan: newColSpan };
@@ -227,7 +286,7 @@ const saveLocalDashboard = () => {
     setRows((currentRows) => {
       return currentRows.map((row) => {
         if (row.id === rowId) {
-          const totalColSpan = row.charts.reduce(
+          const totalColSpan = row.cells.reduce(
             (sum, chart) => sum + chart.colSpan,
             0
           );
@@ -236,13 +295,13 @@ const saveLocalDashboard = () => {
           if (totalColSpan + newColSpan <= 12) {
             return {
               ...row,
-              charts: [
-                ...row.charts,
+              cells: [
+                ...row.cells,
                 { id: generateGUID(), colSpan: newColSpan, content: {} },
               ],
             };
           } else {
-            // Optional: Adjust existing charts or notify the user
+            // Optional: Adjust existing cells or notify the user
           }
         }
         return row;
@@ -256,7 +315,7 @@ const saveLocalDashboard = () => {
         if (row.id === rowId) {
           return {
             ...row,
-            charts: row.charts.map((chart) => {
+            cells: row.cells.map((chart) => {
               if (chart.id === chartId && chart.colSpan > 2) {
                 return { ...chart, colSpan: chart.colSpan - 2 };
               }
@@ -275,7 +334,7 @@ const saveLocalDashboard = () => {
         if (row.id === rowId) {
           return {
             ...row,
-            charts: row.charts.filter((chart) => chart.id !== chartId),
+            cells: row.cells.filter((chart) => chart.id !== chartId),
           };
         }
         return row;
@@ -309,13 +368,18 @@ const saveLocalDashboard = () => {
     
     
     <DragDropContext onDragEnd={onDragEnd}>
-      <ContentSelectModal
-        isOpen={isModalOpen}
+      <ChartSelectModal
+        isOpen={isChartModalOpen}
         content={content}
-        onSelect={handleSelectContent}
-        onClose={() => setIsModalOpen(false)}
+        onSelect={handleSelectChart}
+        onClose={() => setIsChartModalOpen(false)}
       />
-
+      <TileSelectModal
+        isOpen={isTileModalOpen}
+        content={tileContent}
+        onSelect={handleSelectTile}
+        onClose={() => setIsTileModalOpen(false)}
+      />
       {rows.map((row, rowIndex) => (
         <Droppable
           key={row.id}
@@ -328,11 +392,11 @@ const saveLocalDashboard = () => {
               {...provided.droppableProps}
               className="flex flex-wrap mb-4"
             >
-              {row.charts.map((chart, chartIndex) => (
+              {row.cells.map((cell, cellIndex) => (
                 <Draggable
-                  key={chart.id}
-                  draggableId={`${chart.id}`}
-                  index={chartIndex}
+                  key={cell.id}
+                  draggableId={`${cell.id}`}
+                  index={cellIndex}
                 >
                   {(provided) => (
                     <div
@@ -340,37 +404,47 @@ const saveLocalDashboard = () => {
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       className={`px-3 mb-6 flex justify-center items-center ${getColSpanClass(
-                        chart.colSpan
+                        cell.colSpan
                       )}`}
                     >
                       <div className="border rounded flex justify-between items-center p-4 w-full">
-                        <ShowChart chart={chart.content} />
+                        {cell.contentType === "chart" ? (
+                        <ShowChart chart={cell.content} />
+                      ) : ("" )}
+                      {cell.contentType === "tile" ? (
+                        <ShowTile key={JSON.stringify(cell.content.form)} form={cell.content.form} />
+                      ) : ("" )}
                         {editMode ?
                         <div className="flex flex-col space-y-2">
                           <button 
-                          onClick={() => openModal(chart.id)}
+                          onClick={() => openChartModal(cell.id)}
                           className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">
-                            Content
+                            Select Chart
+                          </button>
+                          <button 
+                          onClick={() => openTileModal(cell.id)}
+                          className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">
+                            Select Tile
                           </button>
 
-                          {chart.colSpan < 12 && (
+                          {cell.colSpan < 12 && (
                             <button
-                              onClick={() => extendChart(row.id, chart.id)}
+                              onClick={() => extendChart(row.id, cell.id)}
                               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
                             >
                               Extend
                             </button>
                           )}
-                          {chart.colSpan > 2 && (
+                          {cell.colSpan > 2 && (
                             <button
-                              onClick={() => shrinkChart(row.id, chart.id)}
+                              onClick={() => shrinkChart(row.id, cell.id)}
                               className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
                             >
                               Shrink
                             </button>
                           )}
                           <button
-                            onClick={() => deleteChart(row.id, chart.id)}
+                            onClick={() => deleteChart(row.id, cell.id)}
                             className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
                           >
                             Delete
@@ -383,7 +457,7 @@ const saveLocalDashboard = () => {
                 </Draggable>
               ))}
               
-              {editMode && row.charts.reduce((sum, chart) => sum + chart.colSpan, 0) <=
+              {editMode && row.cells.reduce((sum, chart) => sum + chart.colSpan, 0) <=
                 10 && (
                   
                 <button
@@ -391,7 +465,7 @@ const saveLocalDashboard = () => {
                   type="button"
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
-                  Add Chart
+                  Add Cell
                 </button>
               )}
               {provided.placeholder}

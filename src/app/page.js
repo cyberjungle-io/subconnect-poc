@@ -12,12 +12,14 @@ export default function Home() {
 
   return (
     <main className='w-full h-full'>
-      <Button onClick={() => setPage('dashboard')}>Dashboard Editor</Button>
+      
       <Button onClick={() => setPage('chart')}>Chart Editor</Button>
       <Button onClick={() => setPage('newDashboard')}>NewDashboard</Button>
-      {page === 'dashboard' && <DashboardEditor/>}
+      <Button onClick={() => setPage('tileEditor')}>Tile Editor</Button>
+      
       {page === 'chart' && <ChartEditor/>}
       {page === 'newDashboard' && <NewDashboard/>}
+      {page === 'tileEditor' && <TileEditor/>}
     </main>
   );
 }

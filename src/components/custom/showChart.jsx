@@ -23,13 +23,13 @@ const ShowChart = ({ chart }) => {
       if (!chart || !chart.elements) {
         return; // Exit early if `chart` or `chart.elements` is not defined
       }
-      console.log("chart");
-      console.log(chart);
-      console.log("charts.elements");
-      console.log(chart.elements); // Log to ensure `chart.elements` is defined
+      //console.log("chart");
+      //console.log(chart);
+      //console.log("charts.elements");
+      //console.log(chart.elements); // Log to ensure `chart.elements` is defined
 
       const dta = await fetchElementData(chart.elements);
-      console.log(dta); // This will log the fetched data
+      //console.log(dta); // This will log the fetched data
 
       setData(dta); // This updates the state, but remember the update is asynchronous
     };

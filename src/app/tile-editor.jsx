@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,36 +10,107 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DOMPurify from "dompurify";
+import ShowTile from "@/components/tiles/showTile";
+import ConfigureTextLine from "@/components/tiles/configureTextLine";
+import ConfigureDataLine from "@/components/tiles/configureDataLine";
+import { generateGUID } from "@/lib/utils";
+
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 flex justify-center items-center">
+      <div className="relative bg-white p-4 md:p-6 lg:p-8 rounded-lg shadow-lg max-w-md max-h-full overflow-y-auto z-50">
+        <button
+          onClick={onClose}
+          className="absolute top-0 right-0 mt-4 mr-4 text-gray-700 hover:text-gray-900"
+        >
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        {/* Title */}
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          Select Content
+        </h2>
+        <div className="mt-4">{children}</div>
+      </div>
+    </div>
+  );
+};
 
 export default function TileEditor() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({
     title: { text: "", color: "#000000", fontSize: 16 },
     lines: [
-      { text: "", color: "#000000", fontSize: 16 },
+      { lineType: "Text", text: "", color: "#000000", fontSize: 16 },
       // Add more lines here as needed
     ],
     icon: { text: "", iconSize: 16 },
   });
+  const [content, setContent] = useState([]);
+  const [currentContentIndex, setCurrentContentIndex] = useState(0);
 
   const handleInputChange = (lineIndex, value) => {
-    setForm((prevForm) => {
-      const newLines = [...prevForm.lines];
-      if (newLines[lineIndex]) {
-        newLines[lineIndex].text = value;
-      } else {
-        // Handle the case where newLines[lineIndex] is undefined
-        console.error(`Line index ${lineIndex} is out of bounds`);
-      }
-      return { ...prevForm, lines: newLines };
-    });
+    console.log("lineIndex", lineIndex);
+    console.log("value", value);
+    if (lineIndex === "icon") {
+      setForm((prevForm) => ({
+        ...prevForm,
+        icon: { ...prevForm.icon, text: value },
+      }));
+    }
+    if (lineIndex === "title") {
+      setForm((prevForm) => ({
+        ...prevForm,
+        title: { ...prevForm.title, text: value },
+      }));
+    } else if (typeof lineIndex === "number") {
+      setForm((prevForm) => {
+        const newLines = [...prevForm.lines];
+        if (newLines[lineIndex]) {
+          newLines[lineIndex].text = value;
+        } else {
+          // Handle the case where newLines[lineIndex] is undefined
+          console.error(`Line index ${lineIndex} is out of bounds`);
+        }
+        return { ...prevForm, lines: newLines };
+      });
+    }
   };
+  useEffect(() => {
+    getLocalStorage();
+  }, []);
+  useEffect(() => {
+    console.log("form", form);
+  }, [form]);
 
   function handleColorChange(lineIndex, value) {
-    setForm((prevForm) => {
-      const newLines = [...prevForm.lines];
-      newLines[lineIndex].color = value;
-      return { ...prevForm, lines: newLines };
-    });
+    if (lineIndex === "title") {
+      setForm((prevForm) => ({
+        ...prevForm,
+        title: { ...prevForm.title, color: value },
+      }));
+    } else if (typeof lineIndex === "number") {
+      // Ensure lineIndex is a number
+      setForm((prevForm) => {
+        const newLines = [...prevForm.lines];
+        if (newLines[lineIndex]) {
+          newLines[lineIndex].color = value;
+          return { ...prevForm, lines: newLines };
+        }
+        return prevForm; // In case of an out-of-bounds index, return the previous form.
+      });
+    }
   }
 
   const handleFontSizeChange = (lineIndex, value) => {
@@ -71,278 +142,344 @@ export default function TileEditor() {
     setForm((prevForm) => {
       const newLines = [
         ...prevForm.lines,
-        { text: "", color: "#000000", fontSize: 16 },
+        { lineType: "Text", text: "", color: "#000000", fontSize: 16 },
       ];
       return { ...prevForm, lines: newLines };
     });
   }
+  function handleLineUpdate(lineIndex, newLine) {
+    setForm((prevForm) => {
+      const newLines = [...prevForm.lines];
+      newLines[lineIndex] = newLine;
+      return { ...prevForm, lines: newLines };
+    });
+  }
+  const handleLineTypeChange = (lineIndex, newValue) => {
+    setForm((prevForm) => {
+      const newLines = [...prevForm.lines];
+      if (newLines[lineIndex]) {
+        if (newValue === "Data") {
+          (newLines[lineIndex] = {
+            lineType: "Data",
+            label: { text: "", color: "#000000", fontSize: 16 },
+            value: { id: "", color: "#000000", fontSize: 16, dataQuery: {} },
+          }),
+            (newLines[lineIndex].label.text = "");
+          console.log("newLines[lineIndex]", newLines[lineIndex]);
+        } else if (newValue === "Video") {
+          (newLines[lineIndex] = {
+            lineType: "Video",
+            text: "",
+            color: "#000000",
+            fontSize: 16,
+          }),
+            (newLines[lineIndex].text = "Video");
+        } else if (newValue === "Image") {
+          (newLines[lineIndex] = {
+            lineType: "Image",
+            text: "",
+            color: "#000000",
+            fontSize: 16,
+          }),
+            (newLines[lineIndex].text = "Image");
+        } else {
+          (newLines[lineIndex] = {
+            lineType: "Text",
+            text: "",
+            color: "#000000",
+            fontSize: 16,
+          }),
+            (newLines[lineIndex].text = "");
+        }
+      } else {
+        console.error(`Line index ${lineIndex} is out of bounds`);
+      }
+      return { ...prevForm, lines: newLines };
+    });
+  };
+  const handleSaveClick = () => {
+    savePreferences();
+  };
+  const getLocalStorage = () => {
+    console.log("getLocalStorage");
+    if (localStorage.getItem("subconnect-tiles")) {
+      const savedContent = JSON.parse(localStorage.getItem("subconnect-tiles"));
+      if (savedContent.length === 0) {
+        return;
+      }
+      console.log(savedContent);
+      setContent(savedContent);
+      setCurrentContentIndex(0);
+      setForm(savedContent[0].form);
+    }
+  };
+  const savePreferences = () => {
+    console.log("savePreferences");
+    // temporary load the content from the content array for the currentContentIndex
+    let tempContent = content[currentContentIndex];
+    //test if the tempContent has an element id
+    if (!tempContent) {
+      tempContent = { id: generateGUID() };
+    }
+    // save the form and elements to local storage at the currentContentIndex
+    const tcontent = { id: tempContent.id, form: form };
+    console.log(JSON.stringify(tcontent));
+    let newContent = [...content];
+    newContent[currentContentIndex] = tcontent;
+    setContent(newContent);
 
+    localStorage.setItem("subconnect-tiles", JSON.stringify(newContent));
+  };
+  const handleSelectContent = (selectedIndex) => {
+    setCurrentContentIndex(selectedIndex);
+    setForm(content[selectedIndex].form);
+    
+    setIsModalOpen(false); // Close the modal
+  };
+  const handleDeleteContent = (indexToDelete) => {
+    const newContent = content.filter((_, index) => index !== indexToDelete);
+    setContent(newContent);
+    // Optionally, reset currentContentIndex or adjust it if the current content is being deleted
+    if (indexToDelete === currentContentIndex) {
+      setCurrentContentIndex(0); // Reset to first content or handle appropriately
+    } else if (indexToDelete < currentContentIndex) {
+      setCurrentContentIndex(currentContentIndex - 1); // Adjust the index accordingly
+    }
+    // Save the updated content array to local storage or perform any other cleanup
+    localStorage.setItem("subconnect-tiles", JSON.stringify(newContent));
+  };
+  const handleNewClick = () => {
+    console.log("handleNewClick");
+    const newContent = [...content];
+    setForm({
+      title: { text: "New", color: "#000000", fontSize: 16 },
+      lines: [
+        { lineType: "Text", text: "", color: "#000000", fontSize: 16 },
+        // Add more lines here as needed
+      ],
+      icon: { text: "", iconSize: 16 },
+    }); // clear the form
+    
+    newContent.push({ id: generateGUID(), form: form });
+    setContent(newContent);
+    setCurrentContentIndex(content.length);
+    console.log(content);
+
+  }
   return (
-    <main>
-      <section className="flex justify-center ">
-        <Card className="w-[350px]">
-          <CardHeader>
-            <CardTitle className="flex flex-row">
-              <div
-                className="w-1/2"
-                style={{
-                  color: form.title.color,
-                  fontSize: `${form.title.fontSize}px`,
-                }}
+    <>
+      <Button onClick={handleSaveClick}>Save</Button>
+      <Button onClick={handleNewClick}>New</Button>
+      <Button onClick={() => setIsModalOpen(true)}>Select Content</Button>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ul>
+          {content.map((item, index) => (
+            <li key={index} className="flex justify-between items-center">
+              <button onClick={() => handleSelectContent(index)}>
+                {item.form.title.text}
+              </button>
+              <button
+                onClick={() => handleDeleteContent(index)}
+                className="ml-4"
               >
-                {form.title.text ? form.title.text : "Title"}
-              </div>
-              <div className="w-1/2 flex justify-end me-3">
-                {form.icon.text ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(form.icon.text),
-                    }}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 text-red-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Modal>
+      <main>
+        <ShowTile key={JSON.stringify(form)} form={form} />
+
+        <section className="ms-4">
+          <h3>Title</h3>
+          <div className="flex">
+            <Input
+              name="title"
+              placeholder="Title"
+              value={form.title.text}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              className="w-80 me-4"
+            />
+            <Input
+              type="color"
+              value={form.title.color}
+              onChange={(e) => handleColorChange("title", e.target.value)}
+              className="w-15 border-none"
+            />
+            <div className="flex items-center ms-4">
+              <button
+                onClick={() =>
+                  handleFontSizeChange("title", form.title.fontSize - 1)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6 "
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 12h14"
+                  />
+                </svg>
+              </button>
+              <input
+                type="text"
+                className="mx-2 text-center w-12"
+                value={form.title.fontSize}
+                onChange={(e) => {
+                  if (!isNaN(e.target.value)) {
+                    handleFontSizeChange("title", e.target.value);
+                  }
+                }}
+              />
+              <button
+                onClick={() =>
+                  handleFontSizeChange("title", form.title.fontSize + 1)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <h3>Icon</h3>
+          <div className="flex">
+            <Input
+              name="icon"
+              type="textarea"
+              placeholder="Paste SVG"
+              value={form.icon.text}
+              onChange={(e) => handleInputChange("icon", e.target.value)}
+              className="w-2/3 me-4"
+            />
+            <div className="flex items-center">
+              <button
+                onClick={() =>
+                  handleIconSizeChange("icon", form.icon.iconSize - 1)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6 "
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 12h14"
+                  />
+                </svg>
+              </button>
+              <input
+                type="text"
+                className="mx-2 text-center w-12"
+                value={form.icon.iconSize}
+                onChange={(e) => {
+                  if (!isNaN(e.target.value)) {
+                    handleIconSizeChange("icon", e.target.value);
+                  }
+                }}
+              />
+              <button
+                onClick={() =>
+                  handleIconSizeChange("icon", form.icon.iconSize + 1)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div className="space-y-5 mt-3">
+            {form.lines.map((line, index) => (
+              <div key={index} className="flex ">
+                <select
+                  name={`lineType${index}`}
+                  value={line.lineType}
+                  onChange={(e) => handleLineTypeChange(index, e.target.value)}
+                  className="mr-2"
+                >
+                  <option value="Text">Text</option>
+                  <option value="Data">Data</option>
+                  <option value="Video">Video</option>
+                  <option value="Image">Image</option>
+                </select>
+                {line.lineType === "Text" ? (
+                  <ConfigureTextLine
+                    key={index}
+                    line={line}
+                    index={index}
+                    handleLineUpdate={handleLineUpdate} // Pass handleLineUpdate as a prop
                   />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                    style={{
-                      width: `${form.icon.iconSize}px`,
-                      height: `${form.icon.iconSize}px`,
-                    }}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                    />
-                  </svg>
+                  ""
+                )}
+
+                {line.lineType === "Data" ? (
+                  <ConfigureDataLine
+                    key={index}
+                    line={line}
+                    index={index}
+                    handleLineUpdate={handleLineUpdate} // Pass handleLineUpdate as a prop
+                  />
+                ) : (
+                  ""
                 )}
               </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {form.lines.map((line, index) => (
-              <div
-                key={index}
-                style={{
-                  color: line.color,
-                  fontSize: `${line.fontSize}px`,
-                }}
-              >
-                {line.text ? line.text : `Line ${index + 1} Data`}
-              </div>
             ))}
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="ms-4">
-        <h3>Title</h3>
-        <div className="flex">
-          <Input
-            name="title"
-            placeholder="Title"
-            value={form.title.text}
-            onChange={(e) => handleInputChange("title", e.target.value)}
-            className="w-80 me-4"
-          />
-          <Input
-            type="color"
-            value={form.title.color}
-            onChange={(e) => handleColorChange("title", e.target.value)}
-            className="w-15 border-none"
-          />
-          <div className="flex items-center ms-4">
-            <button
-              onClick={() =>
-                handleFontSizeChange("title", form.title.fontSize - 1)
-              }
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6 "
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 12h14"
-                />
-              </svg>
-            </button>
-            <input
-              type="text"
-              className="mx-2 text-center w-12"
-              value={form.title.fontSize}
-              onChange={(e) => {
-                if (!isNaN(e.target.value)) {
-                  handleFontSizeChange("title", e.target.value);
-                }
-              }}
-            />
-            <button
-              onClick={() =>
-                handleFontSizeChange("title", form.title.fontSize + 1)
-              }
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
-            </button>
           </div>
-        </div>
-        <h3>Icon</h3>
-        <div className="flex">
-          <Input
-            name="icon"
-            type="textarea"
-            placeholder="Paste SVG"
-            value={form.icon.text}
-            onChange={(e) => handleInputChange("icon", e.target.value)}
-            className="w-2/3 me-4"
-          />
-          <div className="flex items-center">
-            <button
-              onClick={() =>
-                handleIconSizeChange("icon", form.icon.iconSize - 1)
-              }
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6 "
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 12h14"
-                />
-              </svg>
-            </button>
-            <input
-              type="text"
-              className="mx-2 text-center w-12"
-              value={form.icon.iconSize}
-              onChange={(e) => {
-                if (!isNaN(e.target.value)) {
-                  handleIconSizeChange("icon", e.target.value);
-                }
-              }}
-            />
-            <button
-              onClick={() =>
-                handleIconSizeChange("icon", form.icon.iconSize + 1)
-              }
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div className="space-y-5 mt-3">
-          {form.lines.map((line, index) => (
-            <div key={index} className="flex ">
-              <Input
-                name={`lineText${index}`}
-                placeholder={`Enter Line ${index + 1} Data`}
-                value={line.text}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-                className="w-80 me-4 "
-              />
-              <Input
-                name={`lineColor${index}`}
-                type="color"
-                value={line.color}
-                onChange={(e) => handleColorChange(index, e.target.value)}
-                className="w-15 border-none"
-              />
-              <div className="flex items-center ms-4">
-                <button
-                  onClick={() => handleFontSizeChange(index, line.fontSize - 1)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-6 h-6 "
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 12h14"
-                    />
-                  </svg>
-                </button>
-                <input
-                  type="text"
-                  className="mx-2 text-center w-12"
-                  value={line.fontSize}
-                  onChange={(e) => {
-                    if (!isNaN(e.target.value)) {
-                      handleFontSizeChange(index, e.target.value);
-                    }
-                  }}
-                />
-                <button
-                  onClick={() => handleFontSizeChange(index, line.fontSize + 1)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        <Button className="mt-3" variant="outline" onClick={addLine}>
-          Add Line
-        </Button>
-      </section>
-    </main>
+          <Button className="mt-3" variant="outline" onClick={addLine}>
+            Add Line
+          </Button>
+        </section>
+      </main>
+    </>
   );
 }

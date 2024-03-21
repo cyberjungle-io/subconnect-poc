@@ -163,15 +163,54 @@ export const graphArray = [
     "yAxis": "idleWorkerCount",
     "postProcess": [],
     "variables": ["pool number"]
+    },
+    {"id" : "8",
+    "name": "Khala Average APR",
+    "chain": "Khala",
+    "URI": ["https://khala-computation.cyberjungle.io/graphql"],
+    "queryType": "value",
+    "queryVars": [],
+    "query": `
+                query {
+                    globalStates {
+                      averageApr
+                      
+                    }
+                  }
+            `,
+    "owner": "Cyber Jungle",
+    "basePath": "globalStates",
+    "value": "averageApr",
+    "postProcess": [{"multiplyBy": 100}, {"round": 2}],
+    "variables": []
+    },
+{"id" : "9",
+    "name": "Khala Average Block Time",
+    "chain": "Khala",
+    "URI": ["https://khala-computation.cyberjungle.io/graphql"],
+    "queryType": "value",
+    "queryVars": [],
+    "query": `
+                query {
+                    globalStates {
+                      averageBlockTime
+                      
+                    }
+                  }
+            `,
+    "owner": "Cyber Jungle",
+    "basePath": "globalStates",
+    "value": "averageBlockTime",
+    "postProcess": [{"devideBy": 1000}, {"round": 2}],
+    "variables": []
     }
-
 ]
 
 export const fetchGraphDataDateSeries = async (element,dateformat,days) => {
     //find the index of the graphArray with the id
     
     const dt = daysFromNow(days);
-    console.log(element.query);
+    //console.log(element.query);
     const client = new ApolloClient({
         uri: element.URI[0],
         cache: new InMemoryCache()
@@ -225,7 +264,20 @@ export const daysFromNow = (days) => {
     return d.toISOString();
 }
 
+export const fetchValueData = async (graphquery) =>{
+    //console.log(graphquery);
+    const client = new ApolloClient({
+        uri: graphquery.URI[0],
+        cache: new InMemoryCache()
+    });
 
+    const { data } = await client.query({
+        query: gql(graphquery.query)
+    });
+    //console.log("Data", data[graphquery.basePath][0][graphquery.value]);
+    const tdata = postProcess(data[graphquery.basePath][0][graphquery.value], graphquery.postProcess);
+    return tdata
+}
 
 function formatDatesInArray(array, property, format) {
     return array.map(item => {
@@ -236,7 +288,7 @@ function formatDatesInArray(array, property, format) {
 }
    
 export const fetchElementData = async (elements) => {
-    console.log(elements);
+    //console.log(elements);
     const dataPromises = elements.map(element =>
         fetchGraphDataDateSeries(element, "MM/DD/YYYY", 7).then(data => {
             return data.map(item => ({
@@ -292,6 +344,6 @@ export const fetchElementData = async (elements) => {
     }, []);
 
     mergedData = formatDatesInArray(mergedData, "updatedTime", "MM/DD/YYYY hh A");
-    console.log(mergedData);
+    //console.log(mergedData);
     return mergedData;
 };

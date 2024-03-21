@@ -41,50 +41,44 @@ import {
   BorderStyleSelect,
   FontSizeControl,
 } from "@/components/custom/controls";
-import { fetchGraphDataDateSeries,graphArray,fetchElementData } from "@/lib/graphdata";
+import {
+  fetchGraphDataDateSeries,
+  graphArray,
+  fetchElementData,
+} from "@/lib/graphdata";
 import { generateGUID } from "@/lib/utils";
 
-/* const GET_DATA = gql`
-  query {
-    globalStateSnapshots(
-      limit: 1000
-      orderBy: updatedTime_ASC
-      where: { updatedTime_gt: "2024-02-01T22:00:00.000000Z" }
-    ) {
-      averageApr
-      averageBlockTime
-      delegatorCount
-      totalValue
-      updatedTime
-    }
-  }
-`;
- */
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 flex justify-center items-center">
       <div className="relative bg-white p-4 md:p-6 lg:p-8 rounded-lg shadow-lg max-w-md max-h-full overflow-y-auto z-50">
-        <button onClick={onClose} className="absolute top-0 right-0 mt-4 mr-4 text-gray-700 hover:text-gray-900">
-          <svg className="h-6 w-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+        <button
+          onClick={onClose}
+          className="absolute top-0 right-0 mt-4 mr-4 text-gray-700 hover:text-gray-900"
+        >
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
         {/* Title */}
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Select Content</h2>
-        <div className="mt-4">
-          {children}
-        </div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          Select Content
+        </h2>
+        <div className="mt-4">{children}</div>
       </div>
     </div>
   );
 };
-
-
-
-
-
 
 const ChartEditor = () => {
   const [data, setData] = useState(null);
@@ -92,21 +86,18 @@ const ChartEditor = () => {
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-
-  
-   useEffect(() => {
-    getLocalStorage()
+  useEffect(() => {
+    getLocalStorage();
     //fetchGraphDataDateSeries("apr","MM/DD/YYYY");
-  }, []); 
+  }, []);
 
-  
   // Add state for the form
-  
+
   const fetchData = async (elementsArray) => {
     const dta = await fetchElementData(elementsArray);
     setData(dta);
     console.log(dta);
-  }
+  };
   const [form, setForm] = useState({
     title: {
       text: "",
@@ -145,7 +136,7 @@ const ChartEditor = () => {
 
   // Add state for the chart elements
   const [elements, setElements] = useState([
-    { 
+    {
       elementId: generateGUID(),
       isEditingTitle: false,
       type: "",
@@ -153,21 +144,20 @@ const ChartEditor = () => {
       dataKey: "",
       opacity: 1,
       seriesText: "New Series",
-      
     },
   ]);
-  
+
   useEffect(() => {
     const asyncFunction = async () => {
-        try {
+      try {
         await fetchData(elements);
-        }
-      catch (error) { console.error(error);}
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     asyncFunction();
-}, [elements]);
-
+  }, [elements]);
 
   // Add a handler for the button click
   const handleAddElement = () => {
@@ -181,7 +171,6 @@ const ChartEditor = () => {
         dataKey: "",
         opacity: 1,
         seriesText: "New Series",
-        
       },
     ]);
   };
@@ -201,7 +190,7 @@ const ChartEditor = () => {
   };
   // Add a handler for the element inputs
   const handleElementChange = (index, field) => (event) => {
-    console.log(event.target.value)
+    console.log(event.target.value);
     const newValue = event.target.value;
     // Assuming `elements` is an array in your component's state that contains the configurations,
     // and you have a method `setElements` to update this state.
@@ -213,16 +202,16 @@ const ChartEditor = () => {
   };
   const handleGraphElementChange = (index, field) => async (event) => {
     const selectedValue = event.target.value;
-    console.log(selectedValue)
+    console.log(selectedValue);
     // Find the selected object based on the `yAxis` value that matches the selected value
     const selectedObject = graphArray.find((item) => item.id === selectedValue);
     console.log(" handleGraphElementChange selectedObject");
     console.log(selectedObject);
     if (!selectedObject) {
-      console.error('Selected object not found in graphArray');
+      console.error("Selected object not found in graphArray");
       return;
     }
-    
+
     // Assuming `elements` is an array in your component's state that contains the configurations,
     // and you have a method `setElements` to update this state.
     let qry = selectedObject.query;
@@ -240,7 +229,7 @@ const ChartEditor = () => {
         qry = qry.replace(rplc, userInput);
       }
     }
-    
+
     setElements((prevElements) => {
       const newElements = [...prevElements];
       newElements[index][field] = selectedObject.yAxis;
@@ -252,17 +241,15 @@ const ChartEditor = () => {
       newElements[index].basePath = selectedObject.basePath;
       newElements[index].postProcess = selectedObject.postProcess;
       newElements[index].seriesText = seriesText;
-      
 
-      
       console.log(newElements);
-      
+
       return newElements;
     });
-    await fetchData(elements)
-    console.log("after fetch data")
+    await fetchData(elements);
+    console.log("after fetch data");
   };
-  
+
   const handleSelectChange = (index, property) => (value) => {
     const newElements = [...elements];
     newElements[index][property] = value;
@@ -324,7 +311,7 @@ const ChartEditor = () => {
         [property]: value,
       },
     }));
-  };
+  }
 
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -334,59 +321,57 @@ const ChartEditor = () => {
           16
         )}`
       : null;
-  };
-const getLocalStorage =   () => {
-  console.log("getLocalStorage");
-  if (localStorage.getItem("subconnect-content")) {
-    
-    const savedContent = JSON.parse(localStorage.getItem("subconnect-content"));
-    if (savedContent.length === 0) {
-      return;
+  }
+  const getLocalStorage = () => {
+    console.log("getLocalStorage");
+    if (localStorage.getItem("subconnect-content")) {
+      const savedContent = JSON.parse(
+        localStorage.getItem("subconnect-content")
+      );
+      if (savedContent.length === 0) {
+        return;
+      }
+      console.log(savedContent);
+      setContent(savedContent);
+      setCurrentContentIndex(0);
+      setForm(savedContent[0].form);
+
+      setElements(savedContent[0].elements);
     }
-    console.log(savedContent);
-    setContent(savedContent);
-    setCurrentContentIndex(0)
-    setForm(savedContent[0].form);
-    
-    setElements(savedContent[0].elements);
-    
-    
-  }
-};
+  };
 
-// Save to local storage
-const saveChartPreferences = () => {
-  console.log("saveChartPreferencesss");
-  // temporary load the content from the content array for the currentContentIndex
-  let tempContent = content[currentContentIndex];
-  //test if the tempContent has an element id
-  if (!tempContent) {
-  
-    tempContent = {id: generateGUID()};
-  }
-  // save the form and elements to local storage at the currentContentIndex
-  const tcontent = {id: tempContent.id, form : form, elements: elements};
-  console.log(JSON.stringify(tcontent));
-  let newContent = [...content];
-  newContent[currentContentIndex] = tcontent;
-  setContent(newContent);
+  // Save to local storage
+  const saveChartPreferences = () => {
+    console.log("saveChartPreferencesss");
+    // temporary load the content from the content array for the currentContentIndex
+    let tempContent = content[currentContentIndex];
+    //test if the tempContent has an element id
+    if (!tempContent) {
+      tempContent = { id: generateGUID() };
+    }
+    // save the form and elements to local storage at the currentContentIndex
+    const tcontent = { id: tempContent.id, form: form, elements: elements };
+    console.log(JSON.stringify(tcontent));
+    let newContent = [...content];
+    newContent[currentContentIndex] = tcontent;
+    setContent(newContent);
 
-  localStorage.setItem("subconnect-content", JSON.stringify(newContent));
-};
-const handleDeleteContent = (indexToDelete) => {
-  const newContent = content.filter((_, index) => index !== indexToDelete);
-  setContent(newContent);
-  // Optionally, reset currentContentIndex or adjust it if the current content is being deleted
-  if (indexToDelete === currentContentIndex) {
-    setCurrentContentIndex(0); // Reset to first content or handle appropriately
-  } else if (indexToDelete < currentContentIndex) {
-    setCurrentContentIndex(currentContentIndex - 1); // Adjust the index accordingly
-  }
-  // Save the updated content array to local storage or perform any other cleanup
-  localStorage.setItem("subconnect-content", JSON.stringify(newContent));
-};
+    localStorage.setItem("subconnect-content", JSON.stringify(newContent));
+  };
+  const handleDeleteContent = (indexToDelete) => {
+    const newContent = content.filter((_, index) => index !== indexToDelete);
+    setContent(newContent);
+    // Optionally, reset currentContentIndex or adjust it if the current content is being deleted
+    if (indexToDelete === currentContentIndex) {
+      setCurrentContentIndex(0); // Reset to first content or handle appropriately
+    } else if (indexToDelete < currentContentIndex) {
+      setCurrentContentIndex(currentContentIndex - 1); // Adjust the index accordingly
+    }
+    // Save the updated content array to local storage or perform any other cleanup
+    localStorage.setItem("subconnect-content", JSON.stringify(newContent));
+  };
 
-/* 
+  /* 
 
 
   console.log("ChartId: " + chartId)
@@ -446,14 +431,14 @@ const handleDeleteContent = (indexToDelete) => {
         dataKey: "",
         opacity: 1,
         seriesText: "New Series",
-        data:[]
+        data: [],
       },
     ]); // clear the elements
-    newContent.push({id : generateGUID(), form : form, elements: elements});
+    newContent.push({ id: generateGUID(), form: form, elements: elements });
     setContent(newContent);
     setCurrentContentIndex(content.length);
     console.log(content);
-    };
+  };
 
   // Render the chart elements and their customization sections
   const renderElements = () => {
@@ -534,19 +519,21 @@ const handleDeleteContent = (indexToDelete) => {
               />
             </div>
             <div className="flex flex-col space-y-1">
-  <Label>Data Key:</Label>
-  <select
-    className="w-80 form-select"
-    value={element.id} // Ensure this is set to the currently selected data key
-    onChange={handleGraphElementChange(index, "dataKey")}
-  >
-    {graphArray.map((item, idx) => (
-      <option key={item.id} value={item.id}>
-        {item.name}
-      </option>
-    ))}
-  </select>
-</div>
+              <Label>Data Key:</Label>
+              <select
+                className="w-80 form-select"
+                value={element.id} // Ensure this is set to the currently selected data key
+                onChange={handleGraphElementChange(index, "dataKey")}
+              >
+                {graphArray
+                  .filter((item) => item.queryType === "time")
+                  .map((item, idx) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
 
             <div className="flex flex-col space-y-1">
               <Label>Opacity:</Label>
@@ -650,28 +637,41 @@ const handleDeleteContent = (indexToDelete) => {
   };
   return (
     <>
-    <Button  onClick={handleSaveClick}>Save</Button>
-    <Button  onClick={handleNewClick}>New</Button>
-    <Button onClick={() => setIsModalOpen(true)}>Select Content</Button>
-    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-  <ul>
-    {content.map((item, index) => (
-      <li key={index} className="flex justify-between items-center">
-        <button onClick={() => handleSelectContent(index)}>
-          {item.form.title.text}
-        </button>
-        <button onClick={() => handleDeleteContent(index)} className="ml-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </li>
-    ))}
-  </ul>
-</Modal>
+      <Button onClick={handleSaveClick}>Save</Button>
+      <Button onClick={handleNewClick}>New</Button>
+      <Button onClick={() => setIsModalOpen(true)}>Select Content</Button>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ul>
+          {content.map((item, index) => (
+            <li key={index} className="flex justify-between items-center">
+              <button onClick={() => handleSelectContent(index)}>
+                {item.form.title.text}
+              </button>
+              <button
+                onClick={() => handleDeleteContent(index)}
+                className="ml-4"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 text-red-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Modal>
 
       <section className="w-2/3 mx-auto">
-        
         <Card className="h-[350px]">
           <CardHeader>
             <CardTitle>
@@ -692,7 +692,6 @@ const handleDeleteContent = (indexToDelete) => {
                 {form.chart.showXAxis && (
                   <XAxis
                     dataKey="updatedTime"
-                    
                     label={form.chart.xAxisLabel}
                     tick={{ fontSize: form.axis.xAxisFontSize }}
                   />
@@ -733,7 +732,6 @@ const handleDeleteContent = (indexToDelete) => {
                       dataKey={dk}
                       fill={element.color}
                       fillOpacity={element.opacity}
-                     
                     />
                   );
                 })}
