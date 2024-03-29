@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext } from "react";
 import {
   Card,
   CardContent,
@@ -14,8 +14,11 @@ import ShowTile from "@/components/tiles/showTile";
 import ConfigureTextLine from "@/components/tiles/configureTextLine";
 import ConfigureDataLine from "@/components/tiles/configureDataLine";
 import { generateGUID } from "@/lib/utils";
+import { setStorageData } from "@/lib/utils"; 
+import { GlobalStateContext } from "@/app/page";
 
 const Modal = ({ isOpen, onClose, children }) => {
+  const globalState = useContext(GlobalStateContext);
   if (!isOpen) return null;
 
   return (
@@ -48,6 +51,7 @@ const Modal = ({ isOpen, onClose, children }) => {
 };
 
 export default function TileEditor() {
+  const { globalState, setGlobalState } = useContext(GlobalStateContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({
     title: { text: "", color: "#000000", fontSize: 16 },
@@ -88,6 +92,7 @@ export default function TileEditor() {
     }
   };
   useEffect(() => {
+    console.log(globalState.account);
     getLocalStorage();
   }, []);
   useEffect(() => {
@@ -201,17 +206,16 @@ export default function TileEditor() {
     savePreferences();
   };
   const getLocalStorage = () => {
-    console.log("getLocalStorage");
-    if (localStorage.getItem("subconnect-tiles")) {
-      const savedContent = JSON.parse(localStorage.getItem("subconnect-tiles"));
-      if (savedContent.length === 0) {
+    
+      if (globalState.data.tiles.length === 0) {
         return;
       }
-      console.log(savedContent);
-      setContent(savedContent);
+
+      
+      setContent(globalState.data.tiles);
       setCurrentContentIndex(0);
-      setForm(savedContent[0].form);
-    }
+      setForm(globalState.data.tiles[0].form);
+    
   };
   const savePreferences = () => {
     console.log("savePreferences");
@@ -226,9 +230,17 @@ export default function TileEditor() {
     console.log(JSON.stringify(tcontent));
     let newContent = [...content];
     newContent[currentContentIndex] = tcontent;
-    setContent(newContent);
-
-    localStorage.setItem("subconnect-tiles", JSON.stringify(newContent));
+    
+    const newState = {
+      ...globalState,
+      data: {
+      ...globalState.data,
+      tiles: newContent
+      }
+    };
+    console.log("newState: ", newState);
+    setGlobalState(newState);
+    setStorageData(newState);
   };
   const handleSelectContent = (selectedIndex) => {
     setCurrentContentIndex(selectedIndex);
@@ -266,6 +278,9 @@ export default function TileEditor() {
     console.log(content);
 
   }
+  useEffect(() => {
+    console.log("globalState: ", globalState);
+  }, [globalState]);
   return (
     <>
       <Button onClick={handleSaveClick}>Save</Button>

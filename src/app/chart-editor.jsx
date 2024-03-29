@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext, use } from "react";
 import { ApolloClient, InMemoryCache, gql, useQuery } from "@apollo/client";
+import { GlobalStateContext } from "@/app/page";
 
 import {
   ComposedChart,
@@ -47,6 +48,7 @@ import {
   fetchElementData,
 } from "@/lib/graphdata";
 import { generateGUID } from "@/lib/utils";
+import { setStorageData } from '@/lib/utils.js';
 
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
@@ -81,6 +83,7 @@ const Modal = ({ isOpen, onClose, children }) => {
 };
 
 const ChartEditor = () => {
+  const { globalState, setGlobalState } = useContext(GlobalStateContext);
   const [data, setData] = useState(null);
   const [content, setContent] = useState([]);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
@@ -323,23 +326,20 @@ const ChartEditor = () => {
       : null;
   }
   const getLocalStorage = () => {
-    console.log("getLocalStorage");
-    if (localStorage.getItem("subconnect-content")) {
-      const savedContent = JSON.parse(
-        localStorage.getItem("subconnect-content")
-      );
-      if (savedContent.length === 0) {
+    
+      setContent(globalState.data.charts);
+      if (globalState.data.charts.length === 0) {
         return;
       }
-      console.log(savedContent);
-      setContent(savedContent);
       setCurrentContentIndex(0);
-      setForm(savedContent[0].form);
+      setForm(globalState.data.charts[0].form);
 
-      setElements(savedContent[0].elements);
-    }
+      setElements(globalState.data.charts[0].elements);
+    
   };
-
+useEffect(() => {
+  console.log("globalState: ", globalState);
+}, [globalState]);
   // Save to local storage
   const saveChartPreferences = () => {
     console.log("saveChartPreferencesss");
@@ -356,7 +356,22 @@ const ChartEditor = () => {
     newContent[currentContentIndex] = tcontent;
     setContent(newContent);
 
-    localStorage.setItem("subconnect-content", JSON.stringify(newContent));
+
+    
+    
+    const newState = {
+      ...globalState,
+      data: {
+      ...globalState.data,
+      charts: newContent
+      }
+    };
+    console.log("newState: ", newState);
+    setGlobalState(newState);
+    setStorageData(newState);
+    
+    
+    
   };
   const handleDeleteContent = (indexToDelete) => {
     const newContent = content.filter((_, index) => index !== indexToDelete);

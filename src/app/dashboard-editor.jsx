@@ -1,9 +1,9 @@
 "use client";
-import React, { useState, useEffect, use } from "react";
+import React, { useContext,useState, useEffect, use } from "react";
 import { ApolloClient, InMemoryCache, gql, useQuery } from "@apollo/client";
 import SimpleChart from "../components/custom/simple-chart.jsx";
 import ShowChart from "../components/custom/showChart.jsx";
-
+import { GlobalStateContext } from "../app/globalState";
 
 const DashboardEditor = () => {
   const [charts, setCharts] = useState([]);

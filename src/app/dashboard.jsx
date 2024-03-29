@@ -1,9 +1,14 @@
-import React, { use, useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { generateGUID } from "@/lib/utils";
 import ShowChart from "@/components/custom/showChart";
 import { Button } from "@/components/ui/button";
 import ShowTile from "@/components/tiles/showTile";
+import { GlobalStateContext } from "@/app/page";
+
+import { setStorageData, getStorageData } from "@/lib/utils";
+import PolkadotJSModal from "@/components/ui/select-js-wallet.jsx";
+
 const uniqueId = (() => {
   console.log("Generating unique ID..."); // Diagnostic log
   let count = 0;
@@ -36,7 +41,8 @@ const getColSpanClass = (colSpan) => {
   }
 };
 
-const NewDashboard = () => {
+const Dashboard = () => {
+  const { globalState, setGlobalState } = useContext(GlobalStateContext);
   const [rows, setRows] = useState([
     {
       id: generateGUID(),
@@ -48,6 +54,7 @@ const NewDashboard = () => {
   const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
   const [editMode, setEditMode] = useState(false);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   const [isTileModalOpen, setIsTileModalOpen] = useState(false);
   const [selectedChartId, setSelectedChartId] = useState(null);
@@ -81,8 +88,10 @@ const NewDashboard = () => {
   };
   const handleSelectTile = (contentId) => {
     //get content record from the content array using the contentId
-    const selectedTileContent = tileContent.find((item) => item.id === contentId);
-    console.log("selected Tile:" , selectedTileContent);
+    const selectedTileContent = tileContent.find(
+      (item) => item.id === contentId
+    );
+    console.log("selected Tile:", selectedTileContent);
     let newRows = rows;
     for (let x = 0; x < newRows.length; x++) {
       for (let y = 0; y < newRows[x].cells.length; y++) {
@@ -108,12 +117,19 @@ const NewDashboard = () => {
           <h2>Select Content</h2>
           <ul>
             {content.map((item) => (
-              <li key={item.id} onClick={() => onSelect(item.id)} className="cursor-pointer hover:bg-gray-100 p-2">
+              <li
+                key={item.id}
+                onClick={() => onSelect(item.id)}
+                className="cursor-pointer hover:bg-gray-100 p-2"
+              >
                 {item.form.title.text} {/* Assuming each content has a title */}
               </li>
             ))}
           </ul>
-          <button onClick={onClose} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
+          <button
+            onClick={onClose}
+            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+          >
             Close
           </button>
         </div>
@@ -131,54 +147,57 @@ const NewDashboard = () => {
           <h2>Select Tiles</h2>
           <ul>
             {content.map((item) => (
-              <li key={item.id} onClick={() => onSelect(item.id)} className="cursor-pointer hover:bg-gray-100 p-2">
+              <li
+                key={item.id}
+                onClick={() => onSelect(item.id)}
+                className="cursor-pointer hover:bg-gray-100 p-2"
+              >
                 {item.form.title.text} {/* Assuming each content has a title */}
               </li>
             ))}
           </ul>
-          <button onClick={onClose} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
+          <button
+            onClick={onClose}
+            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+          >
             Close
           </button>
         </div>
       </div>
     );
   }
-  const getLocalDashboard = () => {
-    //console.log("getLocalStorage");
-    if (localStorage.getItem("subconnect-dashboard")) {
-      const savedRows = JSON.parse(
-        localStorage.getItem("subconnect-dashboard")
-      );
-      setRows(savedRows);
-    }
-  };
-  // Save to local storage
-const saveLocalDashboard = () => {
-  console.log("saveLocalDashboard");
   
-  localStorage.setItem("subconnect-dashboard", JSON.stringify(rows));
-};
+  // Save to local storage
+  const saveLocalDashboard = () => {
+    const newState = {
+      ...globalState,
+      data: {
+        ...globalState.data,
+        dashboards: rows,
+      },
+    };
+    console.log("newState: ", newState);
+    setGlobalState(newState);
+    setStorageData(newState);
+    setStorageData(globalState);
+  };
 
-  const getLocalStorageContent = () => {
+  const getLocalStorageContent = async () => {
     //console.log("getLocalStorage");
-    if (localStorage.getItem("subconnect-content")) {
-      const savedContent = JSON.parse(
-        localStorage.getItem("subconnect-content")
-      );
-      console.log(savedContent);
-      setContent(savedContent);
-      setCurrentContentIndex(0);
+    if (localStorage.getItem("subconnect")) {
+      const acct = JSON.parse(localStorage.getItem("subconnect"));
+      console.log("Account:", acct);
+      let gs = await getStorageData(acct.address);
+      console.log("GS:", gs);
+      setGlobalState(gs);
+      if (gs.data.dashboards) {
+        setRows(gs.data.dashboards);
       }
-      if (localStorage.getItem("subconnect-tiles")) {
-        const savedTileContent = JSON.parse(
-          localStorage.getItem("subconnect-tiles")
-        );
-        console.log("tile Content:" ,savedTileContent);
-        setTileContent(savedTileContent);
-        setCurrentTileContentIndex(0);
-
-      
+    } else {
+      setIsAccountModalOpen(true);
     }
+    
+    
   };
   const onDragEnd = (result) => {
     if (!result.destination) {
@@ -343,7 +362,6 @@ const saveLocalDashboard = () => {
   };
   useEffect(() => {
     getLocalStorageContent();
-    getLocalDashboard();
   }, []);
   useEffect(() => {
     console.log("content");
@@ -361,127 +379,170 @@ const saveLocalDashboard = () => {
   const handleToggleEditMode = () => {
     setEditMode(!editMode);
   };
+  const handleSelectAccountContent = (acct) => {
+    console.log(acct);
+    const newacct = {
+      name: acct.meta.name,
+      address: acct.address,
+    };
+    //saveLocalStorage(newacct);
+    localStorage.setItem("subconnect", JSON.stringify(newacct));
+    console.log(globalState);
+    globalState["account_id"] = newacct.address;
+    getStorageData(newacct.address);
+
+    setIsAccountModalOpen(false);
+  };
   return (
     <>
-    {editMode ? <Button onClick={handleSaveClick}>Save</Button> : ""}
-    {editMode ? <Button onClick={handleToggleEditMode}>Cancel</Button> : <Button onClick={handleToggleEditMode}>Edit</Button>}
-    
-    
-    <DragDropContext onDragEnd={onDragEnd}>
-      <ChartSelectModal
-        isOpen={isChartModalOpen}
-        content={content}
-        onSelect={handleSelectChart}
-        onClose={() => setIsChartModalOpen(false)}
-      />
-      <TileSelectModal
-        isOpen={isTileModalOpen}
-        content={tileContent}
-        onSelect={handleSelectTile}
-        onClose={() => setIsTileModalOpen(false)}
-      />
-      {rows.map((row, rowIndex) => (
-        <Droppable
-          key={row.id}
-          droppableId={`${row.id}`}
-          direction="horizontal"
-        >
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="flex flex-wrap mb-4"
-            >
-              {row.cells.map((cell, cellIndex) => (
-                <Draggable
-                  key={cell.id}
-                  draggableId={`${cell.id}`}
-                  index={cellIndex}
-                >
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className={`px-3 mb-6 flex justify-center items-center ${getColSpanClass(
-                        cell.colSpan
-                      )}`}
-                    >
-                      <div className="border rounded flex justify-between items-center p-4 w-full">
-                        {cell.contentType === "chart" ? (
-                        <ShowChart chart={cell.content} />
-                      ) : ("" )}
-                      {cell.contentType === "tile" ? (
-                        <ShowTile key={JSON.stringify(cell.content.form)} form={cell.content.form} />
-                      ) : ("" )}
-                        {editMode ?
-                        <div className="flex flex-col space-y-2">
-                          <button 
-                          onClick={() => openChartModal(cell.id)}
-                          className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">
-                            Select Chart
-                          </button>
-                          <button 
-                          onClick={() => openTileModal(cell.id)}
-                          className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">
-                            Select Tile
-                          </button>
+      {editMode ? <Button onClick={handleSaveClick}>Save</Button> : ""}
+      {editMode ? (
+        <Button onClick={handleToggleEditMode}>Cancel</Button>
+      ) : (
+        <Button onClick={handleToggleEditMode}>Edit</Button>
+      )}
+      <Button onClick={() => setIsAccountModalOpen(true)}>
+        Account
+      </Button>
 
-                          {cell.colSpan < 12 && (
-                            <button
-                              onClick={() => extendChart(row.id, cell.id)}
-                              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                            >
-                              Extend
-                            </button>
+      <DragDropContext onDragEnd={onDragEnd}>
+        {isAccountModalOpen && (
+          <div className="modal">
+            <PolkadotJSModal
+              onClose={() => setIsAccountModalOpen(false)}
+              handleSelectContent={handleSelectAccountContent}
+            />
+          </div>
+        )}
+        <ChartSelectModal
+          isOpen={isChartModalOpen}
+          content={content}
+          onSelect={handleSelectChart}
+          onClose={() => setIsChartModalOpen(false)}
+        />
+        <TileSelectModal
+          isOpen={isTileModalOpen}
+          content={tileContent}
+          onSelect={handleSelectTile}
+          onClose={() => setIsTileModalOpen(false)}
+        />
+        {rows.map((row, rowIndex) => (
+          <Droppable
+            key={row.id}
+            droppableId={`${row.id}`}
+            direction="horizontal"
+          >
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="flex flex-wrap mb-4"
+              >
+                {row.cells.map((cell, cellIndex) => (
+                  <Draggable
+                    key={cell.id}
+                    draggableId={`${cell.id}`}
+                    index={cellIndex}
+                  >
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className={`px-3 mb-6 flex justify-center items-center ${getColSpanClass(
+                          cell.colSpan
+                        )}`}
+                      >
+                        <div className="border rounded flex justify-between items-center p-4 w-full">
+                          {cell.contentType === "chart" ? (
+                            <ShowChart chart={cell.content} />
+                          ) : (
+                            ""
                           )}
-                          {cell.colSpan > 2 && (
-                            <button
-                              onClick={() => shrinkChart(row.id, cell.id)}
-                              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
-                            >
-                              Shrink
-                            </button>
+                          {cell.contentType === "tile" ? (
+                            <ShowTile
+                              key={JSON.stringify(cell.content.form)}
+                              form={cell.content.form}
+                            />
+                          ) : (
+                            ""
                           )}
-                          <button
-                            onClick={() => deleteChart(row.id, cell.id)}
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                          >
-                            Delete
-                          </button>
+                          {editMode ? (
+                            <div className="flex flex-col space-y-2">
+                              <button
+                                onClick={() => openChartModal(cell.id)}
+                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
+                              >
+                                Select Chart
+                              </button>
+                              <button
+                                onClick={() => openTileModal(cell.id)}
+                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
+                              >
+                                Select Tile
+                              </button>
+
+                              {cell.colSpan < 12 && (
+                                <button
+                                  onClick={() => extendChart(row.id, cell.id)}
+                                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                                >
+                                  Extend
+                                </button>
+                              )}
+                              {cell.colSpan > 2 && (
+                                <button
+                                  onClick={() => shrinkChart(row.id, cell.id)}
+                                  className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
+                                >
+                                  Shrink
+                                </button>
+                              )}
+                              <button
+                                onClick={() => deleteChart(row.id, cell.id)}
+                                className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          ) : (
+                            ""
+                          )}
                         </div>
-                        : ""}
                       </div>
-                    </div>
+                    )}
+                  </Draggable>
+                ))}
+
+                {editMode &&
+                  row.cells.reduce((sum, chart) => sum + chart.colSpan, 0) <=
+                    10 && (
+                    <button
+                      onClick={() => addChartToRow(row.id)} // Modify this function to add a chart to the specific row
+                      type="button"
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                      Add Cell
+                    </button>
                   )}
-                </Draggable>
-              ))}
-              
-              {editMode && row.cells.reduce((sum, chart) => sum + chart.colSpan, 0) <=
-                10 && (
-                  
-                <button
-                  onClick={() => addChartToRow(row.id)} // Modify this function to add a chart to the specific row
-                  type="button"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Add Cell
-                </button>
-              )}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      ))}
-      {editMode ? 
-      <button
-        onClick={addRow}
-        className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Add Row
-      </button>: ""}
-    </DragDropContext></>
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        ))}
+        {editMode ? (
+          <button
+            onClick={addRow}
+            className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Add Row
+          </button>
+        ) : (
+          ""
+        )}
+      </DragDropContext>
+    </>
   );
 };
 
-export default NewDashboard;
+export default Dashboard;
