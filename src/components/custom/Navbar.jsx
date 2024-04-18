@@ -5,9 +5,9 @@ import Dashboard from '@/app/dashboard';
 import RegisterHost from '@/app/register-host.jsx';
 import TileEditor from '@/app/tile-editor.jsx'; 
 import ChartEditor from '@/app/chart-editor.jsx';
-const Navbar = () => {
+const Navbar = ({setPage}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [page, setPage] = useState('dashboard');
+  
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
@@ -55,10 +55,7 @@ const Navbar = () => {
       <Button onClick={() => setPage('tileEditor')}>Tile Editor</Button>
       <Button onClick={() => setPage('registerHost')}>Register Host</Button>
       
-      {page === 'chart' && <ChartEditor/>}
-      {page === 'dashboard' && <Dashboard/>}
-      {page === 'tileEditor' && <TileEditor/>}
-      {page === 'registerHost' && <RegisterHost/>}
+    
         </div>
         </div>
       )}

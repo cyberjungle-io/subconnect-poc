@@ -97,6 +97,7 @@ const ChartEditor = () => {
   // Add state for the form
 
   const fetchData = async (elementsArray) => {
+    console.log("fetchData: " + JSON.stringify(elementsArray))
     const dta = await fetchElementData(elementsArray);
     setData(dta);
     console.log(dta);

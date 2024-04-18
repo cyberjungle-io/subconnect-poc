@@ -34,7 +34,7 @@ export default function Home() {
   return (
     <GlobalStateContext.Provider value={{ globalState, setGlobalState }}>
     <main className='w-full h-full'>
-      <Navbar/>
+      <Navbar setPage={setPage}/>
       <Button onClick={() => setPage('dashboard')}>Dashboard</Button>
       <Button onClick={() => setPage('chart')}>Chart Editor</Button>
       
