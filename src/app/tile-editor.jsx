@@ -206,7 +206,7 @@ export default function TileEditor() {
     savePreferences();
   };
   const getLocalStorage = () => {
-    
+    try {
       if (globalState.data.tiles.length === 0) {
         return;
       }
@@ -215,6 +215,9 @@ export default function TileEditor() {
       setContent(globalState.data.tiles);
       setCurrentContentIndex(0);
       setForm(globalState.data.tiles[0].form);
+    } catch (error) {
+      console.error("Error getting data:", error);
+    }
     
   };
   const savePreferences = () => {
