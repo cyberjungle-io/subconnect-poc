@@ -458,7 +458,7 @@ const Dashboard = () => {
                           cell.colSpan
                         )}`}
                       >
-                        <div className="border rounded flex justify-between items-center p-4 w-full">
+                        <div className="flex justify-between items-center p-4 w-full">
                           {cell.contentType === "chart" ? (
                             <ShowChart chart={cell.content} />
                           ) : (
@@ -476,7 +476,7 @@ const Dashboard = () => {
                             <div className="flex flex-col space-y-2">
                               <button
                                 onClick={() => openChartModal(cell.id)}
-                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
+                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded "
                               >
                                 Select Chart
                               </button>
@@ -525,9 +525,12 @@ const Dashboard = () => {
                     <button
                       onClick={() => addChartToRow(row.id)} // Modify this function to add a chart to the specific row
                       type="button"
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      className="bg-black bg-opacity-40 hover:bg-opacity-70 text-white font-bold py-2 px-4 rounded w-1/12 flex justify-center items-center"
                     >
-                      Add Cell
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+
                     </button>
                   )}
                 {provided.placeholder}
@@ -537,11 +540,15 @@ const Dashboard = () => {
         ))}
         {editMode ? (
           <button
-            onClick={addRow}
-            className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Add Row
-          </button>
+          onClick={addRow}
+          className="ml-4 bg-transparent border-2 border-green-500 hover:border-green-700 text-green-500 hover:text-white hover:bg-green-700 font-bold py-2 px-4 rounded"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+New Row
+        </button>
+        
         ) : (
           ""
         )}

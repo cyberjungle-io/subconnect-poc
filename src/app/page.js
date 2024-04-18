@@ -10,6 +10,7 @@ import TileEditorEditor from './tile-editor.jsx';
 import { Button } from "@/components/ui/button";
 import Dashboard from './dashboard.jsx';
 import RegisterHost from './register-host.jsx';
+import Navbar from '../components/custom/Navbar.jsx';
 
 const initialState = {
   account_id: null,
@@ -33,6 +34,7 @@ export default function Home() {
   return (
     <GlobalStateContext.Provider value={{ globalState, setGlobalState }}>
     <main className='w-full h-full'>
+      <Navbar/>
       <Button onClick={() => setPage('dashboard')}>Dashboard</Button>
       <Button onClick={() => setPage('chart')}>Chart Editor</Button>
       
