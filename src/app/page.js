@@ -12,6 +12,7 @@ import Dashboard from './dashboard.jsx';
 import RegisterHost from './register-host.jsx';
 import Navbar from '../components/custom/Navbar.jsx';
 import PolkadotJSModal from "@/components/ui/select-js-wallet.jsx";
+import { setStorageData, getStorageData } from "@/lib/utils";
 
 const initialState = {
   account_id: null,
