@@ -326,7 +326,7 @@ const ChartEditor = () => {
       : null;
   }
   const getLocalStorage = () => {
-    
+    try{
       setContent(globalState.data.charts);
       if (globalState.data.charts.length === 0) {
         return;
@@ -335,7 +335,9 @@ const ChartEditor = () => {
       setForm(globalState.data.charts[0].form);
 
       setElements(globalState.data.charts[0].elements);
-    
+    } catch (error) {
+      console.error("Error getting data:", error);
+    }
   };
 useEffect(() => {
   console.log("globalState: ", globalState);
