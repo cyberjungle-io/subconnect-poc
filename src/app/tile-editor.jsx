@@ -92,7 +92,7 @@ export default function TileEditor() {
     }
   };
   useEffect(() => {
-    console.log(globalState.account);
+    //console.log(globalState.account);
     getLocalStorage();
   }, []);
   useEffect(() => {
