@@ -5,7 +5,7 @@ import Dashboard from "@/app/dashboard";
 import RegisterHost from "@/app/register-host.jsx";
 import TileEditor from "@/app/tile-editor.jsx";
 import ChartEditor from "@/app/chart-editor.jsx";
-const Navbar = ({ setPage }) => {
+const Navbar = ({ setPage,setIsAccountModalOpen}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -69,7 +69,7 @@ const Navbar = ({ setPage }) => {
           </div>
 
           {/* Wallet connect button */}
-          <button className="bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded-md">
+          <button className="bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded-md"  onClick={() => setIsAccountModalOpen(true)}>
             Connect Wallet
           </button>
         </div>

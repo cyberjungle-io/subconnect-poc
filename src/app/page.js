@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import Dashboard from './dashboard.jsx';
 import RegisterHost from './register-host.jsx';
 import Navbar from '../components/custom/Navbar.jsx';
+import PolkadotJSModal from "@/components/ui/select-js-wallet.jsx";
 
 const initialState = {
   account_id: null,
@@ -26,15 +27,36 @@ export const GlobalStateContext = createContext();
 
 
 export default function Home() {
-  
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [page, setPage] = useState('dashboard');
   const [globalState, setGlobalState] = useState(initialState);
+  const handleSelectAccountContent = (acct) => {
+    console.log(acct);
+    const newacct = {
+      name: acct.meta.name,
+      address: acct.address,
+    };
+    //saveLocalStorage(newacct);
+    localStorage.setItem("subconnect", JSON.stringify(newacct));
+    console.log(globalState);
+    globalState["account_id"] = newacct.address;
+    getStorageData(newacct.address);
 
+    setIsAccountModalOpen(false);
+  };
   
   return (
     <GlobalStateContext.Provider value={{ globalState, setGlobalState }}>
+      {isAccountModalOpen && (
+          <div className="modal">
+            <PolkadotJSModal
+              onClose={() => setIsAccountModalOpen(false)}
+              handleSelectContent={handleSelectAccountContent}
+            />
+          </div>
+        )}
     <main className='w-full h-full'>
-      <Navbar setPage={setPage}/>
+      <Navbar setPage={setPage} setIsAccountModalOpen={setIsAccountModalOpen}/>
       {page === 'chart' && <ChartEditor/>}
       {page === 'dashboard' && <Dashboard/>}
       {page === 'tileEditor' && <TileEditor/>}

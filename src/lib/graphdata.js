@@ -25,18 +25,8 @@ export const graphArray = [
     URI: ["https://khala-computation.cyberjungle.io/graphql"],
     queryType: "time",
     queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
-    query: `
-                query {
-                globalStateSnapshots(
-                    limit: 1000
-                    orderBy: updatedTime_ASC
-                    where: { updatedTime_gt: "<<datetime>>" }
-                ) {
-                    averageBlockTime
-                    updatedTime
-                }
-                }
-            `,
+    query: `query {globalStateSnapshots(limit: 1000, orderBy: updatedTime_ASC,where: { updatedTime_gt: "<<datetime>>" }) {averageBlockTime,updatedTime}}`,
+    
     owner: "Cyber Jungle",
     basePath: "globalStateSnapshots",
     xAxis: "updatedTime",
@@ -213,7 +203,7 @@ export const fetchGraphDataDateSeries = async (element, dateformat, days) => {
     uri: element.URI[0],
     cache: new InMemoryCache(),
   });
-
+  console.log("Query: ", element.query.replace("<<datetime>>", dt));
   const { data } = await client.query({
     query: gql(element.query.replace("<<datetime>>", dt)),
   });
