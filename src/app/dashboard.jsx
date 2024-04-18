@@ -166,7 +166,7 @@ const Dashboard = () => {
       </div>
     );
   }
-  
+
   // Save to local storage
   const saveLocalDashboard = () => {
     const newState = {
@@ -183,23 +183,25 @@ const Dashboard = () => {
   };
 
   const getLocalStorageContent = async () => {
-    //console.log("getLocalStorage");
-    if (localStorage.getItem("subconnect")) {
-      const acct = JSON.parse(localStorage.getItem("subconnect"));
-      console.log("Account:", acct);
-      let gs = await getStorageData(acct.address);
-      console.log("GS:", gs);
-      setGlobalState(gs);
-      if (gs.data.dashboards) {
-        setRows(gs.data.dashboards);
-        setContent(gs.data.charts);
-        setTileContent(gs.data.tiles);
+    //console.log("getLocalStorage")
+    try {
+      if (localStorage.getItem("subconnect")) {
+        const acct = JSON.parse(localStorage.getItem("subconnect"));
+        console.log("Account:", acct);
+        let gs = await getStorageData(acct.address);
+        console.log("GS:", gs);
+        setGlobalState(gs);
+        if (gs.data.dashboards) {
+          setRows(gs.data.dashboards);
+          setContent(gs.data.charts);
+          setTileContent(gs.data.tiles);
+        }
+      } else {
+        setIsAccountModalOpen(true);
       }
-    } else {
-      setIsAccountModalOpen(true);
+    } catch (error) {
+      console.error("Error getting data:", error);
     }
-    
-    
   };
   const onDragEnd = (result) => {
     if (!result.destination) {
@@ -367,14 +369,14 @@ const Dashboard = () => {
     getLocalStorageContent();
   }, []);
   useEffect(() => {
-   console.log("globalState: ", globalState);
+    console.log("globalState: ", globalState);
   }, [globalState]);
   useEffect(() => {
     console.log("content");
     console.log(content);
   }, [content]);
   useEffect(() => {
-    console.log("rows: " , rows);
+    console.log("rows: ", rows);
   }, [rows]);
 
   const handleSaveClick = () => {
@@ -406,9 +408,7 @@ const Dashboard = () => {
       ) : (
         <Button onClick={handleToggleEditMode}>Edit</Button>
       )}
-      <Button onClick={() => setIsAccountModalOpen(true)}>
-        Account
-      </Button>
+      <Button onClick={() => setIsAccountModalOpen(true)}>Account</Button>
 
       <DragDropContext onDragEnd={onDragEnd}>
         {isAccountModalOpen && (
