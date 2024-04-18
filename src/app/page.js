@@ -35,12 +35,6 @@ export default function Home() {
     <GlobalStateContext.Provider value={{ globalState, setGlobalState }}>
     <main className='w-full h-full'>
       <Navbar setPage={setPage}/>
-      <Button onClick={() => setPage('dashboard')}>Dashboard</Button>
-      <Button onClick={() => setPage('chart')}>Chart Editor</Button>
-      
-      <Button onClick={() => setPage('tileEditor')}>Tile Editor</Button>
-      <Button onClick={() => setPage('registerHost')}>Register Host</Button>
-      
       {page === 'chart' && <ChartEditor/>}
       {page === 'dashboard' && <Dashboard/>}
       {page === 'tileEditor' && <TileEditor/>}
