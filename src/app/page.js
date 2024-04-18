@@ -9,6 +9,7 @@ import DashboardEditor from './dashboard-editor.jsx';
 import TileEditorEditor from './tile-editor.jsx'; 
 import { Button } from "@/components/ui/button";
 import Dashboard from './dashboard.jsx';
+import RegisterHost from './register-host.jsx';
 
 const initialState = {
   account_id: null,
@@ -36,10 +37,12 @@ export default function Home() {
       <Button onClick={() => setPage('chart')}>Chart Editor</Button>
       
       <Button onClick={() => setPage('tileEditor')}>Tile Editor</Button>
+      <Button onClick={() => setPage('registerHost')}>Register Host</Button>
       
       {page === 'chart' && <ChartEditor/>}
       {page === 'dashboard' && <Dashboard/>}
       {page === 'tileEditor' && <TileEditor/>}
+      {page === 'registerHost' && <RegisterHost/>}
     </main>
     </GlobalStateContext.Provider>
   );

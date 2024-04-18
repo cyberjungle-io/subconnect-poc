@@ -26,6 +26,8 @@ export async function getAccounts(appName) {
     return accounts;
 }
 
+
+
 export async function signTransaction(account, transaction) {
     // Get the injector for the given account
     const injector = await web3FromSource(account.meta.source);

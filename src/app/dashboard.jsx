@@ -179,7 +179,7 @@ const Dashboard = () => {
     console.log("newState: ", newState);
     setGlobalState(newState);
     setStorageData(newState);
-    setStorageData(globalState);
+    //setStorageData(globalState);
   };
 
   const getLocalStorageContent = async () => {
@@ -192,6 +192,8 @@ const Dashboard = () => {
       setGlobalState(gs);
       if (gs.data.dashboards) {
         setRows(gs.data.dashboards);
+        setContent(gs.data.charts);
+        setTileContent(gs.data.tiles);
       }
     } else {
       setIsAccountModalOpen(true);
@@ -361,15 +363,18 @@ const Dashboard = () => {
     );
   };
   useEffect(() => {
+    console.log("useEffect getLocalStorageContent");
     getLocalStorageContent();
   }, []);
+  useEffect(() => {
+   console.log("globalState: ", globalState);
+  }, [globalState]);
   useEffect(() => {
     console.log("content");
     console.log(content);
   }, [content]);
   useEffect(() => {
-    console.log("rows");
-    console.log(rows);
+    console.log("rows: " , rows);
   }, [rows]);
 
   const handleSaveClick = () => {

@@ -17,7 +17,7 @@ export function generateGUID() {
 
 export async function getStorageData(account_id) {
   try {
-    const response = await fetch('http://10.2.3.100:8002/getData', {
+    const response = await fetch('https://w3s.cyberjungle.io/getData', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -48,7 +48,7 @@ export async function setStorageData(globalState) {
       "key":"subconnect-poc"
     }
     console.log(tjson);
-     const response = await fetch('http://10.2.3.100:8002/setData', {
+     const response = await fetch('https://w3s.cyberjungle.io/setData', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
