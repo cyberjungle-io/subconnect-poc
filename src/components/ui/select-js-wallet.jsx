@@ -20,7 +20,7 @@ const PolkadotJSModal = ({onClose,handleSelectContent }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 flex justify-center items-center">
-      <div className="relative bg-white p-4 md:p-6 lg:p-8 rounded-lg shadow-lg max-w-md max-h-full overflow-y-auto z-50">
+      <div className="relative bg-white p-4 md:p-6 lg:p-8 rounded-lg shadow-lg w-full max-w-lg max-h-full overflow-y-auto z-50">
         <button
           onClick={onClose}
           className="absolute top-0 right-0 mt-4 mr-4 text-gray-700 hover:text-gray-900"
@@ -39,14 +39,15 @@ const PolkadotJSModal = ({onClose,handleSelectContent }) => {
         </button>
         {/* Title */}
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          Select Account
+          Select Wallet
         </h2>
         <div className="mt-4">
         <ul>
           {accounts.map((item, index) => (
-            <li key={index} className="flex justify-between items-center">
+            <li key={index} className="flex justify-between items-center border rounded p-3 bg-gray-50 my-3">
               <button onClick={() => handleSelectContent(item)}>
-                {item.meta.name}
+              <span className="font-semibold">{item.meta.name}</span>
+              <span className="text-sm text-gray-600">{item.meta.address}</span>
               </button>
               
             </li>
