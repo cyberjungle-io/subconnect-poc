@@ -192,8 +192,50 @@ export const graphArray = [
     postProcess: [{ devideBy: 1000 }, { round: 2 }],
     variables: [],
   },
+  {
+    id: "10",
+    name: "Current APR for Pool",
+    chain: "Khala",
+    URI: ["https://khala-computation.cyberjungle.io/graphql"],
+    queryType: "value",
+    queryVars: [],
+    query: `query {basePoolSnapshots(limit: 1, orderBy: updatedTime_DESC, where: {basePool: {pid_eq: "<<pool number>>"}}) {apr}}`,
+    owner: "Cyber Jungle",
+    basePath: "basePoolSnapshots",
+    value: "apr",
+    postProcess: [{ devideBy: 1000 }, { round: 2 }],
+    variables: ["pool number"],
+  },
+  {
+    id: "11",
+    name: "Current commission for Pool",
+    chain: "Khala",
+    URI: ["https://khala-computation.cyberjungle.io/graphql"],
+    queryType: "value",
+    queryVars: [],
+    query: `query {basePoolSnapshots(limit: 1, orderBy: updatedTime_DESC, where: {basePool: {pid_eq: "<<pool number>>"}}) {commission}}`,
+    owner: "Cyber Jungle",
+    basePath: "basePoolSnapshots",
+    value: "commission",
+    postProcess: [{ devideBy: 1000 }, { round: 2 }],
+    variables: ["pool number"],
+  },
+  {
+    id: "12",
+    name: "Current cumulativeOwnerRewards for Pool",
+    chain: "Khala",
+    URI: ["https://khala-computation.cyberjungle.io/graphql"],
+    queryType: "value",
+    queryVars: [],
+    query: `query {basePoolSnapshots(limit: 1, orderBy: updatedTime_DESC, where: {basePool: {pid_eq: "<<pool number>>"}}) {cumulativeOwnerRewards}}`,
+    owner: "Cyber Jungle",
+    basePath: "basePoolSnapshots",
+    value: "cumulativeOwnerRewards",
+    postProcess: [{ devideBy: 1000 }, { round: 2 }],
+    variables: ["pool number"],
+  },
 ];
-
+//apr,commission,cumulativeOwnerRewards,delegatorCount,idleWorkerCount,sharePrice,stakePoolCount,totalValue,updatedTime,workerCount
 export const fetchGraphDataDateSeries = async (element, dateformat, days) => {
   //find the index of the graphArray with the id
 

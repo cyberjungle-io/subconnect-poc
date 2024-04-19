@@ -17,9 +17,9 @@ const initialState = {
   account_id: null,
   key: null,
   data: {
-    tiles: {},
-    dashboards: {},
-    charts: {},
+    tiles: [],
+    dashboards: [],
+    charts: [],
   },
 };
 // Create a context
@@ -29,6 +29,8 @@ export default function Home() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [globalState, setGlobalState] = useState(initialState);
+  
+  
   const handleSelectAccountContent = (acct) => {
     console.log(acct);
     const newacct = {
@@ -38,12 +40,16 @@ export default function Home() {
     //saveLocalStorage(newacct);
     localStorage.setItem("subconnect", JSON.stringify(newacct));
     console.log(globalState);
+    setGlobalState(initialState)
     globalState["account_id"] = newacct.address;
     getStorageData(newacct.address);
 
     setIsAccountModalOpen(false);
+    location.reload();
   };
-
+useEffect(() => {
+  console.log("Global State", globalState);
+} ,[globalState]);
   return (
     <GlobalStateContext.Provider value={{ globalState, setGlobalState }}>
       {isAccountModalOpen && (
