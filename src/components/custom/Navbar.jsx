@@ -20,22 +20,7 @@ const Navbar = ({ setPage,setIsAccountModalOpen}) => {
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
             >
-              {isOpen ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18 18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
+              {!isOpen ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -50,6 +35,8 @@ const Navbar = ({ setPage,setIsAccountModalOpen}) => {
                     d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
                   />
                 </svg>
+              ) : (
+                ""
               )}
             </button>
           </div>
@@ -78,7 +65,31 @@ const Navbar = ({ setPage,setIsAccountModalOpen}) => {
             isOpen ? "translate-x-0" : "translate-x-full"
           } transition-transform duration-300 ease-in-out`}
         >
-            
+            <div className="flex">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            >
+              {isOpen ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18 18 6M6 6l12 12"
+                  />
+                </svg>
+              ) : (
+                ""
+              )}
+            </button>
+          </div>
           <div className="bg-gray-700 p-4 ">
             <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => setPage("dashboard")}>
               Dashboards
