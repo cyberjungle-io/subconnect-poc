@@ -367,6 +367,8 @@ const Dashboard = () => {
   }, []);
   useEffect(() => {
     console.log("globalState: ", globalState);
+    
+   
   }, [globalState]);
   useEffect(() => {
     console.log("content");
@@ -375,6 +377,7 @@ const Dashboard = () => {
   useEffect(() => {
     console.log("rows: ", rows);
   }, [rows]);
+  
 
   const handleSaveClick = () => {
     saveLocalDashboard();
@@ -387,20 +390,8 @@ const Dashboard = () => {
   const deleteRow = (rowId) => {
     setRows(rows.filter((row) => row.id !== rowId));
   };
-  /* const handleSelectAccountContent = (acct) => {
-    console.log(acct);
-    const newacct = {
-      name: acct.meta.name,
-      address: acct.address,
-    };
-    //saveLocalStorage(newacct);
-    localStorage.setItem("subconnect", JSON.stringify(newacct));
-    console.log(globalState);
-    globalState["account_id"] = newacct.address;
-    getStorageData(newacct.address);
-
-    setIsAccountModalOpen(false);
-  }; */
+  
+  
   return (
     <>
       <div className="flex justify-end pt-2 pe-3">
