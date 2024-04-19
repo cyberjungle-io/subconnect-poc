@@ -44,11 +44,11 @@ const PolkadotJSModal = ({onClose,handleSelectContent }) => {
         <div className="mt-4">
         <ul>
           {accounts.map((item, index) => (
-            <li key={index} className="flex justify-between items-center border rounded p-3 bg-gray-50 my-3">
-              <button onClick={() => handleSelectContent(item)}>
-              <span className="font-semibold">{item.meta.name}</span>
-              <span className="text-sm text-gray-600">{item.address}</span>
-              </button>
+            <li key={index} onClick={() => handleSelectContent(item)} className="flex justify-between items-center border rounded p-3 bg-gray-50 my-3 cursor-pointer">
+              <div >
+              <div className="font-semibold text-left">{item.meta.name}</div>
+              <div className="text-xs text-gray-600 text-left">{item.address}</div>
+              </div>
               
             </li>
           ))}
