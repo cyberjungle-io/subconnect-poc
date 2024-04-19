@@ -7,7 +7,7 @@ import ShowTile from "@/components/tiles/showTile";
 import { GlobalStateContext } from "@/app/page";
 
 import { setStorageData, getStorageData } from "@/lib/utils";
-import PolkadotJSModal from "@/components/ui/select-js-wallet.jsx";
+
 
 const uniqueId = (() => {
   console.log("Generating unique ID..."); // Diagnostic log
@@ -54,7 +54,7 @@ const Dashboard = () => {
   const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
   const [editMode, setEditMode] = useState(false);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
-  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   const [isTileModalOpen, setIsTileModalOpen] = useState(false);
   const [selectedChartId, setSelectedChartId] = useState(null);
@@ -196,8 +196,6 @@ const Dashboard = () => {
           setContent(gs.data.charts);
           setTileContent(gs.data.tiles);
         }
-      } else {
-        setIsAccountModalOpen(true);
       }
     } catch (error) {
       console.error("Error getting data:", error);
@@ -386,7 +384,7 @@ const Dashboard = () => {
   const handleToggleEditMode = () => {
     setEditMode(!editMode);
   };
-  const handleSelectAccountContent = (acct) => {
+  /* const handleSelectAccountContent = (acct) => {
     console.log(acct);
     const newacct = {
       name: acct.meta.name,
@@ -399,7 +397,7 @@ const Dashboard = () => {
     getStorageData(newacct.address);
 
     setIsAccountModalOpen(false);
-  };
+  }; */
   return (
     <>
       {editMode ? <Button onClick={handleSaveClick}>Save</Button> : ""}
@@ -434,17 +432,10 @@ const Dashboard = () => {
           </Button>
         </div>
       )}
-      <Button onClick={() => setIsAccountModalOpen(true)}>Account</Button>
+      
 
       <DragDropContext onDragEnd={onDragEnd}>
-        {isAccountModalOpen && (
-          <div className="modal">
-            <PolkadotJSModal
-              onClose={() => setIsAccountModalOpen(false)}
-              handleSelectContent={handleSelectAccountContent}
-            />
-          </div>
-        )}
+       
         <ChartSelectModal
           isOpen={isChartModalOpen}
           content={content}
