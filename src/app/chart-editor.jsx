@@ -655,7 +655,18 @@ useEffect(() => {
   };
   return (
     <>
-      <Button onClick={handleSaveClick}>Save</Button>
+      <Button onClick={handleSaveClick} className="mr-2 flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out"><svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                fillRule="evenodd"
+                d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z"
+                clipRule="evenodd"
+              />
+            </svg> Save</Button>
       <Button onClick={handleNewClick}>New</Button>
       <Button onClick={() => setIsModalOpen(true)}>Select Content</Button>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -758,8 +769,13 @@ useEffect(() => {
           </CardContent>
         </Card>
       </section>
-      <section className="m-10 space-y-4">
-        <h3>Title</h3>
+
+
+
+
+
+
+      <section className="ps-5 pt-5 space-y-4 bg-white">
         <div>
           <Input
             name="title"
