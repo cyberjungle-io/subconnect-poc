@@ -46,8 +46,38 @@ export default function ConfigureTextLine({ line, index, handleLineUpdate }) {
     console.log("index", index);
     const dta = graphArray.find((item) => item.id === event.target.value);
     console.log("dta", dta);
-    setNewLine({ ...newline, value: { ...newline.value, id : event.target.value,dataQuery: dta } });
+    let newmappings = [];
+    //input alert a string
+    for (let i = 0; i < dta.variables.length; i++) {
+      let v = dta.variables[i];
+      
+      const prmpt = `please enter ${v}`;
+      let userInput = prompt(prmpt, "");
+      if (userInput == null || userInput == "") {
+        alert("User cancelled the prompt.");
+      } else {
+        
+        let m = {  }
+        m[dta.variables[i]] = userInput;
+        newmappings.push(m);
+        //let rplc = "<<" + selectedObject.variables[i] + ">>";
+        //qry = qry.replace(rplc, userInput);
+      }
+      console.log("mappings", newmappings);
+    }
+    const updatedNewline = {
+      ...newline,
+      value: {
+          ...newline.value,
+          dataQuery: dta,
+          mappings: newmappings
+      }
+  };
+  console.log("updatedNewline", updatedNewline);
+    setNewLine(updatedNewline);
     
+    
+     console.log("newline", newline);
     console.log("after fetch data")
   };
   return (

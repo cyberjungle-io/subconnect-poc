@@ -9,8 +9,8 @@ export default function ShowDataLine({ line, index }) {
   useEffect(() => {
     console.log("line", line);
     const fetchData = async () => {
-        console.log("line.value.dataQuery", line.value.dataQuery);
-        const dta = await fetchValueData(line.value.dataQuery);
+        console.log("line.value", line.value);
+        const dta = await fetchValueData(line.value);
         setData(dta);
         console.log(dta);
       }

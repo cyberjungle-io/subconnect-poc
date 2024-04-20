@@ -203,7 +203,7 @@ export const graphArray = [
     owner: "Cyber Jungle",
     basePath: "basePoolSnapshots",
     value: "apr",
-    postProcess: [{ devideBy: 1000 }, { round: 2 }],
+    postProcess: [{ multiplyBy: 100 }, { round: 2 }],
     variables: ["pool number"],
   },
   {
@@ -217,7 +217,7 @@ export const graphArray = [
     owner: "Cyber Jungle",
     basePath: "basePoolSnapshots",
     value: "commission",
-    postProcess: [{ devideBy: 1000 }, { round: 2 }],
+    postProcess: [{ multiplyBy: 100 }, { round: 0 }],
     variables: ["pool number"],
   },
   {
@@ -231,7 +231,7 @@ export const graphArray = [
     owner: "Cyber Jungle",
     basePath: "basePoolSnapshots",
     value: "cumulativeOwnerRewards",
-    postProcess: [{ devideBy: 1000 }, { round: 2 }],
+    postProcess: [{ round: 0 }],
     variables: ["pool number"],
   },
 ];
@@ -308,19 +308,30 @@ export const daysFromNow = (days) => {
 };
 
 export const fetchValueData = async (graphquery) => {
-  //console.log(graphquery);
+  console.log("fetchValueData: ",graphquery);
   const client = new ApolloClient({
-    uri: graphquery.URI[0],
+    uri: graphquery.dataQuery.URI[0],
     cache: new InMemoryCache(),
   });
-
+  let newquery = graphquery.dataQuery.query;
+  for (let i = 0; i < graphquery.mappings.length; i++) {
+    let map = graphquery.mappings[i];
+    let keys = Object.keys(map);
+    console.log("Map keys: ", keys[0]);
+    let subs = "<<" + keys[0] + ">>";
+    console.log("Subs: ", subs);
+    newquery = newquery.replace(subs, map[keys[0]]);
+  }
+  console.log("New Query: ", newquery);
   const { data } = await client.query({
-    query: gql(graphquery.query),
+    query: gql(newquery),
   });
+
+ 
   //console.log("Data", data[graphquery.basePath][0][graphquery.value]);
   const tdata = postProcess(
-    data[graphquery.basePath][0][graphquery.value],
-    graphquery.postProcess
+    data[graphquery.dataQuery.basePath][0][graphquery.dataQuery.value],
+    graphquery.dataQuery.postProcess
   );
   return tdata;
 };
