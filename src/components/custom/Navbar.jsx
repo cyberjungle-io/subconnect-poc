@@ -5,7 +5,7 @@ import Dashboard from "@/app/dashboard";
 import RegisterHost from "@/app/register-host.jsx";
 import TileEditor from "@/app/tile-editor.jsx";
 import ChartEditor from "@/app/chart-editor.jsx";
-const Navbar = ({ setPage,setIsAccountModalOpen}) => {
+const Navbar = ({ setPage,setIsAccountModalOpen, accountName}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -50,9 +50,12 @@ const Navbar = ({ setPage,setIsAccountModalOpen}) => {
 
           {/* Wallet connect button */}
           <div className="flex justify-right">
-          <button className="bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded-md"  onClick={() => setIsAccountModalOpen(true)}>
-            Connect Wallet
-          </button>
+          <button 
+  className="bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded-md" 
+  onClick={() => setIsAccountModalOpen(true)}
+>
+  {accountName ? `${accountName}` : 'Connect Wallet'}
+</button>
           </div>
         </div>
       </div>
@@ -65,7 +68,7 @@ const Navbar = ({ setPage,setIsAccountModalOpen}) => {
             isOpen ? "translate-x-0" : "translate-x-full"
           } transition-transform duration-300 ease-in-out`}
         >
-            <div className="flex">
+            <div className="flex justify-end">
             <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"

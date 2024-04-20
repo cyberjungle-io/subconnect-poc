@@ -29,7 +29,7 @@ export default function Home() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [globalState, setGlobalState] = useState(initialState);
-  
+  const [selectedAccount, setSelectedAccount] = useState({ name: ''});
   
   const handleSelectAccountContent = (acct) => {
     console.log(acct);
@@ -43,9 +43,9 @@ export default function Home() {
     setGlobalState(initialState)
     globalState["account_id"] = newacct.address;
     getStorageData(newacct.address);
-
+    setSelectedAccount(newacct);
     setIsAccountModalOpen(false);
-    location.reload();
+    //location.reload();
   };
 useEffect(() => {
   console.log("Global State", globalState);
@@ -64,6 +64,7 @@ useEffect(() => {
         <Navbar
           setPage={setPage}
           setIsAccountModalOpen={setIsAccountModalOpen}
+          accountName={selectedAccount.name}
         />
         <main className="flex-grow">
           {page === "chart" && <ChartEditor />}

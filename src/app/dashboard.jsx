@@ -587,7 +587,7 @@ const Dashboard = () => {
                       </svg>
                     </button>
                   )}
-                {row.cells.length === 0 && (
+                {editMode && row.cells.length === 0 && (
                   <div
                     className="bg-transparent hover:bg-transparent hover:text-red-700 text-red-500 font-bold py-2 px-4 rounded cursor-pointer flex justify-center items-center "
                     onClick={() => deleteRow(row.id)}
