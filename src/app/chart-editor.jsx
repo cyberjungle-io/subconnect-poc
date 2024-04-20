@@ -142,6 +142,7 @@ const ChartEditor = () => {
   const [elements, setElements] = useState([
     {
       elementId: generateGUID(),
+      mappings: [],
       isEditingTitle: false,
       type: "",
       color: "",
@@ -170,6 +171,7 @@ const ChartEditor = () => {
       ...elements,
       {
         elementId: generateGUID(),
+        mappings: [],
         type: "",
         color: "",
         dataKey: "",
@@ -220,23 +222,29 @@ const ChartEditor = () => {
     // and you have a method `setElements` to update this state.
     let qry = selectedObject.query;
     let seriesText = selectedObject.yAxis;
+    let mappings = [];
     //input alert a string
     for (let i = 0; i < selectedObject.variables.length; i++) {
       let v = selectedObject.variables[i];
+      
       const prmpt = `please enter ${v}`;
       let userInput = prompt(prmpt, "");
       if (userInput == null || userInput == "") {
         alert("User cancelled the prompt.");
       } else {
         seriesText = userInput;
-        let rplc = "<<" + selectedObject.variables[i] + ">>";
-        qry = qry.replace(rplc, userInput);
+        let m = {  }
+        m[selectedObject.variables[i]] = userInput;
+        mappings.push(m);
+        //let rplc = "<<" + selectedObject.variables[i] + ">>";
+        //qry = qry.replace(rplc, userInput);
       }
     }
 
     setElements((prevElements) => {
       const newElements = [...prevElements];
       newElements[index][field] = selectedObject.yAxis;
+      newElements[index].mappings = mappings;
       newElements[index].URI = selectedObject.URI;
       newElements[index].query = qry;
       newElements[index].id = selectedObject.id;

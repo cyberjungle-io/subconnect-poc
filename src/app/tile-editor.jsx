@@ -167,7 +167,7 @@ export default function TileEditor() {
           (newLines[lineIndex] = {
             lineType: "Data",
             label: { text: "", color: "#000000", fontSize: 16 },
-            value: { id: "", color: "#000000", fontSize: 16, dataQuery: {} },
+            value: { id: "", color: "#000000", fontSize: 16, dataQuery: {}, mappings: [] }, 
           }),
             (newLines[lineIndex].label.text = "");
           console.log("newLines[lineIndex]", newLines[lineIndex]);

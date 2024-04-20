@@ -245,9 +245,19 @@ export const fetchGraphDataDateSeries = async (element, dateformat, days) => {
     uri: element.URI[0],
     cache: new InMemoryCache(),
   });
-  console.log("Query: ", element.query.replace("<<datetime>>", dt));
+  
+  let newquery = element.query.replace("<<datetime>>", dt);
+  for (let i = 0; i < element.mappings.length; i++) {
+    let map = element.mappings[i];
+    let keys = Object.keys(map);
+    console.log("Map keys: ", keys[0]);
+    let subs = "<<" + keys[0] + ">>";
+    console.log("Subs: ", subs);
+    newquery = newquery.replace(subs, map[keys[0]]);
+  }
+  console.log("New Query: ", newquery);
   const { data } = await client.query({
-    query: gql(element.query.replace("<<datetime>>", dt)),
+    query: gql(newquery),
   });
   let newArray = [];
   for (let i = 0; i < data[element.basePath].length; i++) {
