@@ -9,9 +9,16 @@ const Navbar = ({ setPage,setIsAccountModalOpen, accountName}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
+  const closeMenu = () => setIsOpen(false);
 
   return (
     <div className="bg-gray-800 text-white">
+       {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          onClick={closeMenu}
+        ></div>
+      )}
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Hamburger button */}
@@ -66,7 +73,7 @@ const Navbar = ({ setPage,setIsAccountModalOpen, accountName}) => {
         <div
           className={`absolute top-0 left-0 w-[300px] h-full bg-gray-700 transform ${
             isOpen ? "translate-x-0" : "translate-x-full"
-          } transition-transform duration-300 ease-in-out`}
+          } transition-transform duration-300 ease-in-out z-30`}
         >
             <div className="flex justify-end">
             <button
