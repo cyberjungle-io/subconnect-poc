@@ -414,10 +414,56 @@ const Dashboard = () => {
   const deleteRow = (rowId) => {
     setRows(rows.filter((row) => row.id !== rowId));
   };
+  const handleDashboardChange = (event) => {
+    const newCurrentDashboard = parseInt(event.target.value);
+    const newState = {
+      ...globalState,
+      data: {
+        ...globalState.data,
+        currentDashboard: newCurrentDashboard,
+      },
+    };
+    setGlobalState(newState);  // Update global state
+    setRows(globalState.data.dashboards[newCurrentDashboard].dashboard);  // Update rows to reflect the selected dashboard
+  };
 
+  // Function to handle adding a new dashboard
+  const addDashboard = () => {
+    const newDashboard = {
+      name: `Dashboard ${globalState.data.dashboards.length + 1}`, // Simple naming strategy
+      dashboard: []  // Start with an empty dashboard configuration
+    };
+    const newState = {
+      ...globalState,
+      data: {
+        ...globalState.data,
+        dashboards: [...globalState.data.dashboards, newDashboard],
+        currentDashboard: globalState.data.dashboards.length  // Set the newly added dashboard as the current one
+      },
+    };
+    setGlobalState(newState);  // Update global state
+    setRows([]);  // Since the new dashboard is empty, set rows to an empty array
+  };
   return (
     <>
       <div className="flex justify-end pt-2 pe-3">
+      <select
+          value={globalState.data.currentDashboard}
+          onChange={handleDashboardChange}
+          className="select select-bordered w-full max-w-xs"
+        >
+          {globalState.data.dashboards.map((dashboard, index) => (
+            <option key={index} value={index}>
+              {dashboard.name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={addDashboard}
+          className="btn btn-primary ml-2"
+        >
+          Add Dashboard
+        </button>
         {editMode ? (
           <Button
             className="mr-2 flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out"
