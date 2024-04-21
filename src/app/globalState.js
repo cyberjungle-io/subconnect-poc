@@ -1,5 +1,5 @@
 // GlobalState.js
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 const GlobalStateContext = createContext();
 
@@ -9,11 +9,16 @@ export const GlobalStateProvider = ({ children }) => {
   const [globalState, setGlobalState] = useState({
     account_id: null,
     key: null,
-    config: {
-      tiles: {},
-      dashboards: {},
-      charts: {},
-    },
+    dashboards: [
+      {
+        name: "Main",
+        data: {
+          tiles: {},
+          dashboards: {},
+          charts: {},
+        },
+      },
+    ],
   });
 
   const updateGlobalState = (newState) => {

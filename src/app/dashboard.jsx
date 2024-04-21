@@ -7,6 +7,7 @@ import ShowTile from "@/components/tiles/showTile";
 import { GlobalStateContext } from "@/app/page";
 
 import { setStorageData, getStorageData } from "@/lib/utils";
+import { data } from "autoprefixer";
 
 const uniqueId = (() => {
   console.log("Generating unique ID..."); // Diagnostic log
@@ -189,8 +190,25 @@ const Dashboard = () => {
         console.log("Account:", acct);
         let gs = await getStorageData(acct.address);
         console.log("GS:", gs);
+        if (!gs) {
+          gs = {
+            account_id: acct.address,
+            key: "subconnect-poc",
+            data: {
+              tiles: [],
+              charts: [],
+              currentDashboard: 0,
+              dashboards: [
+                {
+                  name: "Main",
+                  dashboard: [],
+                },
+              ],
+            },
+          };
+        }
         setGlobalState(gs);
-        if (gs.data.dashboards) {
+        if (gs.data.dashboards[gs.data.currentDashboard].dashboard.length > 0) {
           setRows(gs.data.dashboards);
           setContent(gs.data.charts);
           setTileContent(gs.data.tiles);
@@ -367,8 +385,6 @@ const Dashboard = () => {
   }, []);
   useEffect(() => {
     console.log("globalState: ", globalState);
-    
-   
   }, [globalState]);
   useEffect(() => {
     console.log("content");
@@ -377,7 +393,6 @@ const Dashboard = () => {
   useEffect(() => {
     console.log("rows: ", rows);
   }, [rows]);
-  
 
   const handleSaveClick = () => {
     saveLocalDashboard();
@@ -390,8 +405,7 @@ const Dashboard = () => {
   const deleteRow = (rowId) => {
     setRows(rows.filter((row) => row.id !== rowId));
   };
-  
-  
+
   return (
     <>
       <div className="flex justify-end pt-2 pe-3">
