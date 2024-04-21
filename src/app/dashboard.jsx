@@ -172,10 +172,16 @@ const Dashboard = () => {
     const newState = {
       ...globalState,
       data: {
-        ...globalState.data,
-        dashboards: rows,
+          ...globalState.data,
+          dashboards: globalState.data.dashboards.map((dashboard, index) => {
+              if (index === globalState.data.currentDashboard) {
+                  return { ...dashboard, dashboard: rows };
+              }
+              return dashboard;
+          }),
       },
-    };
+  };
+  
     console.log("newState: ", newState);
     setGlobalState(newState);
     setStorageData(newState);
@@ -208,10 +214,13 @@ const Dashboard = () => {
           };
         }
         setGlobalState(gs);
-        if (gs.data.dashboards[gs.data.currentDashboard].dashboard.length > 0) {
-          setRows(gs.data.dashboards);
-          setContent(gs.data.charts);
+        setContent(gs.data.charts);
+        console.log("charts:", gs.data.charts);
           setTileContent(gs.data.tiles);
+        if (gs.data.dashboards[gs.data.currentDashboard].dashboard.length > 0) {
+          setRows(gs.data.dashboards[gs.data.currentDashboard].dashboard);
+          
+          
         }
       }
     } catch (error) {
