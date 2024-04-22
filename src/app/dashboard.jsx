@@ -54,7 +54,7 @@ const Dashboard = () => {
   const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
   const [editMode, setEditMode] = useState(false);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
-
+  const [isOpen, setIsOpen] = useState(false);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   const [isTileModalOpen, setIsTileModalOpen] = useState(false);
   const [selectedChartId, setSelectedChartId] = useState(null);
@@ -424,9 +424,11 @@ const Dashboard = () => {
       },
     };
     setGlobalState(newState);  // Update global state
-    setRows(globalState.data.dashboards[newCurrentDashboard].dashboard);  // Update rows to reflect the selected dashboard
+    setRows(globalState.data.dashboards[newCurrentDashboard].dashboard);// Update rows to reflect the selected dashboard
+    setIsOpen(false);  
   };
-
+  // Toggle dropdown visibility
+  const toggleDropdown = () => setIsOpen(!isOpen);
   // Function to handle adding a new dashboard
   const addDashboard = () => {
     const newDashboard = {
@@ -447,17 +449,6 @@ const Dashboard = () => {
   return (
     <>
       <div className="flex justify-end pt-2 pe-3">
-      <select
-          value={globalState.data.currentDashboard}
-          onChange={handleDashboardChange}
-          className="select select-bordered w-full max-w-xs"
-        >
-          {globalState.data.dashboards.map((dashboard, index) => (
-            <option key={index} value={index}>
-              {dashboard.name}
-            </option>
-          ))}
-        </select>
         <button
           onClick={addDashboard}
           className="btn btn-primary ml-2"
@@ -706,6 +697,41 @@ const Dashboard = () => {
           ""
         )}
       </DragDropContext>
+       <div className="fixed bottom-12 right-10 z-50">
+        <button
+          onClick={toggleDropdown}
+          className="h-12 w-12 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 focus:outline-none"
+          aria-label="Select Dashboard"
+        >
+          {isOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>  // X icon for closing
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>  // Plus icon when closed
+          )}
+        </button>
+
+        {/* Dropdown menu, showing options when the button is clicked */}
+        {isOpen && (
+          <div className="absolute right-0 bottom-14 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+            <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+              {globalState.data.dashboards.map((dashboard, index) => (
+                <button
+                  key={index}
+                  className={`text-gray-700 block px-4 py-2 text-sm w-full text-left ${index === globalState.data.currentDashboard ? 'bg-blue-100' : ''}`}
+                  role="menuitem"
+                  onClick={() => handleDashboardChange(index)}
+                >
+                  {dashboard.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 };
