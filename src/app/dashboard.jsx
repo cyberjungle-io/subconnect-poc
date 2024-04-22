@@ -43,6 +43,7 @@ const getColSpanClass = (colSpan) => {
 
 const Dashboard = () => {
   const { globalState, setGlobalState } = useContext(GlobalStateContext);
+  
   const [rows, setRows] = useState([
     {
       id: generateGUID(),
@@ -424,8 +425,11 @@ const Dashboard = () => {
           currentDashboard: parseInt(index),
         },
       };
+      console.log("newState: ", newState);
       setGlobalState(newState);
       setSelectButtonState(prev => ({ ...prev, isOpen: false }));
+      setRows(globalState.data.dashboards[index].dashboard);
+
     }
   };
   // Toggle dropdown visibility
