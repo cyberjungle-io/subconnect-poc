@@ -273,7 +273,7 @@ export const graphArray = [
     owner: "Cyber Jungle",
     basePath: "basePoolSnapshots",
     value: "sharePrice",
-    postProcess: [],
+    postProcess: [{ multiplyBy: 1 }, { round: 2}],
     variables: ["pool number"],
   },
   {
@@ -301,7 +301,7 @@ export const graphArray = [
     owner: "Cyber Jungle",
     basePath: "basePoolSnapshots",
     value: "totalValue",
-    postProcess: [],
+    postProcess: [{ multiplyBy: 1 }, { round: 0}],
     variables: ["pool number"],
   },
   {
