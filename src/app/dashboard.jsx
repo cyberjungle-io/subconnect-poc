@@ -54,7 +54,10 @@ const Dashboard = () => {
   const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
   const [editMode, setEditMode] = useState(false);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
+  const [selectButtonState, setSelectButtonState] = useState({
+    isOpen: false,
+    buttonBottom: 28, // Initial bottom position
+  });
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   const [isTileModalOpen, setIsTileModalOpen] = useState(false);
   const [selectedChartId, setSelectedChartId] = useState(null);
@@ -172,16 +175,16 @@ const Dashboard = () => {
     const newState = {
       ...globalState,
       data: {
-          ...globalState.data,
-          dashboards: globalState.data.dashboards.map((dashboard, index) => {
-              if (index === globalState.data.currentDashboard) {
-                  return { ...dashboard, dashboard: rows };
-              }
-              return dashboard;
-          }),
+        ...globalState.data,
+        dashboards: globalState.data.dashboards.map((dashboard, index) => {
+          if (index === globalState.data.currentDashboard) {
+            return { ...dashboard, dashboard: rows };
+          }
+          return dashboard;
+        }),
       },
-  };
-  
+    };
+
     console.log("newState: ", newState);
     setGlobalState(newState);
     setStorageData(newState);
@@ -216,11 +219,9 @@ const Dashboard = () => {
         setGlobalState(gs);
         setContent(gs.data.charts);
         console.log("charts:", gs.data.charts);
-          setTileContent(gs.data.tiles);
+        setTileContent(gs.data.tiles);
         if (gs.data.dashboards[gs.data.currentDashboard].dashboard.length > 0) {
           setRows(gs.data.dashboards[gs.data.currentDashboard].dashboard);
-          
-          
         }
       }
     } catch (error) {
@@ -414,45 +415,72 @@ const Dashboard = () => {
   const deleteRow = (rowId) => {
     setRows(rows.filter((row) => row.id !== rowId));
   };
-  const handleDashboardChange = (event) => {
-    const newCurrentDashboard = parseInt(event.target.value);
-    const newState = {
-      ...globalState,
-      data: {
-        ...globalState.data,
-        currentDashboard: newCurrentDashboard,
-      },
-    };
-    setGlobalState(newState);  // Update global state
-    setRows(globalState.data.dashboards[newCurrentDashboard].dashboard);// Update rows to reflect the selected dashboard
-    setIsOpen(false);  
+  const handleDashboardChange = (index) => {
+    if (index !== globalState.data.currentDashboard) {
+      const newState = {
+        ...globalState,
+        data: {
+          ...globalState.data,
+          currentDashboard: parseInt(index),
+        },
+      };
+      setGlobalState(newState);
+      setSelectButtonState(prev => ({ ...prev, isOpen: false }));
+    }
   };
   // Toggle dropdown visibility
-  const toggleDropdown = () => setIsOpen(!isOpen);
-  // Function to handle adding a new dashboard
+  const toggleDropdown = () => {
+    setSelectButtonState((prevState) => ({
+      ...prevState,
+      isOpen: !prevState.isOpen,
+    }));
+  };
+
+  // Adjust the button position based on scroll and window size
+  useEffect(() => {
+    const adjustButtonPosition = () => {
+      window.requestAnimationFrame(() => {
+        const scrolledFromBottom =
+          document.documentElement.scrollHeight -
+          window.scrollY -
+          window.innerHeight;
+        const newBottom =
+          scrolledFromBottom < 100 ? 100 - scrolledFromBottom : 28;
+        setSelectButtonState((prevState) => ({
+          ...prevState,
+          buttonBottom: newBottom,
+        }));
+      });
+    };
+
+    window.addEventListener("scroll", adjustButtonPosition);
+    window.addEventListener("resize", adjustButtonPosition);
+
+    return () => {
+      window.removeEventListener("scroll", adjustButtonPosition);
+      window.removeEventListener("resize", adjustButtonPosition);
+    };
+  }, []);
   const addDashboard = () => {
     const newDashboard = {
       name: `Dashboard ${globalState.data.dashboards.length + 1}`, // Simple naming strategy
-      dashboard: []  // Start with an empty dashboard configuration
+      dashboard: [], // Start with an empty dashboard configuration
     };
     const newState = {
       ...globalState,
       data: {
         ...globalState.data,
         dashboards: [...globalState.data.dashboards, newDashboard],
-        currentDashboard: globalState.data.dashboards.length  // Set the newly added dashboard as the current one
+        currentDashboard: globalState.data.dashboards.length, // Set the newly added dashboard as the current one
       },
     };
-    setGlobalState(newState);  // Update global state
-    setRows([]);  // Since the new dashboard is empty, set rows to an empty array
+    setGlobalState(newState); // Update global state
+    setRows([]); // Since the new dashboard is empty, set rows to an empty array
   };
   return (
     <>
       <div className="flex justify-end pt-2 pe-3">
-        <button
-          onClick={addDashboard}
-          className="btn btn-primary ml-2"
-        >
+        <button onClick={addDashboard} className="btn btn-primary ml-2">
           Add Dashboard
         </button>
         {editMode ? (
@@ -697,33 +725,70 @@ const Dashboard = () => {
           ""
         )}
       </DragDropContext>
-       <div className="fixed bottom-12 right-10 z-50">
+      <div
+        style={{
+          position: "fixed",
+          bottom: `${selectButtonState.buttonBottom}px`,
+          right: "10px",
+          zIndex: 50,
+        }}
+      >
         <button
           onClick={toggleDropdown}
-          className="h-12 w-12 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 focus:outline-none"
+          className="h-16 w-16 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 focus:outline-none"
           aria-label="Select Dashboard"
         >
-          {isOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>  // X icon for closing
+          {selectButtonState.isOpen ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className="w-8 h-8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg> // X icon for closing
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>  // Plus icon when closed
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-8 h-8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3"
+              />
+            </svg>
           )}
         </button>
 
-        {/* Dropdown menu, showing options when the button is clicked */}
-        {isOpen && (
-          <div className="absolute right-0 bottom-14 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-            <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+        {selectButtonState.isOpen && (
+          <div className="absolute right-0 bottom-20 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+            <div
+              className="py-1"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="options-menu"
+            >
               {globalState.data.dashboards.map((dashboard, index) => (
                 <button
                   key={index}
-                  className={`text-gray-700 block px-4 py-2 text-sm w-full text-left ${index === globalState.data.currentDashboard ? 'bg-blue-100' : ''}`}
+                  className={`text-gray-700 block px-4 py-2 text-sm w-full text-left ${
+                    index === globalState.data.currentDashboard
+                      ? "bg-blue-100"
+                      : ""
+                  }`}
                   role="menuitem"
-                  onClick={() => handleDashboardChange(index)}
+                  onClick={() => handleDashboardChange(index)} // Directly passing index
                 >
                   {dashboard.name}
                 </button>

@@ -56,7 +56,7 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        scroll: '1rem',
+        
       },
       keyframes: {
         "accordion-down": {
@@ -74,5 +74,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("tailwind-scrollbar")],
+  plugins: [require("tailwindcss-animate")],
 };
