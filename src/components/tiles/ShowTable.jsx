@@ -2,14 +2,14 @@
 import React, { useState, useEffect, use } from "react";
 import { fetchValueData } from "@/lib/graphdata";
 
-export default function ShowDataLine({ line, index }) {
+export default function ShowTable({ line, index }) {
   const [data, setData] = useState(null);
 
   useEffect(() => {
     console.log("line", line);
     const fetchData = async () => {
       console.log("line.value", line.value);
-      const dta = await fetchValueData(line.value);
+      const dta = await fetchTableData(line.value);
       setData(dta);
       console.log(dta);
     };
