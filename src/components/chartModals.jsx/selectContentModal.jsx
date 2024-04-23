@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ChartSelectModal from './ChartSelectModal';
 
-function SelectContentModal({ isOpen, onClose, content, handleSelectChart }) {
+function SelectContentModal({ isOpen, onClose, content, onSelect,handleSelectChart }) {
     const [activeTab, setActiveTab] = useState('tab1');  // Initialize with 'tab1'
 
     if (!isOpen) return null;
@@ -34,12 +34,14 @@ function SelectContentModal({ isOpen, onClose, content, handleSelectChart }) {
                     {activeTab === 'tab1' ? (
                         <p>Tiles Content Here</p>
                     ) : (
+                        <>
+                        <p>charts</p>
                         <ChartSelectModal
-                            isOpen={activeTab === 'tab2'}
+                            
                             content={content}
                             onSelect={handleSelectChart}
-                            onClose={() => setActiveTab('tab1')}  // Switch back to the first tab or close modal entirely
-                        />
+                              // Switch back to the first tab or close modal entirely
+                        /></>
                     )}
                     <button
                         onClick={onClose}

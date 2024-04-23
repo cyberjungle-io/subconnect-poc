@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import ShowTile from "@/components/tiles/showTile";
 import { GlobalStateContext } from "@/app/page";
 import { setStorageData, getStorageData } from "@/lib/utils";
-import SelectContentModal from "@/components/chartModals.jsx/selectContentModal"
+import SelectContentModal from "@/components/chartModals.jsx/selectContentModal";
 import { data } from "autoprefixer";
 
 const uniqueId = (() => {
@@ -51,8 +51,8 @@ const Dashboard = () => {
     },
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-const [modalType, setModalType] = useState('chart'); // or 'tile'
-const [currentRowId, setCurrentRowId] = useState(null);
+  const [modalType, setModalType] = useState("chart"); // or 'tile'
+  const [currentRowId, setCurrentRowId] = useState(null);
 
   const [content, setContent] = useState([]);
   const [tileContent, setTileContent] = useState([]);
@@ -115,35 +115,6 @@ const [currentRowId, setCurrentRowId] = useState(null);
     console.log("handleSelectTile");
     console.log(newRows);
   };
-  function ChartSelectModal({ isOpen, content, onSelect, onClose }) {
-    if (!isOpen) return null;
-    console.log("ChartSelectModal");
-    console.log(content);
-    return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-        <div className="modal bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
-          <h2>Select Content</h2>
-          <ul>
-            {content.map((item) => (
-              <li
-                key={item.id}
-                onClick={() => onSelect(item.id)}
-                className="cursor-pointer hover:bg-gray-100 p-2"
-              >
-                {item.form.title.text} {/* Assuming each content has a title */}
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={onClose}
-            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   function TileSelectModal({ isOpen, content, onSelect, onClose }) {
     if (!isOpen) return null;
@@ -558,13 +529,13 @@ const [currentRowId, setCurrentRowId] = useState(null);
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-      <SelectContentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-        <ChartSelectModal
-          isOpen={isChartModalOpen}
+        <SelectContentModal
+          isOpen={isModalOpen}
           content={content}
           onSelect={handleSelectChart}
-          onClose={() => setIsChartModalOpen(false)}
+          onClose={() => setIsModalOpen(false)}
         />
+        
         <TileSelectModal
           isOpen={isTileModalOpen}
           content={tileContent}
@@ -701,26 +672,14 @@ const [currentRowId, setCurrentRowId] = useState(null);
                   </Draggable>
                 ))}
 
-
-
-
-
-
-
-
-
-
-
-
-
                 {editMode &&
                   row.cells.reduce((sum, chart) => sum + chart.colSpan, 0) <=
                     10 && (
-                      <button
-  onClick={() => setIsModalOpen(true)} // This will only open the modal
-  type="button"
-  className="bg-black bg-opacity-40 hover:bg-opacity-70 text-white font-bold py-2 px-4 rounded w-1/12 flex justify-center items-center"
->
+                    <button
+                      onClick={() => setIsModalOpen(true)} // This will only open the modal
+                      type="button"
+                      className="bg-black bg-opacity-40 hover:bg-opacity-70 text-white font-bold py-2 px-4 rounded w-1/12 flex justify-center items-center"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -735,8 +694,9 @@ const [currentRowId, setCurrentRowId] = useState(null);
                           d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                         />
                       </svg>
-                    </button> )}
-                    {/*<button
+                    </button>
+                  )}
+                {/*<button
                       onClick={() => addChartToRow(row.id)} // Modify this function to add a chart to the specific row
                       type="button"
                       className="bg-black bg-opacity-40 hover:bg-opacity-70 text-white font-bold py-2 px-4 rounded w-1/12 flex justify-center items-center"
@@ -756,7 +716,7 @@ const [currentRowId, setCurrentRowId] = useState(null);
                         />
                       </svg>
                     </button>*/}
-                  
+
                 {editMode && row.cells.length === 0 && (
                   <div
                     className="bg-transparent hover:bg-transparent hover:text-red-700 text-red-500 font-bold py-2 px-4 rounded cursor-pointer flex justify-center items-center "

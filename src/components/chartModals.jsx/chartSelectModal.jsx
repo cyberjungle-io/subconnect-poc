@@ -1,8 +1,10 @@
 // ChartSelectModal.js
 import React from 'react';
 
-function ChartSelectModal({ isOpen, content, onSelect, onClose }) {
-  if (!isOpen) return null;
+function ChartSelectModal({ content, onSelect }) {
+  
+  console.log("ChartSelectModal");
+  console.log(content);
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
       <div className="modal bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
@@ -18,12 +20,7 @@ function ChartSelectModal({ isOpen, content, onSelect, onClose }) {
             </li>
           ))}
         </ul>
-        <button
-          onClick={onClose}
-          className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-        >
-          Close
-        </button>
+       
       </div>
     </div>
   );
