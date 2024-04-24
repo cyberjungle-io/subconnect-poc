@@ -6,9 +6,9 @@ function SelectContentModal({
   isOpen,
   onClose,
   content,
-  tileContent,
-  handleSelectTile,
-  handleSelectChart,
+  
+  onSelect,
+  
 }) {
   const [activeTab, setActiveTab] = useState("tab2"); // Initialize with 'tab1'
 
@@ -78,15 +78,15 @@ function SelectContentModal({
           {activeTab === "tab1" ? (
             <>
               <TileSelectModal
-                content={tileContent}
-                onSelect={handleSelectTile}
+                content={content[1]}
+                onSelect={onSelect[1]}
               />
             </>
           ) : (
             <>
               <ChartSelectModal
-                content={content}
-                onSelect={handleSelectChart}
+                content={content[0]}
+                onSelect={onSelect[0]}
               />
             </>
           )}

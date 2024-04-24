@@ -1,7 +1,7 @@
 import React from "react";
 
 function TileSelectModal({ content, onSelect }) {
-  console.log("ChartSelectModal");
+  console.log("TileSelectModal");
   console.log(content);
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">

@@ -77,22 +77,16 @@ const Dashboard = () => {
   };
   const handleSelectChart = (contentId) => {
     //get content record from the content array using the contentId
+    
     const selectedContent = content.find((item) => item.id === contentId);
+    addCell(selectedContent,"chart")
     console.log(selectedContent);
-    let newRows = rows;
-    for (let x = 0; x < newRows.length; x++) {
-      for (let y = 0; y < newRows[x].cells.length; y++) {
-        if (newRows[x].cells[y].id === selectedChartId) {
-          newRows[x].cells[y].contentType = "chart";
-          newRows[x].cells[y].content = selectedContent;
-        }
-      }
-    }
+    
 
-    setRows(newRows);
-    setIsChartModalOpen(false);
-    console.log("handleSelectChart");
-    console.log(newRows);
+  
+    setIsModalOpen(false);
+    
+    
   };
   const handleSelectTile = (contentId) => {
     //get content record from the content array using the contentId
@@ -100,20 +94,9 @@ const Dashboard = () => {
       (item) => item.id === contentId
     );
     console.log("selected Tile:", selectedTileContent);
-    let newRows = rows;
-    for (let x = 0; x < newRows.length; x++) {
-      for (let y = 0; y < newRows[x].cells.length; y++) {
-        if (newRows[x].cells[y].id === selectedTileId) {
-          newRows[x].cells[y].contentType = "tile";
-          newRows[x].cells[y].content = selectedTileContent;
-        }
-      }
-    }
-    console.log("newRows", newRows);
-    setRows(newRows);
-    setIsTileModalOpen(false);
-    console.log("handleSelectTile");
-    console.log(newRows);
+    addCell(selectedTileContent,"tile")
+    setIsModalOpen(false);
+   
   };
 
  
@@ -226,7 +209,7 @@ const Dashboard = () => {
     }
   };
 
-  const addChart = (event) => {
+  const addCell = (content,type) => {
     console.log("Adding chart..."); // Diagnostic log
 
     const currentRows = rows;
@@ -239,11 +222,11 @@ const Dashboard = () => {
     );
 
     if (totalColSpan + 2 <= 12) {
-      lastRow.cells.push({ id: generateGUID(), colSpan: 2, content: {} });
+      lastRow.cells.push({ id: generateGUID(), colSpan: 2,contentType:type, content: content });
     } else {
       newRows.push({
         id: uniqueId(),
-        cells: [{ id: generateGUID(), colSpan: 2, content: {} }],
+        cells: [{ id: generateGUID(), colSpan: 2, content: content }],
       });
     }
 
