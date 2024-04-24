@@ -116,35 +116,7 @@ const Dashboard = () => {
     console.log(newRows);
   };
 
-  function TileSelectModal({ isOpen, content, onSelect, onClose }) {
-    if (!isOpen) return null;
-    console.log("ChartSelectModal");
-    console.log(content);
-    return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-        <div className="modal bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
-          <h2>Select Tiles</h2>
-          <ul>
-            {content.map((item) => (
-              <li
-                key={item.id}
-                onClick={() => onSelect(item.id)}
-                className="cursor-pointer hover:bg-gray-100 p-2"
-              >
-                {item.form.title.text} {/* Assuming each content has a title */}
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={onClose}
-            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
+ 
 
   // Save to local storage
   const saveLocalDashboard = () => {
@@ -531,17 +503,12 @@ const Dashboard = () => {
       <DragDropContext onDragEnd={onDragEnd}>
         <SelectContentModal
           isOpen={isModalOpen}
-          content={content}
-          onSelect={handleSelectChart}
+          content={[content, tileContent]}
+          onSelect={[handleSelectChart, handleSelectTile]}
           onClose={() => setIsModalOpen(false)}
         />
         
-        <TileSelectModal
-          isOpen={isTileModalOpen}
-          content={tileContent}
-          onSelect={handleSelectTile}
-          onClose={() => setIsTileModalOpen(false)}
-        />
+        
         {rows.map((row, rowIndex) => (
           <Droppable
             key={row.id}
