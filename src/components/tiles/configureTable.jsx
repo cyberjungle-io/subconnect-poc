@@ -80,7 +80,7 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
     <>
     
      
-      <div className="row">
+      <div className="flex flex-col">
       <Label>Data Key:</Label>
       <select
         className="w-80 form-select"
@@ -94,8 +94,8 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
               {item.name}
             </option>
           ))}
-      </select></div>
-      <div className="row">test</div>
+      </select>
+      <div className="flex flex-col">test</div></div>
     </>
   );
 }
