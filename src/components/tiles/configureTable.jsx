@@ -35,6 +35,16 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
   useEffect(() => {
     handleLineUpdate(index, newline);
   }, [newline]);
+  useEffect(() => {
+    console.log("line", line);
+    let qry = graphArray
+    .filter((item) => item.queryType === "table")
+    if (line.value.dataQuery) {
+      newline.value.dataQuery = qry[0];
+      console.log("newline", newline);
+    }
+  
+  } , []);
 
   const handleGraphElementChange = (index, field) => async (event) => {
     console.log("field", field);
