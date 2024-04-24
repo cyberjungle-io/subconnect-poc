@@ -5,7 +5,7 @@ import Dashboard from "@/app/dashboard";
 import RegisterHost from "@/app/register-host.jsx";
 import TileEditor from "@/app/tile-editor.jsx";
 import ChartEditor from "@/app/chart-editor.jsx";
-const Navbar = ({ setPage,setIsAccountModalOpen, accountName}) => {
+const Navbar = ({ setPage,setIsAccountModalOpen, accountName, addDashboard}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -104,6 +104,9 @@ const Navbar = ({ setPage,setIsAccountModalOpen, accountName}) => {
             <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => setPage("dashboard")}>
               Dashboards
             </h3>
+            <button onClick={addDashboard} className="btn btn-primary ml-2">
+          Add Dashboard
+        </button>
             <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => setPage("chart")}>
               Charts
             </h3>

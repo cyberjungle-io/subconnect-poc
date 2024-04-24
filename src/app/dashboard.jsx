@@ -8,6 +8,7 @@ import { GlobalStateContext } from "@/app/page";
 import { setStorageData, getStorageData } from "@/lib/utils";
 import SelectContentModal from "@/components/chartModals.jsx/selectContentModal";
 import { data } from "autoprefixer";
+import Navbar from "@/components/custom/Navbar";
 
 const uniqueId = (() => {
   console.log("Generating unique ID..."); // Diagnostic log
