@@ -4,15 +4,15 @@ function TileSelectModal({ content, onSelect }) {
   console.log("TileSelectModal");
   console.log(content);
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="modal bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
-        <h2>Select Tiles</h2>
+    <div className="flex justify-start">
+      <div className="text-start w-full ">
+        <p className="italic font-light text-sm">Select Tile</p>
         <ul>
           {content.map((item) => (
             <li
               key={item.id}
               onClick={() => onSelect(item.id)}
-              className="cursor-pointer hover:bg-gray-100 p-2"
+              className="cursor-pointer hover:bg-gray-100 p-1 bg-gray-50 border rounded font-light text-sm"
             >
               {item.form.title.text} {/* Assuming each content has a title */}
             </li>

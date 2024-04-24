@@ -10,7 +10,7 @@ function SelectContentModal({
   onSelect,
   
 }) {
-  const [activeTab, setActiveTab] = useState("tab2"); // Initialize with 'tab1'
+  const [activeTab, setActiveTab] = useState("tab1"); // Initialize with 'tab1'
 
   if (!isOpen) return null;
 
@@ -22,7 +22,7 @@ function SelectContentModal({
           <button
             onClick={() => setActiveTab("tab1")}
             className={`flex-1 py-3 flex items-center justify-center ${
-              activeTab === "tab2"
+              activeTab === "tab1"
                 ? "border-b-4 border-blue-500 text-blue-500"
                 : "border-b-4 border-transparent text-gray-600"
             } hover:border-blue-500 hover:text-blue-500 transition-colors duration-300`}
@@ -48,7 +48,7 @@ function SelectContentModal({
           <button
             onClick={() => setActiveTab("tab2")}
             className={`flex-1 py-3 flex items-center justify-center ${
-              activeTab === "tab1"
+              activeTab === "tab2"
                 ? "border-b-4 border-blue-500 text-blue-500"
                 : "border-b-4 border-transparent text-gray-600"
             } hover:border-blue-500 hover:text-blue-500 transition-colors duration-300`}
