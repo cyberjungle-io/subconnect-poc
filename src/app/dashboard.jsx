@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import ShowTile from "@/components/tiles/showTile";
 import { GlobalStateContext } from "@/app/page";
 import { setStorageData, getStorageData } from "@/lib/utils";
-import SelectContentModal from "@/components/chartModals.jsx/selectContentModal";
+import SelectContentModal from "@/components/chartModals/selectContentModal";
 import { data } from "autoprefixer";
 import Navbar from "@/components/custom/Navbar";
 

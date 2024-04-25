@@ -13,10 +13,12 @@ function SelectContentModal({
   const [activeTab, setActiveTab] = useState("tab1"); // Initialize with 'tab1'
 
   if (!isOpen) return null;
-
+  const handleModalClick = (event) => {
+    event.stopPropagation();
+  };
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg overflow-hidden">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" onClick={onClose}>
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg overflow-hidden" onClick={handleModalClick}>
         {/* Tabs at the top of the modal */}
         <div className="flex">
           <button

@@ -5,11 +5,31 @@ import Dashboard from "@/app/dashboard";
 import RegisterHost from "@/app/register-host.jsx";
 import TileEditor from "@/app/tile-editor.jsx";
 import ChartEditor from "@/app/chart-editor.jsx";
-const Navbar = ({ setPage,setIsAccountModalOpen, accountName, addDashboard}) => {
-  const [isOpen, setIsOpen] = useState(false);
+import NewDashboardModal from "@/components/chartModals/newDashboardModal.jsx";
 
+const Navbar = ({ setPage,setIsAccountModalOpen, accountName, globalState}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
+  const toggleModal = () => setIsModalOpen(!isModalOpen);
+
+  const addDashboard = () => {
+    const newDashboard = {
+      name: `Dashboard ${globalState.data.dashboards.length + 1}`, // Simple naming strategy
+      dashboard: [], // Start with an empty dashboard configuration
+    };
+    const newState = {
+      ...globalState,
+      data: {
+        ...globalState.data,
+        dashboards: [...globalState.data.dashboards, newDashboard],
+        currentDashboard: globalState.data.dashboards.length, // Set the newly added dashboard as the current one
+      },
+    };
+    setGlobalState(newState); // Update global state
+    setRows([]); // Since the new dashboard is empty, set rows to an empty array
+  };
 
   return (
     <div className="bg-gray-800 text-white">
@@ -101,22 +121,23 @@ const Navbar = ({ setPage,setIsAccountModalOpen, accountName, addDashboard}) => 
             </button>
           </div>
           <div className="bg-gray-700 p-4 ">
-            <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => setPage("dashboard")}>
+            <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => { setPage("dashboard"); closeMenu(); }}>
               Dashboards
             </h3>
-            <button onClick={addDashboard} className="btn btn-primary ml-2">
-          Add Dashboard
-        </button>
-            <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => setPage("chart")}>
+            <button className="bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded-md ml-2" onClick={() => { toggleModal(); closeMenu(); }}>
+              Add Dashboard
+            </button>
+            <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => { setPage("chart"); closeMenu(); }}>
               Charts
             </h3>
-            <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => setPage("tileEditor")}>
+            <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => { setPage("tileEditor"); closeMenu(); }}>
               Tiles
             </h3>
-            <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => setPage("registerHost")}>Data</h3>
+            <h3 className="bg-transparent hover:bg-black hover:bg-opacity-25 text-white py-2 px-4 rounded cursor-pointer" onClick={() => { setPage("registerHost"); closeMenu(); }}>Data</h3>
           </div>
         </div>
       )}
+      {isModalOpen && <NewDashboardModal onSubmit={addDashboard} closeModal={toggleModal} />}
     </div>
   );
 };
