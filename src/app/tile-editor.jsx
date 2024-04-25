@@ -17,6 +17,7 @@ import ConfigureTable from "@/components/tiles/configureTable";
 import { generateGUID } from "@/lib/utils";
 import { setStorageData } from "@/lib/utils"; 
 import { GlobalStateContext } from "@/app/page";
+import { graphArray, fetchValueData } from "@/lib/graphdata";
 
 const Modal = ({ isOpen, onClose, children }) => {
   const globalState = useContext(GlobalStateContext);
@@ -165,10 +166,12 @@ export default function TileEditor() {
       const newLines = [...prevForm.lines];
       if (newLines[lineIndex]) {
         if (newValue === "Table") {
+          let qry = graphArray.filter((item) => item.queryType === "table");
+          if (!qry) {qry = []}
           (newLines[lineIndex] = {
             lineType: "Table",
             label: { text: "", color: "#000000", fontSize: 16 },
-            value: { id: "", color: "#000000", fontSize: 16, dataQuery: {}, mappings: [] }, 
+            value: { id: "", color: "#000000", fontSize: 16, dataQuery: qry[0],columns:[], mappings: [] }, 
           }),
             (newLines[lineIndex].label.text = "");
           console.log("newLines[lineIndex]", newLines[lineIndex]);

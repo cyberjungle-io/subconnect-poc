@@ -460,7 +460,7 @@ export const fetchValueData = async (graphquery) => {
   return tdata;
 };
 export const fetchTableData = async (graphquery) => {
-  console.log("fetchValueData: ", graphquery);
+  console.log("fetchTableData: ", graphquery);
   const client = new ApolloClient({
     uri: graphquery.dataQuery.URI[0],
     cache: new InMemoryCache(),
@@ -479,12 +479,12 @@ export const fetchTableData = async (graphquery) => {
     query: gql(newquery),
   });
 
-  //console.log("Data", data[graphquery.basePath][0][graphquery.value]);
-  const tdata = postProcess(
+  console.log("Data", data["delegations"]);
+  /* const tdata = postProcess(
     data[graphquery.dataQuery.basePath][0][graphquery.dataQuery.value],
     graphquery.dataQuery.postProcess
-  );
-  return tdata;
+  ); */
+  return data[graphquery.dataQuery.basePath];
 };
 function formatDatesInArray(array, property, format) {
   return array.map((item) => {

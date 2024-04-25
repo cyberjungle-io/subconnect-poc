@@ -1,51 +1,69 @@
-"use client";
 import React, { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import DOMPurify from "dompurify";
+import { Button } from "@/components/ui/button";
 import { graphArray, fetchValueData } from "@/lib/graphdata";
 
+
 export default function ConfigureTable({ line, index, handleLineUpdate }) {
-  const [graphQuery, setGraphQuery] = useState(
-    graphArray.filter((item) => item.queryType === "table"))
-  ;
-  //graphArray.filter((item) => item.queryType === "table");
   const [newline, setNewLine] = useState(line);
 
-  const handleInputChange = (value) => {
-    console.log("value", value);
-    setNewLine({ ...newline, label: { ...newline.label, text: value } });
+  const handleInputChangeLabel = (value, idx, field) => {
+    const newColumns = [...newline.value.columns];
+    const updatedColumn = { ...newColumns[idx].label, [field]: value };
+    newColumns[idx].label = updatedColumn;
+    setNewLine({
+      ...newline,
+      value: { ...newline.value, columns: newColumns },
+    });
   };
+  const formatType = ["round","rTrim","lTrim","date","time","dateTime"]
 
-  function handleColorChange(value) {
-    setNewLine({ ...newline, label: { ...newline.label, color: value } });
-  }
-  const handleFontSizeChange = (value) => {
-    
-    setNewLine({ ...newline, label: { ...newline.label, fontSize: value } });
-  };
-  useEffect(() => {
-    handleLineUpdate(index, newline);
-  }, [newline]);
-  useEffect(() => {
-    console.log("line", line);
-    let qry = graphArray
-    .filter((item) => item.queryType === "table")
-    if (line.value.dataQuery) {
-      newline.value.dataQuery = qry[0];
-      console.log("newline", newline);
-    }
   
-  } , []);
+  const handleInputChangeHeader = (value, idx, field) => {
+    const newColumns = [...newline.value.columns];
+    const updatedColumn = { ...newColumns[idx].header, [field]: value };
+    newColumns[idx].header = updatedColumn;
+    setNewLine({
+      ...newline,
+      value: { ...newline.value, columns: newColumns },
+    });
+  };
+  const handleDropdownChange = (value, idx) => {
+    const newColumns = [...newline.value.columns];
+    const columnKey = newline.value.dataQuery.columns.find(
+      (col) => Object.values(col)[0] === value
+    );
+    newColumns[idx].selectedField = value; // Store the value
+    newColumns[idx].label.text = Object.keys(columnKey)[0]; // Assuming you want to store the column key as label text
+    setNewLine({
+      ...newline,
+      value: { ...newline.value, columns: newColumns },
+    });
+  };
 
+  const handleAddColumn = () => {
+    const newColumns = [
+      ...newline.value.columns,
+      {
+        label: { text: "", color: "", fontSize: "",preText:"",postText:"",format:"",formatValue:"" },
+        header: { text: "", color: "", fontSize: "" },
+        selectedField: "", // Initial selected field
+      },
+    ];
+    setNewLine({
+      ...newline,
+      value: { ...newline.value, columns: newColumns },
+    });
+  };
+  const handleFormatChange = (value, idx) => {
+    const newColumns = [...newline.value.columns];
+    newColumns[idx].label.format = value;
+    setNewLine({
+      ...newline,
+      value: { ...newline.value, columns: newColumns },
+    });
+  };
   const handleGraphElementChange = (index, field) => async (event) => {
     console.log("field", field);
     console.log("event", event.target.value);
@@ -71,27 +89,14 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
       }
       console.log("mappings", newmappings);
     }
-    const updatedNewline = {
-      ...newline,
-      value: {
-          ...newline.value,
-          dataQuery: dta,
-          mappings: newmappings
-      }
   };
-  console.log("updatedNewline", updatedNewline);
-    setNewLine(updatedNewline);
-    
-    
-     console.log("newline", newline);
-    console.log("after fetch data")
-  };
+  useEffect(() => {
+    handleLineUpdate(index, newline);
+  }, [newline]);
   return (
     <>
-    
-     
-      <div className="flex flex-col">
-      <Label>Data Key:</Label>
+    <div className="flex flex-col">
+      <Label>Data Query:</Label>
       <select
         className="w-80 form-select"
         value={newline.value.id} 
@@ -105,7 +110,76 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
             </option>
           ))}
       </select>
-      <div className="flex flex-col">test</div></div>
-    </>
+      </div>
+    <div className="flex flex-col">
+      {newline.value.columns.map((item, idx) => (
+        <div key={idx} className="flex">
+          <Label>Column Header:</Label>
+          <Input
+            value={item.header.text}
+            onChange={(e) =>
+              handleInputChangeHeader(e.target.value, idx, "text")
+            }
+          />
+          <Label>Column Name:</Label>
+          <select
+            className="w-full form-select"
+            value={item.selectedField || ""} // Use selectedField to maintain dropdown state
+            onChange={(e) => handleDropdownChange(e.target.value, idx)}
+          >
+            {newline.value.dataQuery.columns.map((col) => (
+              <option key={Object.values(col)[0]} value={Object.values(col)[0]}>
+                {Object.keys(col)[0]}
+              </option>
+            ))}
+          </select>
+
+          <Label>Column Color:</Label>
+          <Input
+            value={item.label.color}
+            onChange={(e) =>
+              handleInputChangeLabel(e.target.value, idx, "color")
+            }
+          />
+          <Label>Column Font Size:</Label>
+          <Input
+            value={item.label.fontSize}
+            onChange={(e) =>
+              handleInputChangeLabel(e.target.value, idx, "fontSize")
+            }
+          />
+          <Label>Column PreText:</Label>
+          <Input
+            value={item.label.preText}
+            onChange={(e) =>
+              handleInputChangeLabel(e.target.value, idx, "preText")
+            }
+          />
+          <Label>Column PostText:</Label>
+          <Input
+            value={item.label.postText}
+            onChange={(e) =>
+              handleInputChangeLabel(e.target.value, idx, "postText")
+            }
+          />
+           <Label>Format Type:</Label>
+            <select className="w-full form-select" value={item.label.format || ""} onChange={(e) => handleFormatChange(e.target.value, idx)}>
+              {formatType.map((type, idx) => (
+                <option key={idx} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            <Label>Format Value:</Label>
+          <Input
+            value={item.label.formatValue}
+            onChange={(e) =>
+              handleInputChangeLabel(e.target.value, idx, "formatValue")
+            }
+          />
+        </div>
+      ))}
+      <Button onClick={handleAddColumn}>Add Column</Button>
+    </div></>
   );
 }

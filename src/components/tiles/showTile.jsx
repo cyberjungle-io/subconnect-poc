@@ -10,6 +10,7 @@ import {
 
 import ShowTextLine from "./showTextLine";
 import ShowDataLine from "./showDataLine";
+import ShowTable from "./ShowTable";
 import DOMPurify from "dompurify";
 
 export default function ShowTile(param) {
@@ -70,6 +71,10 @@ export default function ShowTile(param) {
                     {line.lineType === "Data"
                         ? 
                         <ShowDataLine line={line} index={index}/>
+                     : ""}
+                     {line.lineType === "Table"
+                        ? 
+                        <ShowTable line={line} index={index}/>
                      : ""}
              
                 </div>
