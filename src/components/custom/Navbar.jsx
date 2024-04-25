@@ -136,7 +136,7 @@ const Navbar = ({
             </h3>
             <button
               className="bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded-md"
-              onClick={() => setIsModalOpen(true)} // Open modal
+              onClick={() => {setIsModalOpen(true), closeMenu()}} // Open modal
             >
               Add Dashboard
             </button>

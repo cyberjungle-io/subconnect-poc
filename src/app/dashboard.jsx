@@ -94,7 +94,9 @@ const Dashboard = () => {
     addCell(selectedTileContent, "tile");
     setIsModalOpen(false);
   };
-
+  //Dashboard Name
+  const currentDashboardIndex = globalState.data.currentDashboard;
+  const currentDashboard = globalState.data.dashboards[currentDashboardIndex];
   // Save to local storage
   const saveLocalDashboard = () => {
     const newState = {
@@ -420,7 +422,11 @@ const Dashboard = () => {
   // Event listener to close the dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (selectButtonState.isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        selectButtonState.isOpen &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
         closeDropdown();
       }
     };
@@ -437,75 +443,81 @@ const Dashboard = () => {
   }, [selectButtonState.isOpen]); // Ensure the effect runs only when the dropdown state changes
   return (
     <>
-      <div className="flex justify-end pt-2 pe-3">
-        <button onClick={addDashboard} className="btn btn-primary ml-2">
-          Add Dashboard
-        </button>
-        {editMode ? (
-          <Button
-            className="mr-2 flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out"
-            onClick={handleSaveClick}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                fillRule="evenodd"
-                d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Save
-          </Button>
-        ) : (
-          ""
-        )}
-        {editMode ? (
-          <Button
-            className="flex items-center justify-center bg-transparent border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
-            onClick={handleToggleEditMode}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Cancel
-          </Button>
-        ) : (
-          <div>
+      <div className="flex justify-between items-center p-4">
+      <div className="w-3/12"></div>
+      <h1 className="text-xl font-bold flex-grow text-center w-6/12">
+          {currentDashboard ? currentDashboard.name : "No Dashboard Selected"}
+        </h1>
+
+        <div className="flex justify-end w-3/12">
+          {editMode ? (
+            <>
+              <Button
+                className="mr-2 flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out"
+                onClick={handleSaveClick}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Save
+              </Button>
+            </>
+          ) : (
+            ""
+          )}
+          {editMode ? (
             <Button
+              className="flex items-center justify-center bg-transparent border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
               onClick={handleToggleEditMode}
-              className="flex items-center justify-center bg-transparent border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6 pe-1"
+                fill="currentColor"
+                className="w-5 h-5"
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
+                  fillRule="evenodd"
+                  d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                  clipRule="evenodd"
                 />
               </svg>
-              Edit
+              Cancel
             </Button>
-          </div>
-        )}
+          ) : (
+            <div>
+              <Button
+                onClick={handleToggleEditMode}
+                className="flex items-center justify-center bg-transparent border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6 pe-1"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
+                  />
+                </svg>
+                Edit
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -560,16 +572,25 @@ const Dashboard = () => {
                           {editMode && (
                             <div className="absolute inset-0 bg-black mx-auto bg-opacity-40 hover:bg-opacity-70 border-2 rounded-lg border-gray-600">
                               <div className="flex justify-center items-center h-full text-white">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" />
-</svg>
-
-                                </div>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="w-16 h-16"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
+                                  />
+                                </svg>
+                              </div>
                             </div>
                           )}
                           {editMode ? (
                             <div className="absolute top-0 right-0 p-2">
-
                               {cell.colSpan < 12 && (
                                 <div
                                   onClick={() => extendChart(row.id, cell.id)}
@@ -783,7 +804,10 @@ const Dashboard = () => {
         </button>
 
         {selectButtonState.isOpen && (
-          <div ref={dropdownRef} className="absolute right-0 bottom-20 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div
+            ref={dropdownRef}
+            className="absolute right-0 bottom-20 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+          >
             <div
               className="py-1"
               role="menu"
