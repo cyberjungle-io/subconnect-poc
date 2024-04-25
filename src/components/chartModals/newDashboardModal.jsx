@@ -12,7 +12,7 @@ const NewDashboardModal = ({ onSubmit, closeModal }) => {
     event.stopPropagation();
 };
     return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center" onClick={closeModal}>
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 text-black" onClick={closeModal}>
         <div className="bg-white p-4 rounded-lg shadow-lg"  onClick={handleModalClick}>
           <h2 className="text-lg font-bold mb-4">Create New Dashboard</h2>
           <form onSubmit={handleSubmit}>

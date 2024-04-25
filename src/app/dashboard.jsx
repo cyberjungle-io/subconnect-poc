@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { generateGUID } from "@/lib/utils";
 import ShowChart from "@/components/custom/showChart";
@@ -409,6 +409,32 @@ const Dashboard = () => {
     setGlobalState(newState); // Update global state
     setRows([]); // Since the new dashboard is empty, set rows to an empty array
   };
+  // Ref to track the dropdown element
+  const dropdownRef = useRef(null);
+
+  // Function to close the dropdown
+  const closeDropdown = () => {
+    setSelectButtonState((prevState) => ({ ...prevState, isOpen: false }));
+  };
+
+  // Event listener to close the dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (selectButtonState.isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        closeDropdown();
+      }
+    };
+
+    // Attach the listener
+    if (selectButtonState.isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup the listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [selectButtonState.isOpen]); // Ensure the effect runs only when the dropdown state changes
   return (
     <>
       <div className="flex justify-end pt-2 pe-3">
@@ -757,7 +783,7 @@ const Dashboard = () => {
         </button>
 
         {selectButtonState.isOpen && (
-          <div className="absolute right-0 bottom-20 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div ref={dropdownRef} className="absolute right-0 bottom-20 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div
               className="py-1"
               role="menu"
