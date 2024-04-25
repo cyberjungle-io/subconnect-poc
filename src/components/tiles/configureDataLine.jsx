@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import DOMPurify from "dompurify";
 import { graphArray, fetchValueData } from "@/lib/graphdata";
 
-export default function ConfigureTextLine({ line, index, handleLineUpdate }) {
+export default function ConfigureTable({ line, index, handleLineUpdate }) {
   const [graphQuery, setGraphQuery] = useState(
     graphArray.reduce((acc, item) => {
       if (item.queryType === "value") {

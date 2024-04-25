@@ -3,19 +3,18 @@ import React, { useState, useEffect, use } from "react";
 import { fetchValueData } from "@/lib/graphdata";
 
 export default function ShowDataLine({ line, index }) {
-    const [data, setData] = useState(null);
-    
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     console.log("line", line);
     const fetchData = async () => {
-        console.log("line.value", line.value);
-        const dta = await fetchValueData(line.value);
-        setData(dta);
-        console.log(dta);
-      }
-      fetchData();
-      }, [line]);
+      console.log("line.value", line.value);
+      const dta = await fetchValueData(line.value);
+      setData(dta);
+      console.log(dta);
+    };
+    fetchData();
+  }, [line]);
 
   return (
     <div
@@ -25,10 +24,8 @@ export default function ShowDataLine({ line, index }) {
         fontSize: `${line.label.fontSize}px`,
       }}
     >
-      {line.label.text ? line.label.text : `Data ${index + 1} `}
-      {" "}
-      
-      {data? data : "Loading..."}
+      {line.label.text ? line.label.text : `Data ${index + 1} `}{" "}
+      {data ? data : "Loading..."}
     </div>
   );
 }

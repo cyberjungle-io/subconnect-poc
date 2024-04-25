@@ -26,7 +26,7 @@ export const graphArray = [
     queryType: "time",
     queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
     query: `query {globalStateSnapshots(limit: 1000, orderBy: updatedTime_ASC,where: { updatedTime_gt: "<<datetime>>" }) {averageBlockTime,updatedTime}}`,
-    
+
     owner: "Cyber Jungle",
     basePath: "globalStateSnapshots",
     xAxis: "updatedTime",
@@ -273,7 +273,7 @@ export const graphArray = [
     owner: "Cyber Jungle",
     basePath: "basePoolSnapshots",
     value: "sharePrice",
-    postProcess: [{ multiplyBy: 1 }, { round: 2}],
+    postProcess: [{ multiplyBy: 1 }, { round: 2 }],
     variables: ["pool number"],
   },
   {
@@ -301,7 +301,7 @@ export const graphArray = [
     owner: "Cyber Jungle",
     basePath: "basePoolSnapshots",
     value: "totalValue",
-    postProcess: [{ multiplyBy: 1 }, { round: 0}],
+    postProcess: [{ multiplyBy: 1 }, { round: 0 }],
     variables: ["pool number"],
   },
   {
@@ -332,6 +332,33 @@ export const graphArray = [
     postProcess: [],
     variables: ["pool number"],
   },
+  {
+    id: "20",
+    name: "Pool and Vault Delegation",
+    chain: "Khala",
+    URI: ["https://khala-computation.cyberjungle.io/graphql"],
+    queryType: "table",
+    queryVars: [],
+    query: `{delegations(limit: 100, where: {basePool: {pid_eq: "5294"}}) {cost,shares,value, withdrawalStartTime,withdrawingShares,withdrawingValue,account {identityDisplay,id} basePool {pid,withdrawingValue,withdrawingShares,kind}}}`,
+    owner: "Cyber Jungle",
+    basePath: "delegations",
+    columns: [
+      { Cost: "cost" },
+      { Shares: "shares" },
+      { Value: "value" },
+      { "Withdrawal Start Time": "withdrawalStartTime" },
+      { "Withdrawing Shares": "withdrawingShares" },
+      { "Withdrawing Value": "withdrawingValue" },
+      { "Account Identity": "account.identityDisplay" },
+      { "Account ID": "account.id" },
+      { "Pool ID": "basePool.pid" },
+      { "Pool Kind": "basePool.kind" },
+      { "Pool Withdrawing Value": "basePool.withdrawingValue" },
+      { "Pool Withdrawing Shares": "basePool.withdrawingShares" },
+    ],
+    postProcess: [],
+    variables: ["pool number"],
+  },
 ];
 //apr,commission,cumulativeOwnerRewards,delegatorCount,idleWorkerCount,sharePrice,stakePoolCount,totalValue,updatedTime,workerCount
 export const fetchGraphDataDateSeries = async (element, dateformat, days) => {
@@ -343,7 +370,7 @@ export const fetchGraphDataDateSeries = async (element, dateformat, days) => {
     uri: element.URI[0],
     cache: new InMemoryCache(),
   });
-  
+
   let newquery = element.query.replace("<<datetime>>", dt);
   for (let i = 0; i < element.mappings.length; i++) {
     let map = element.mappings[i];
@@ -406,7 +433,7 @@ export const daysFromNow = (days) => {
 };
 
 export const fetchValueData = async (graphquery) => {
-  console.log("fetchValueData: ",graphquery);
+  console.log("fetchValueData: ", graphquery);
   const client = new ApolloClient({
     uri: graphquery.dataQuery.URI[0],
     cache: new InMemoryCache(),
@@ -425,7 +452,6 @@ export const fetchValueData = async (graphquery) => {
     query: gql(newquery),
   });
 
- 
   //console.log("Data", data[graphquery.basePath][0][graphquery.value]);
   const tdata = postProcess(
     data[graphquery.dataQuery.basePath][0][graphquery.dataQuery.value],
@@ -433,7 +459,33 @@ export const fetchValueData = async (graphquery) => {
   );
   return tdata;
 };
+export const fetchTableData = async (graphquery) => {
+  console.log("fetchTableData: ", graphquery);
+  const client = new ApolloClient({
+    uri: graphquery.dataQuery.URI[0],
+    cache: new InMemoryCache(),
+  });
+  let newquery = graphquery.dataQuery.query;
+  for (let i = 0; i < graphquery.mappings.length; i++) {
+    let map = graphquery.mappings[i];
+    let keys = Object.keys(map);
+    console.log("Map keys: ", keys[0]);
+    let subs = "<<" + keys[0] + ">>";
+    console.log("Subs: ", subs);
+    newquery = newquery.replace(subs, map[keys[0]]);
+  }
+  console.log("New Query: ", newquery);
+  const { data } = await client.query({
+    query: gql(newquery),
+  });
 
+  console.log("Data", data["delegations"]);
+  /* const tdata = postProcess(
+    data[graphquery.dataQuery.basePath][0][graphquery.dataQuery.value],
+    graphquery.dataQuery.postProcess
+  ); */
+  return data[graphquery.dataQuery.basePath];
+};
 function formatDatesInArray(array, property, format) {
   return array.map((item) => {
     const date = moment(item[property]);
@@ -450,7 +502,6 @@ export const fetchElementData = async (elements) => {
         ...item,
         elementId: element.elementId, // Assuming each element has an identifier 'id'
         yAxis: element.yAxis, // Preserving the 'yAxis' property from the element
-        
       }));
     })
   );

@@ -13,9 +13,11 @@ import DOMPurify from "dompurify";
 import ShowTile from "@/components/tiles/showTile";
 import ConfigureTextLine from "@/components/tiles/configureTextLine";
 import ConfigureDataLine from "@/components/tiles/configureDataLine";
+import ConfigureTable from "@/components/tiles/configureTable";
 import { generateGUID } from "@/lib/utils";
 import { setStorageData } from "@/lib/utils"; 
 import { GlobalStateContext } from "@/app/page";
+import { graphArray, fetchValueData } from "@/lib/graphdata";
 
 const Modal = ({ isOpen, onClose, children }) => {
   const globalState = useContext(GlobalStateContext);
@@ -163,7 +165,17 @@ export default function TileEditor() {
     setForm((prevForm) => {
       const newLines = [...prevForm.lines];
       if (newLines[lineIndex]) {
-        if (newValue === "Data") {
+        if (newValue === "Table") {
+          let qry = graphArray.filter((item) => item.queryType === "table");
+          if (!qry) {qry = []}
+          (newLines[lineIndex] = {
+            lineType: "Table",
+            label: { text: "", color: "#000000", fontSize: 16 },
+            value: { id: "", color: "#000000", fontSize: 16, dataQuery: qry[0],columns:[], mappings: [] }, 
+          }),
+            (newLines[lineIndex].label.text = "");
+          console.log("newLines[lineIndex]", newLines[lineIndex]);
+        } else if (newValue === "Data") {
           (newLines[lineIndex] = {
             lineType: "Data",
             label: { text: "", color: "#000000", fontSize: 16 },
@@ -465,6 +477,7 @@ export default function TileEditor() {
                 >
                   <option value="Text">Text</option>
                   <option value="Data">Data</option>
+                  <option value="Table">Table</option>
                   <option value="Video">Video</option>
                   <option value="Image">Image</option>
                 </select>
@@ -485,6 +498,16 @@ export default function TileEditor() {
                     line={line}
                     index={index}
                     handleLineUpdate={handleLineUpdate} // Pass handleLineUpdate as a prop
+                  />
+                ) : (
+                  ""
+                )}
+                {line.lineType === "Table" ? (
+                  <ConfigureTable
+                    key={index}
+                    line={line}
+                    index={index}
+                    handleLineUpdate={handleLineUpdate} 
                   />
                 ) : (
                   ""
