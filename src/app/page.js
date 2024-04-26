@@ -16,6 +16,7 @@ import { setStorageData, getStorageData } from "@/lib/utils";
 const initialState = {
   account_id: null,
   key: null,
+  footerHeight: 0,
   data: {
     tiles: [],
     dashboards: [],
@@ -47,6 +48,7 @@ export default function Home() {
     setIsAccountModalOpen(false);
     //location.reload();
   };
+  
 useEffect(() => {
   console.log("Global State", globalState);
 } ,[globalState]);

@@ -54,7 +54,7 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("chart"); // or 'tile'
   const [currentRowId, setCurrentRowId] = useState(null);
-
+  const [selectButtonBottom, setSelectButtonBottom] = useState(50);
   const [content, setContent] = useState([]);
   const [tileContent, setTileContent] = useState([]);
   const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
@@ -373,44 +373,34 @@ const Dashboard = () => {
   // Adjust the button position based on scroll and window size
   useEffect(() => {
     const adjustButtonPosition = () => {
-      window.requestAnimationFrame(() => {
-        const scrolledFromBottom =
-          document.documentElement.scrollHeight -
-          window.scrollY -
-          window.innerHeight;
-        const newBottom =
-          scrolledFromBottom < 100 ? 100 - scrolledFromBottom : 28;
-        setSelectButtonState((prevState) => ({
-          ...prevState,
-          buttonBottom: newBottom,
-        }));
-      });
+      console.log(`Footer height from global state: ${globalState.footerHeight}`);
+      const viewportHeight = window.innerHeight;
+      const totalPageHeight = document.documentElement.scrollHeight;
+      const scrolledFromBottom = totalPageHeight - window.scrollY - viewportHeight;
+      const footerHeight = globalState.footerHeight || 0; // Default to 0 if not set
+  
+      let newBottom = 50; // Default distance from the bottom
+      if (scrolledFromBottom < (footerHeight + 50)) {
+        newBottom = footerHeight + 30; // Adjust based on footer height
+      }
+  
+      console.log(`Adjusting: scrolledFromBottom=${scrolledFromBottom}, footerHeight=${footerHeight}, newBottom=${newBottom}`);
+  
+      setSelectButtonBottom(newBottom);
     };
-
+  
+    // Trigger adjustment on scroll and resize
     window.addEventListener("scroll", adjustButtonPosition);
     window.addEventListener("resize", adjustButtonPosition);
-
+    adjustButtonPosition(); // Initial adjustment
+  
+    // Cleanup function
     return () => {
       window.removeEventListener("scroll", adjustButtonPosition);
       window.removeEventListener("resize", adjustButtonPosition);
     };
-  }, []);
-  const addDashboard = () => {
-    const newDashboard = {
-      name: `Dashboard ${globalState.data.dashboards.length + 1}`, // Simple naming strategy
-      dashboard: [], // Start with an empty dashboard configuration
-    };
-    const newState = {
-      ...globalState,
-      data: {
-        ...globalState.data,
-        dashboards: [...globalState.data.dashboards, newDashboard],
-        currentDashboard: globalState.data.dashboards.length, // Set the newly added dashboard as the current one
-      },
-    };
-    setGlobalState(newState); // Update global state
-    setRows([]); // Since the new dashboard is empty, set rows to an empty array
-  };
+  }, [globalState.footerHeight]); // Dependency on the footer height from global state
+  
   // Ref to track the dropdown element
   const dropdownRef = useRef(null);
 

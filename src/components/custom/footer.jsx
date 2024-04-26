@@ -1,8 +1,32 @@
-import React from "react";
+import React, { useContext, useEffect, useRef } from 'react';
+import { GlobalStateContext } from '@/app/page';
 
 const Footer = () => {
+  const footerRef = useRef(null);
+  const { setGlobalState } = useContext(GlobalStateContext);
+  useEffect(() => {
+    const updateFooterHeight = () => {
+      if (footerRef.current) {
+        const height = footerRef.current.getBoundingClientRect().height;
+        setGlobalState(prevState => ({
+          ...prevState,
+          footerHeight: height
+        }));
+        console.log(`Updating footer height to: ${height}`);
+      }
+    };
+
+    // Make sure the footer height is updated after component mounts and on window resize
+    window.addEventListener('resize', updateFooterHeight);
+    updateFooterHeight();  // Initial update on mount
+
+    return () => {
+      window.removeEventListener('resize', updateFooterHeight);
+      
+    };
+  }, [setGlobalState]);
   return (
-    <footer className="bg-gray-800 text-white mt-8">
+    <footer ref={footerRef} className="bg-gray-800 text-white mt-8">
       <div className="container mx-auto px-6 py-4">
         <div className="flex flex-wrap justify-between items-center">
           <div className="flex flex-col md:flex-row md:items-center">
