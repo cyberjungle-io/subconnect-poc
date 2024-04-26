@@ -29,6 +29,7 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
       value: { ...newline.value, columns: newColumns },
     });
   };
+  
   const handleDropdownChange = (value, idx) => {
     const newColumns = [...newline.value.columns];
     const columnKey = newline.value.dataQuery.columns.find(
@@ -64,6 +65,16 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
       value: { ...newline.value, columns: newColumns },
     });
   };
+  const handleInputChangeMappings = (value, idx, field) => {
+    const newMappings = [...newline.value.mappings];
+    const updatedMapping = { ...newMappings[idx], [Object.keys(newMappings[idx])[0]]: value };
+    newMappings[idx] = updatedMapping;
+    setNewLine({
+      ...newline,
+      value: { ...newline.value, mappings: newMappings }
+    });
+  };
+  
   const handleGraphElementChange = (index, field) => async (event) => {
     console.log("field", field);
     console.log("event", event.target.value);
@@ -75,18 +86,11 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
     for (let i = 0; i < dta.variables.length; i++) {
       let v = dta.variables[i];
       
-      const prmpt = `please enter ${v}`;
-      let userInput = prompt(prmpt, "");
-      if (userInput == null || userInput == "") {
-        alert("User cancelled the prompt.");
-      } else {
         
         let m = {  }
-        m[dta.variables[i]] = userInput;
+        m[dta.variables[i]] = "";
         newmappings.push(m);
-        //let rplc = "<<" + selectedObject.variables[i] + ">>";
-        //qry = qry.replace(rplc, userInput);
-      }
+        
       console.log("mappings", newmappings);
     }
   };
@@ -110,6 +114,17 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
             </option>
           ))}
       </select>
+      {newline.value.mappings.map((item, idx) => (
+        <>
+        <Label key={idx}>{Object.keys(item)[0]}</Label>
+        <Input
+            value={item[Object.keys(item)[0]]}
+            onChange={(e) =>
+              handleInputChangeMappings(e.target.value, idx, "text")
+            }
+          /></>
+        ))}
+
       </div>
     <div className="flex flex-col">
       {newline.value.columns.map((item, idx) => (

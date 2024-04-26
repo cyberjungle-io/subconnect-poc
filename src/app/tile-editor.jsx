@@ -167,11 +167,25 @@ export default function TileEditor() {
       if (newLines[lineIndex]) {
         if (newValue === "Table") {
           let qry = graphArray.filter((item) => item.queryType === "table");
+          console.log("qry", qry);
+          let newmappings = [];
+          for (let i = 0; i < qry[0].variables.length; i++) {
+            
+            
+              
+              let m = {  }
+              m[qry[0].variables[i]] = "";
+              newmappings.push(m);
+              
+            console.log("mappings", newmappings);
+          }
+
+
           if (!qry) {qry = []}
           (newLines[lineIndex] = {
             lineType: "Table",
             label: { text: "", color: "#000000", fontSize: 16 },
-            value: { id: "", color: "#000000", fontSize: 16, dataQuery: qry[0],columns:[], mappings: [] }, 
+            value: { id: "", color: "#000000", fontSize: 16, dataQuery: qry[0],columns:[], mappings: newmappings }, 
           }),
             (newLines[lineIndex].label.text = "");
           console.log("newLines[lineIndex]", newLines[lineIndex]);

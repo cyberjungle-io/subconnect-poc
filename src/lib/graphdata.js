@@ -339,7 +339,7 @@ export const graphArray = [
     URI: ["https://khala-computation.cyberjungle.io/graphql"],
     queryType: "table",
     queryVars: [],
-    query: `{delegations(limit: 100, where: {basePool: {pid_eq: "5294"}}) {cost,shares,value, withdrawalStartTime,withdrawingShares,withdrawingValue,account {identityDisplay,id} basePool {pid,withdrawingValue,withdrawingShares,kind}}}`,
+    query: `{delegations(limit: 100, where: {basePool: {pid_eq: "<<pool number>>"}}) {cost,shares,value, withdrawalStartTime,withdrawingShares,withdrawingValue,account {identityDisplay,id} basePool {pid,withdrawingValue,withdrawingShares,kind}}}`,
     owner: "Cyber Jungle",
     basePath: "delegations",
     columns: [
