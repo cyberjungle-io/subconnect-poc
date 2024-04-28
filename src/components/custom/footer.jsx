@@ -3,16 +3,18 @@ import { GlobalStateContext } from '@/app/page';
 
 const Footer = () => {
   const footerRef = useRef(null);
-  const { setGlobalState } = useContext(GlobalStateContext);
+  const { globalState, setGlobalState } = useContext(GlobalStateContext);
   useEffect(() => {
     const updateFooterHeight = () => {
       if (footerRef.current) {
         const height = footerRef.current.getBoundingClientRect().height;
-        setGlobalState(prevState => ({
-          ...prevState,
+        console.log(`******Footer height: ${height}`);
+        const updatedGlobalState = {
+          ...globalState,
           footerHeight: height
-        }));
-        console.log(`Updating footer height to: ${height}`);
+        };
+        setGlobalState(updatedGlobalState);
+        console.log("Updated Global State", updatedGlobalState);
       }
     };
 
@@ -24,7 +26,8 @@ const Footer = () => {
       window.removeEventListener('resize', updateFooterHeight);
       
     };
-  }, [setGlobalState]);
+  }, []);
+  useEffect(() => { console.log(globalState); }, [globalState]);
   return (
     <footer ref={footerRef} className="bg-gray-800 text-white mt-8">
       <div className="container mx-auto px-6 py-4">

@@ -16,7 +16,7 @@ import { setStorageData, getStorageData } from "@/lib/utils";
 const initialState = {
   account_id: null,
   key: null,
-  footerHeight: 0,
+  
   data: {
     tiles: [],
     dashboards: [],
@@ -43,15 +43,13 @@ export default function Home() {
     console.log(globalState);
     setGlobalState(initialState)
     globalState["account_id"] = newacct.address;
-    getStorageData(newacct.address);
+    //getStorageData(newacct.address);
     setSelectedAccount(newacct);
     setIsAccountModalOpen(false);
-    //location.reload();
+    location.reload();
   };
   
-useEffect(() => {
-  console.log("Global State", globalState);
-} ,[globalState]);
+
   return (
     <GlobalStateContext.Provider value={{ globalState, setGlobalState }}>
       {isAccountModalOpen && (
