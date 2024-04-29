@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState,useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Card,
   CardContent,
@@ -15,7 +15,7 @@ import ConfigureTextLine from "@/components/tiles/configureTextLine";
 import ConfigureDataLine from "@/components/tiles/configureDataLine";
 import ConfigureTable from "@/components/tiles/configureTable";
 import { generateGUID } from "@/lib/utils";
-import { setStorageData } from "@/lib/utils"; 
+import { setStorageData } from "@/lib/utils";
 import { GlobalStateContext } from "@/app/page";
 import { graphArray, fetchValueData } from "@/lib/graphdata";
 
@@ -65,6 +65,7 @@ export default function TileEditor() {
   });
   const [content, setContent] = useState([]);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState("tab1");
 
   const handleInputChange = (lineIndex, value) => {
     console.log("lineIndex", lineIndex);
@@ -170,22 +171,27 @@ export default function TileEditor() {
           console.log("qry", qry);
           let newmappings = [];
           for (let i = 0; i < qry[0].variables.length; i++) {
-            
-            
-              
-              let m = {  }
-              m[qry[0].variables[i]] = "";
-              newmappings.push(m);
-              
+            let m = {};
+            m[qry[0].variables[i]] = "";
+            newmappings.push(m);
+
             console.log("mappings", newmappings);
           }
 
-
-          if (!qry) {qry = []}
+          if (!qry) {
+            qry = [];
+          }
           (newLines[lineIndex] = {
             lineType: "Table",
             label: { text: "", color: "#000000", fontSize: 16 },
-            value: { id: "", color: "#000000", fontSize: 16, dataQuery: qry[0],columns:[], mappings: newmappings }, 
+            value: {
+              id: "",
+              color: "#000000",
+              fontSize: 16,
+              dataQuery: qry[0],
+              columns: [],
+              mappings: newmappings,
+            },
           }),
             (newLines[lineIndex].label.text = "");
           console.log("newLines[lineIndex]", newLines[lineIndex]);
@@ -193,7 +199,13 @@ export default function TileEditor() {
           (newLines[lineIndex] = {
             lineType: "Data",
             label: { text: "", color: "#000000", fontSize: 16 },
-            value: { id: "", color: "#000000", fontSize: 16, dataQuery: {}, mappings: [] }, 
+            value: {
+              id: "",
+              color: "#000000",
+              fontSize: 16,
+              dataQuery: {},
+              mappings: [],
+            },
           }),
             (newLines[lineIndex].label.text = "");
           console.log("newLines[lineIndex]", newLines[lineIndex]);
@@ -237,14 +249,12 @@ export default function TileEditor() {
         return;
       }
 
-      
       setContent(globalState.data.tiles);
       setCurrentContentIndex(0);
       setForm(globalState.data.tiles[0].form);
     } catch (error) {
       console.error("Error getting data:", error);
     }
-    
   };
   const savePreferences = () => {
     console.log("savePreferences");
@@ -259,13 +269,13 @@ export default function TileEditor() {
     console.log(JSON.stringify(tcontent));
     let newContent = [...content];
     newContent[currentContentIndex] = tcontent;
-    
+
     const newState = {
       ...globalState,
       data: {
-      ...globalState.data,
-      tiles: newContent
-      }
+        ...globalState.data,
+        tiles: newContent,
+      },
     };
     console.log("newState: ", newState);
     setGlobalState(newState);
@@ -274,7 +284,7 @@ export default function TileEditor() {
   const handleSelectContent = (selectedIndex) => {
     setCurrentContentIndex(selectedIndex);
     setForm(content[selectedIndex].form);
-    
+
     setIsModalOpen(false); // Close the modal
   };
   const handleDeleteContent = (indexToDelete) => {
@@ -300,13 +310,12 @@ export default function TileEditor() {
       ],
       icon: { text: "", iconSize: 16 },
     }); // clear the form
-    
+
     newContent.push({ id: generateGUID(), form: form });
     setContent(newContent);
     setCurrentContentIndex(content.length);
     console.log(content);
-
-  }
+  };
   useEffect(() => {
     console.log("globalState: ", globalState);
   }, [globalState]);
@@ -347,7 +356,236 @@ export default function TileEditor() {
       </Modal>
       <main>
         <ShowTile key={JSON.stringify(form)} form={form} />
+        
+        
+        <section className="">
+          <div className="flex flex-col items-center justify-center min-h-screen w-full px-0">
+            {/* Tab Navigation */}
+            <div className="w-full">
+            <div className="bg-white">
+              {/* Tab Headers */}
+              <div className="flex border-b">
+                <button
+                  onClick={() => setActiveTab("tab1")}
+                  className={`flex-1 py-3 px-6 text-center cursor-pointer ${
+                    activeTab === "tab1"
+                      ? "text-blue-500 border-b-2 border-blue-500"
+                      : "text-gray-600 hover:text-blue-500"
+                  }`}
+                >
+                  Styles
+                </button>
+                <button
+                  onClick={() => setActiveTab("tab2")}
+                  className={`flex-1 py-3 px-6 text-center cursor-pointer ${
+                    activeTab === "tab2"
+                      ? "text-blue-500 border-b-2 border-blue-500"
+                      : "text-gray-600 hover:text-blue-500"
+                  }`}
+                >
+                  Data
+                </button>
+              </div>
+              {/* Tab Content */}
+              <div className="p-5">
+                {activeTab === "tab1" ? (
+                  <div >
+                    
+                    <h3>Title</h3>
+          <div className="flex">
+            <Input
+              name="title"
+              placeholder="Title"
+              value={form.title.text}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              className="w-80 me-4"
+            />
+            <Input
+              type="color"
+              value={form.title.color}
+              onChange={(e) => handleColorChange("title", e.target.value)}
+              className="w-15 border-none"
+            />
+            <div className="flex items-center ms-4">
+              <button
+                onClick={() =>
+                  handleFontSizeChange("title", form.title.fontSize - 1)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6 "
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 12h14"
+                  />
+                </svg>
+              </button>
+              <input
+                type="text"
+                className="mx-2 text-center w-12"
+                value={form.title.fontSize}
+                onChange={(e) => {
+                  if (!isNaN(e.target.value)) {
+                    handleFontSizeChange("title", e.target.value);
+                  }
+                }}
+              />
+              <button
+                onClick={() =>
+                  handleFontSizeChange("title", form.title.fontSize + 1)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <h3>Icon</h3>
+          <div className="flex">
+            <Input
+              name="icon"
+              type="textarea"
+              placeholder="Paste SVG"
+              value={form.icon.text}
+              onChange={(e) => handleInputChange("icon", e.target.value)}
+              className="w-2/3 me-4"
+            />
+            <div className="flex items-center">
+              <button
+                onClick={() =>
+                  handleIconSizeChange("icon", form.icon.iconSize - 1)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6 "
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 12h14"
+                  />
+                </svg>
+              </button>
+              <input
+                type="text"
+                className="mx-2 text-center w-12"
+                value={form.icon.iconSize}
+                onChange={(e) => {
+                  if (!isNaN(e.target.value)) {
+                    handleIconSizeChange("icon", e.target.value);
+                  }
+                }}
+              />
+              <button
+                onClick={() =>
+                  handleIconSizeChange("icon", form.icon.iconSize + 1)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+                    
+                    
+                  </div>
+                ) : (
+                  <div>
+                     <div className="space-y-5 mt-3">
+            {form.lines.map((line, index) => (
+              <div key={index}>
+                <select
+                  name={`lineType${index}`}
+                  value={line.lineType}
+                  onChange={(e) => handleLineTypeChange(index, e.target.value)}
+                  className="w-1/5 mb-2 py-2 px-3 text-base border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mr-2"
+                >
+                  <option value="Text">Text</option>
+                  <option value="Data">Data</option>
+                  <option value="Table">Table</option>
+                  <option value="Video">Video</option>
+                  <option value="Image">Image</option>
+                </select>
+                {line.lineType === "Text" ? (
+                  <ConfigureTextLine
+                    key={index}
+                    line={line}
+                    index={index}
+                    handleLineUpdate={handleLineUpdate} // Pass handleLineUpdate as a prop
+                  />
+                ) : (
+                  ""
+                )}
 
+                {line.lineType === "Data" ? (
+                  <ConfigureDataLine
+                    key={index}
+                    line={line}
+                    index={index}
+                    handleLineUpdate={handleLineUpdate} // Pass handleLineUpdate as a prop
+                  />
+                ) : (
+                  ""
+                )}
+                {line.lineType === "Table" ? (
+                  <ConfigureTable
+                    key={index}
+                    line={line}
+                    index={index}
+                    handleLineUpdate={handleLineUpdate}
+                  />
+                ) : (
+                  ""
+                )}
+              </div>
+            ))}
+          </div>
+
+          <Button className="mt-3" variant="outline" onClick={addLine}>
+            Add Line
+          </Button>
+                  </div>
+                )}
+              </div>
+            </div></div>
+          </div>
+        </section>
         <section className="ms-4">
           <h3>Title</h3>
           <div className="flex">
@@ -521,7 +759,7 @@ export default function TileEditor() {
                     key={index}
                     line={line}
                     index={index}
-                    handleLineUpdate={handleLineUpdate} 
+                    handleLineUpdate={handleLineUpdate}
                   />
                 ) : (
                   ""

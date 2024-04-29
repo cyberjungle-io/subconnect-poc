@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext} from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { generateGUID } from "@/lib/utils";
 import ShowChart from "@/components/custom/showChart";
@@ -54,7 +54,7 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("chart"); // or 'tile'
   const [currentRowId, setCurrentRowId] = useState(null);
-  const [selectButtonBottom, setSelectButtonBottom] = useState(50);
+  
   const [content, setContent] = useState([]);
   const [tileContent, setTileContent] = useState([]);
   const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
@@ -370,39 +370,7 @@ const Dashboard = () => {
     }));
   };
 
-  // Adjust the button position based on scroll and window size
-  useEffect(() => {
-    const adjustButtonPosition = () => {
-      console.log(`Footer height from global state: ${globalState.footerHeight}`);
-      const viewportHeight = window.innerHeight;
-      const totalPageHeight = document.documentElement.scrollHeight;
-      const scrolledFromBottom = totalPageHeight - window.scrollY - viewportHeight;
-      const footerHeight = globalState.footerHeight || 0; // Default to 0 if not set
   
-      let newBottom = 50; // Default distance from the bottom
-      if (scrolledFromBottom < (footerHeight + 50)) {
-        newBottom = footerHeight + 30; // Adjust based on footer height
-      }
-  
-      console.log(`Adjusting: scrolledFromBottom=${scrolledFromBottom}, footerHeight=${footerHeight}, newBottom=${newBottom}`);
-  
-      setSelectButtonBottom(newBottom);
-    };
-  
-    // Trigger adjustment on scroll and resize
-    window.addEventListener("scroll", adjustButtonPosition);
-    window.addEventListener("resize", adjustButtonPosition);
-    adjustButtonPosition(); // Initial adjustment
-  
-    // Cleanup function
-    return () => {
-      window.removeEventListener("scroll", adjustButtonPosition);
-      window.removeEventListener("resize", adjustButtonPosition);
-    };
-  }, [globalState.footerHeight]); // Dependency on the footer height from global state
-  
-  // Ref to track the dropdown element
-  const dropdownRef = useRef(null);
 
   // Function to close the dropdown
   const closeDropdown = () => {
@@ -750,7 +718,7 @@ const Dashboard = () => {
       <div
         style={{
           position: "fixed",
-          bottom: `${selectButtonState.buttonBottom}px`,
+          bottom: "70px",
           right: "10px",
           zIndex: 50,
         }}
