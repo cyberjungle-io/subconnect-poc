@@ -143,7 +143,14 @@ const Dashboard = () => {
             },
           };
         }
-        setGlobalState(gs);
+        const updatedGlobalState = {
+          ...globalState, // Preserve all existing state
+          account_id: gs.account_id, // Update account_id
+          key: gs.key,              // Update key
+          data: gs.data          // Update data
+        };
+        console.log("--------Updated Global State:", updatedGlobalState);
+        setGlobalState(updatedGlobalState);
         setContent(gs.data.charts);
         console.log("charts:", gs.data.charts);
         setTileContent(gs.data.tiles);

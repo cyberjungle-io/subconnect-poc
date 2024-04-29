@@ -9,6 +9,7 @@ export const GlobalStateProvider = ({ children }) => {
   const [globalState, setGlobalState] = useState({
     account_id: null,
     key: null,
+    footerHeight: 0,
     dashboards: [
       {
         name: "Main",
