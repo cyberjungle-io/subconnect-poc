@@ -65,7 +65,7 @@ export default function Home() {
           setIsAccountModalOpen={setIsAccountModalOpen}
           accountName={selectedAccount.name}
         />
-        <main className="flex-grow">
+        <main className="flex-grow ">
           {page === "chart" && <ChartEditor />}
           {page === "dashboard" && <Dashboard />}
           {page === "tileEditor" && <TileEditor />}

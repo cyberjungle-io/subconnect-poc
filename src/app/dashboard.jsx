@@ -751,7 +751,7 @@ const Dashboard = () => {
 
         {selectButtonState.isOpen && (
           <div
-            ref={dropdownRef}
+           
             className="absolute right-0 bottom-20 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
           >
             <div

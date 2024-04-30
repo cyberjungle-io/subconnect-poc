@@ -321,6 +321,7 @@ export default function TileEditor() {
   }, [globalState]);
   return (
     <>
+    <div className="bg-white">
       <div className="flex justify-between items-center p-4 mt-2 rounded-lg ">
   <div className="flex space-x-2">
     <Button className="flex items-center justify-center bg-transparent border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out" onClick={() => setIsModalOpen(true)}>
@@ -370,8 +371,9 @@ export default function TileEditor() {
         </ul>
       </Modal>
       <main>
+        <div className=" bg-gray-100">
         <ShowTile key={JSON.stringify(form)} form={form} />
-        
+        </div>
         
         <section className="mt-6">
           <div className="flex flex-col items-center justify-center w-full px-0">
@@ -603,6 +605,6 @@ export default function TileEditor() {
         </section>
  
       </main>
-    </>
+    </div></>
   );
 }

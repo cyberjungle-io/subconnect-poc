@@ -149,6 +149,7 @@ const ChartEditor = () => {
       dataKey: "",
       opacity: 1,
       seriesText: "New Series",
+
     },
   ]);
 
@@ -729,8 +730,10 @@ useEffect(() => {
                 {form.chart.showXAxis && (
                   <XAxis
                     dataKey="updatedTime"
-                    label={form.chart.xAxisLabel}
-                    tick={{ fontSize: form.axis.xAxisFontSize }}
+                    tickFormatter={(tick) => new Date(tick).toLocaleDateString()}
+                    tick={{ fill: 'gray', fontSize: 15, angle: -45 }}
+                    //label={form.chart.xAxisLabel}
+                    //tick={{ fontSize: form.axis.xAxisFontSize }}
                   />
                 )}
                 {form.chart.showYAxis && (
@@ -767,8 +770,9 @@ useEffect(() => {
                       key={index}
                       name={element.seriesText}
                       dataKey={dk}
-                      fill={element.color}
+                      fill= {false}//{element.color}
                       fillOpacity={element.opacity}
+                      dot={false}
                     />
                   );
                 })}
