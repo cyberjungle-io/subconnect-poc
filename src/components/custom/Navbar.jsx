@@ -49,7 +49,7 @@ const Navbar = ({
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Hamburger button */}
-          <div className="flex">
+          <div className="flex w-1/5">
             <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -81,9 +81,9 @@ const Navbar = ({
           </div>
 
           {/* Wallet connect button */}
-          <div className="flex justify-right">
+          <div className="flex justify-end w-1/5">
             <button
-              className="bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded-md"
+              className="flex items-center justify-center bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-800 py-2 px-4 rounded transition duration-150 ease-in-out"
               onClick={() => setIsAccountModalOpen(true)}
             >
               {accountName ? `${accountName}` : "Connect Wallet"}

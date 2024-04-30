@@ -321,9 +321,24 @@ export default function TileEditor() {
   }, [globalState]);
   return (
     <>
-      <Button onClick={handleSaveClick}>Save</Button>
-      <Button onClick={handleNewClick}>New</Button>
-      <Button onClick={() => setIsModalOpen(true)}>Select Content</Button>
+      <div className="flex justify-between items-center p-4 mt-2 rounded-lg ">
+  <div className="flex space-x-2">
+    <Button className="flex items-center justify-center bg-transparent border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out" onClick={() => setIsModalOpen(true)}>
+      Select Content
+    </Button>
+    <Button className="flex items-center justify-center bg-transparent border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out" onClick={handleNewClick}>
+      New
+    </Button>
+  </div>
+  <div>
+    <Button className="flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out" onClick={handleSaveClick}>
+      Save
+    </Button>
+  </div>
+</div>
+
+
+
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <ul>
           {content.map((item, index) => (
@@ -358,8 +373,8 @@ export default function TileEditor() {
         <ShowTile key={JSON.stringify(form)} form={form} />
         
         
-        <section className="">
-          <div className="flex flex-col items-center justify-center min-h-screen w-full px-0">
+        <section className="mt-6">
+          <div className="flex flex-col items-center justify-center w-full px-0">
             {/* Tab Navigation */}
             <div className="w-full">
             <div className="bg-white">
