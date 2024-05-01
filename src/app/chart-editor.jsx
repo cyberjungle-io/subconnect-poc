@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect,useContext, use } from "react";
+import React, { useState, useEffect, useContext, use } from "react";
 import { ApolloClient, InMemoryCache, gql, useQuery } from "@apollo/client";
 import { GlobalStateContext } from "@/app/page";
 
@@ -48,7 +48,7 @@ import {
   fetchElementData,
 } from "@/lib/graphdata";
 import { generateGUID } from "@/lib/utils";
-import { setStorageData } from '@/lib/utils.js';
+import { setStorageData } from "@/lib/utils.js";
 
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
@@ -97,7 +97,7 @@ const ChartEditor = () => {
   // Add state for the form
 
   const fetchData = async (elementsArray) => {
-    console.log("fetchData: " + JSON.stringify(elementsArray))
+    console.log("fetchData: " + JSON.stringify(elementsArray));
     const dta = await fetchElementData(elementsArray);
     setData(dta);
     console.log(dta);
@@ -149,7 +149,6 @@ const ChartEditor = () => {
       dataKey: "",
       opacity: 1,
       seriesText: "New Series",
-
     },
   ]);
 
@@ -227,14 +226,14 @@ const ChartEditor = () => {
     //input alert a string
     for (let i = 0; i < selectedObject.variables.length; i++) {
       let v = selectedObject.variables[i];
-      
+
       const prmpt = `please enter ${v}`;
       let userInput = prompt(prmpt, "");
       if (userInput == null || userInput == "") {
         alert("User cancelled the prompt.");
       } else {
         seriesText = userInput;
-        let m = {  }
+        let m = {};
         m[selectedObject.variables[i]] = userInput;
         mappings.push(m);
         //let rplc = "<<" + selectedObject.variables[i] + ">>";
@@ -336,7 +335,7 @@ const ChartEditor = () => {
       : null;
   }
   const getLocalStorage = () => {
-    try{
+    try {
       setContent(globalState.data.charts);
       if (globalState.data.charts.length === 0) {
         return;
@@ -349,9 +348,9 @@ const ChartEditor = () => {
       console.error("Error getting data:", error);
     }
   };
-useEffect(() => {
-  console.log("globalState: ", globalState);
-}, [globalState]);
+  useEffect(() => {
+    console.log("globalState: ", globalState);
+  }, [globalState]);
   // Save to local storage
   const saveChartPreferences = () => {
     console.log("saveChartPreferencesss");
@@ -368,22 +367,16 @@ useEffect(() => {
     newContent[currentContentIndex] = tcontent;
     setContent(newContent);
 
-
-    
-    
     const newState = {
       ...globalState,
       data: {
-      ...globalState.data,
-      charts: newContent
-      }
+        ...globalState.data,
+        charts: newContent,
+      },
     };
     console.log("newState: ", newState);
     setGlobalState(newState);
     setStorageData(newState);
-    
-    
-    
   };
   const handleDeleteContent = (indexToDelete) => {
     const newContent = content.filter((_, index) => index !== indexToDelete);
@@ -664,20 +657,30 @@ useEffect(() => {
   };
   return (
     <>
-      <Button onClick={handleSaveClick} className="mr-2 flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out"><svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                fillRule="evenodd"
-                d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z"
-                clipRule="evenodd"
-              />
-            </svg> Save</Button>
-      <Button onClick={handleNewClick}>New</Button>
-      <Button onClick={() => setIsModalOpen(true)}>Select Content</Button>
+      <div className="flex justify-between items-center p-4 mt-2 rounded-lg ">
+        <div className="flex space-x-2">
+          <Button
+            className="flex items-center justify-center bg-transparent border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Select Content
+          </Button>
+          <Button
+            className="flex items-center justify-center bg-transparent border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
+            onClick={handleNewClick}
+          >
+            New
+          </Button>
+        </div>
+        <div>
+          <Button
+            className="flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out"
+            onClick={handleSaveClick}
+          >
+            Save
+          </Button>
+        </div>
+      </div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <ul>
           {content.map((item, index) => (
@@ -730,8 +733,10 @@ useEffect(() => {
                 {form.chart.showXAxis && (
                   <XAxis
                     dataKey="updatedTime"
-                    tickFormatter={(tick) => new Date(tick).toLocaleDateString()}
-                    tick={{ fill: 'gray', fontSize: 15, angle: -45 }}
+                    tickFormatter={(tick) =>
+                      new Date(tick).toLocaleDateString()
+                    }
+                    tick={{ fill: "gray", fontSize: 15, angle: -45 }}
                     //label={form.chart.xAxisLabel}
                     //tick={{ fontSize: form.axis.xAxisFontSize }}
                   />
@@ -770,7 +775,7 @@ useEffect(() => {
                       key={index}
                       name={element.seriesText}
                       dataKey={dk}
-                      fill= {false}//{element.color}
+                      fill={false} //{element.color}
                       fillOpacity={element.opacity}
                       dot={false}
                     />
@@ -781,11 +786,6 @@ useEffect(() => {
           </CardContent>
         </Card>
       </section>
-
-
-
-
-
 
       <section className="ps-5 pt-5 space-y-4 bg-white">
         <div>

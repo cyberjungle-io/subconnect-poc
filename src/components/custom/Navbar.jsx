@@ -99,7 +99,7 @@ const Navbar = ({
             isOpen ? "translate-x-0" : "translate-x-full"
           } transition-transform duration-300 ease-in-out z-30`}
         >
-          <div className="flex justify-end">
+          <div className="flex justify-end ">
             <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"

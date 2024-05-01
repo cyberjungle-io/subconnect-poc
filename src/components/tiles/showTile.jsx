@@ -15,10 +15,11 @@ import DOMPurify from "dompurify";
 
 export default function ShowTile(param) {
   const [form, setForm] = useState(param.form);
+  
   return (
     <>
-      <section className="flex justify-center ">
-        <Card className="w-[350px]">
+      <section className="flex justify-center w-full">
+        <Card className="w-full">
           <CardHeader>
             <CardTitle className="flex flex-row">
               <div

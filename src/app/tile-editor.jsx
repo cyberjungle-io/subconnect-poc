@@ -55,6 +55,7 @@ const Modal = ({ isOpen, onClose, children }) => {
 export default function TileEditor() {
   const { globalState, setGlobalState } = useContext(GlobalStateContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tileWidth, setTileWidth] = useState(2);
   const [form, setForm] = useState({
     title: { text: "", color: "#000000", fontSize: 16 },
     lines: [
@@ -319,9 +320,21 @@ export default function TileEditor() {
   useEffect(() => {
     console.log("globalState: ", globalState);
   }, [globalState]);
+
+//Customize width of tile in editor
+const increaseWidth = () => {
+  setTileWidth(prevWidth => (prevWidth < 10 ? prevWidth + 2 : prevWidth));
+};
+
+const decreaseWidth = () => {
+        setTileWidth(prevWidth => (prevWidth > 2 ? prevWidth - 2 : prevWidth));
+    };
+
+const tileClass = `w-${tileWidth}/12`;
+
   return (
     <>
-    <div className="bg-white">
+    <div className="bg-gray-100">
       <div className="flex justify-between items-center p-4 mt-2 rounded-lg ">
   <div className="flex space-x-2">
     <Button className="flex items-center justify-center bg-transparent border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out" onClick={() => setIsModalOpen(true)}>
@@ -371,8 +384,25 @@ export default function TileEditor() {
         </ul>
       </Modal>
       <main>
-        <div className=" bg-gray-100">
-        <ShowTile key={JSON.stringify(form)} form={form} />
+      <div className="flex justify-center relative">
+            <div className={tileClass + "  relative"}>
+                <ShowTile key={JSON.stringify(form)} form={form} />
+                <div className="absolute inset-0 flex justify-between items-center px-3 py-2 opacity-0 hover:opacity-100 hover:border-2 rounded-lg hover:border-gray-600 bg-black bg-opacity-40 transition-opacity duration-300">
+                <div className="absolute top-0 right-0 p-2">
+                    
+                    <div onClick={increaseWidth} disabled={tileWidth >= 12} className="text-white hover:text-green-700 font-bold py-1 px-2 rounded">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-8 h-8">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                        </svg>
+                    </div>
+                    <div onClick={decreaseWidth} disabled={tileWidth <= 2} className="text-white hover:text-red-700 font-bold py-1 px-2 rounded">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-8 h-8">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14"/>
+                        </svg>
+                    </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <section className="mt-6">
