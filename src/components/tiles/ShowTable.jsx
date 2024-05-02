@@ -40,15 +40,10 @@ export default function ShowTable({ line, index }) {
     }
   };
   return (
-    <div
-      key={index}
-      style={{
-        color: line.label.color,
-        fontSize: `${line.label.fontSize}px`,
-      }}
-    >
+    <div key={index} className={`text-${line.label.color} text-[${line.label.fontSize}px] overflow-hidden`}>
       {data ? (
-        <table>
+        <div className="overflow-y-auto max-h-120">
+        <table className="">
           <thead>
             <tr>
               {line.value.columns.map((column, idx) => (
@@ -72,6 +67,7 @@ export default function ShowTable({ line, index }) {
             ))}
           </tbody>
         </table>
+        </div>
       ) : (
         <div>Loading...</div>
       )}
