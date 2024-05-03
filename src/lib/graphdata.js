@@ -381,6 +381,50 @@ export const graphArray = [
     postProcess: [{"multiplyBy": 100}, {"round": 2}],
     variables: ["pool number"],
   },
+  {
+    id: "22",
+    name: "Khala Pool or Vault Delegator Count",
+    chain: "Khala",
+    URI: ["https://khala-computation.cyberjungle.io/graphql"],
+    queryType: "time",
+    queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
+    query: `
+                query {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                      updatedTime
+                      delegatorCount
+                    }
+                  }
+            `,
+    owner: "Cyber Jungle",
+    basePath: "basePoolSnapshots",
+    xAxis: "updatedTime",
+    yAxis: "delegatorCount",
+    postProcess: [{}, {"round": 2}],
+    variables: ["pool number"],
+  },
+  {
+    id: "21",
+    name: "Khala Pool or Vault Commission",
+    chain: "Khala",
+    URI: ["https://khala-computation.cyberjungle.io/graphql"],
+    queryType: "time",
+    queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
+    query: `
+                query {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                      updatedTime
+                      commission
+                    }
+                  }
+            `,
+    owner: "Cyber Jungle",
+    basePath: "basePoolSnapshots",
+    xAxis: "updatedTime",
+    yAxis: "commission",
+    postProcess: [{"multiplyBy": 100}, {"round": 2}],
+    variables: ["pool number"],
+  },
 ];
 //apr,commission,cumulativeOwnerRewards,delegatorCount,idleWorkerCount,sharePrice,stakePoolCount,totalValue,updatedTime,workerCount
 export const fetchGraphDataDateSeries = async (element, dateformat, days) => {
