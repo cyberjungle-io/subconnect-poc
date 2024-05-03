@@ -1,46 +1,62 @@
 // polkadotExtension.js
-import { web3Enable, web3Accounts, web3FromSource } from '@polkadot/extension-dapp';
-import { signatureVerify } from '@polkadot/util-crypto';
+import {
+  web3Enable,
+  web3Accounts,
+  web3FromAddress
+} from "@polkadot/extension-dapp";
 
-function verifySignature(message, signature, address) {
-    const { isValid } = signatureVerify(message, signature, address);
-    return isValid;
+import { signatureVerify, decodeAddress } from "@polkadot/util-crypto";
+import { u8aToHex, stringToU8a, hexToU8a } from "@polkadot/util";
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+
+
+export function verifySignature(message, signature, address) {
+  const { isValid } = signatureVerify(message, signature, address);
+  return isValid;
 }
 
 export async function getAccounts(appName) {
-    // Request access to the user's Polkadot.js extension accounts
+  // Request access to the user's Polkadot.js extension accounts
+  const injected = await web3Enable(appName);
+
+  if (injected.length === 0) {
+    console.log("No extension found");
+    return [];
+  }
+
+  // Get all the accounts in the user's Polkadot.js extension
+  const accounts = await web3Accounts();
+  if (accounts.length === 0) {
+    console.log("No accounts found");
+    return [];
+  }
+
+  return accounts;
+}
+
+export async function signTransaction(account, message, appName) {
     const injected = await web3Enable(appName);
+    const injector = await web3FromAddress(account);
+    const signRaw = injector?.signer?.signRaw;
 
-    if (injected.length === 0) {
-        console.log('No extension found');
-        return [];
+    if (signRaw) {
+      try {
+        const { signature } = await signRaw({
+          address: account,
+          data: message,
+          type: 'bytes'
+        });
+        return signature
+      } catch (error) {
+        console.error('Failed to sign message:', error);
+        alert('Failed to sign message');
+      }
     }
-
-    // Get all the accounts in the user's Polkadot.js extension
-    const accounts = await web3Accounts();
-    if (accounts.length === 0) {
-        console.log('No accounts found');
-        return [];
-    }
-    
-    return accounts;
 }
 
-
-
-export async function signTransaction(account, transaction) {
-    // Get the injector for the given account
-    const injector = await web3FromSource(account.meta.source);
-
-    // Sign the transaction payload
-    const signedTransaction = await injector.signer.signPayload({
-        address: account.address,
-        ...transaction,
-    });
-
-    return signedTransaction;
-}
-
-export async function verifyMessage(message, signature, address) {
-    return verifySignature(message, signature, address);
-}
+export const isValidSignature = async (signedMessage, signature, address) => {
+    const publicKey = decodeAddress(address);
+    const hexPublicKey = u8aToHex(publicKey);
+    await cryptoWaitReady();
+    return signatureVerify(signedMessage, signature, hexPublicKey).isValid;
+  };

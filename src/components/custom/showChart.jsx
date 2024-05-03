@@ -76,6 +76,8 @@ const ShowChart = ({ chart }) => {
   {chart?.form?.chart?.showYAxis && chart.elements?.map((element, index) => (
     <YAxis
       yAxisId={element.elementId}
+      key={element.elementId}
+      
       
       domain={['dataMin', 'dataMax']} // You might want to specify these domains dynamically
       

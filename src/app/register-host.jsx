@@ -1,10 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { generateGUID } from "@/lib/utils";
+import React, { useState, useEffect,useContext } from "react";
+import { generateGUID,registerHost } from "@/lib/utils";
+import { signTransaction,isValidSignature } from "@/lib/polkadotWallet";
+import { GlobalStateContext } from "@/app/page";
+
+
+
 
 export default function RegisterHost() {
+  const { globalState, setGlobalState } = useContext(GlobalStateContext);
+  function stringToHex(string) {
+    return Buffer.from(string, 'utf8').toString('hex');
+  }
   const [formData, setFormData] = useState({
     host_id: "",
-    owner_id: "",
+    owner_id: globalState.account_id,
     ip_address: "",
     host_name: "",
 
@@ -13,13 +22,14 @@ export default function RegisterHost() {
 
   useEffect(() => {
     const host_id = generateGUID();
+
     setFormData({ ...formData, host_id });
   }, []);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
 
@@ -29,11 +39,29 @@ export default function RegisterHost() {
       ip_address: formData.ip_address,
       host_name: formData.host_name,
     };
+    /*const accts = await getAccounts("sub-connect");
     console.log(msg);
+     const acct = accts.find((a) => a.address === msg.owner_id);
+    console.log("address: " + JSON.stringify(acct)) */
+    const signature = await signTransaction(formData.owner_id,formData.owner_id,"sub-connect");
+    
+    
+    console.log("Signature: " + signature);
 
-    // Here you can handle the form submission, e.g., send the data to a server
+    let isValid = await isValidSignature(formData.owner_id, signature, formData.owner_id);
+    console.log("isValid: " + isValid);
+
+    //const rs = await verifyFromPolkadotJs(msg.owner_id, signature, msg.owner_id);
+    
+    //const result =  signatureVerify(stringToU8a(acct.address), signature, acct.address);
+    //console.log("varified: " + JSON.stringify(result));
+    msg.signature = signature;
+    console.log(msg);
+    
+    await registerHost(msg);
+    
   };
-
+  
   return (
     <div className="flex justify-center mt-10">
       <form
