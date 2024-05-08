@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, use } from "react";
 import { fetchTableData } from "@/lib/graphdata";
-
+import { Skeleton } from "@/components/ui/skeleton";
 export default function ShowTable({ line, index }) {
   const [data, setData] = useState(null);
 
@@ -36,7 +36,7 @@ export default function ShowTable({ line, index }) {
       case "dateTime":
         return new Date(value).toLocaleString();
       default:
-        return value; // No formatting applied if format is unrecognized
+        return value; 
     }
   };
   return (
@@ -69,7 +69,18 @@ export default function ShowTable({ line, index }) {
         </table>
         </div>
       ) : (
-        <div>Loading...</div>
+        <div className="flex flex-col w-full space-y-2">
+       
+          
+          <div className="flex justify-between space-x-2">
+            <Skeleton className="flex-1 h-4" /> 
+            <Skeleton className="flex-1 h-4" /> 
+          </div>
+          <div className="flex justify-between space-x-2">
+            <Skeleton className="flex-1 h-4" /> 
+            <Skeleton className="flex-1 h-4" /> 
+          </div>
+        </div>
       )}
     </div>
   );

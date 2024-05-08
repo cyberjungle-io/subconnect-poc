@@ -2,6 +2,8 @@
 import React, { useState, useEffect, use } from "react";
 import { fetchValueData } from "@/lib/graphdata";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 export default function ShowDataLine({ line, index }) {
   const [data, setData] = useState(null);
 
@@ -19,13 +21,23 @@ export default function ShowDataLine({ line, index }) {
   return (
     <div
       key={index}
+      className="flex items-center space-x-2"
       style={{
         color: line.label.color,
         fontSize: `${line.label.fontSize}px`,
       }}
     >
-      {line.label.text ? line.label.text : `Data ${index + 1} `}{" "}
-      {data ? data : "Loading..."}
+      {data ? (
+        line.label.text
+      ) : (
+        <Skeleton className="h-8 w-32" /> 
+      )}
+      {" "}
+      {data ? (
+        data
+      ) : (
+        <Skeleton className="h-8 w-24" />
+      )}
     </div>
   );
 }

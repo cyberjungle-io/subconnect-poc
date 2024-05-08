@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -12,72 +12,78 @@ import ShowTextLine from "./showTextLine";
 import ShowDataLine from "./showDataLine";
 import ShowTable from "./ShowTable";
 import DOMPurify from "dompurify";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ShowTile(param) {
   const [form, setForm] = useState(param.form);
+  const [loadingStates, setLoadingStates] = useState(new Array(form.lines.length).fill(true));
+
+  useEffect(() => {
+    // Simulate fetching data and update loading states accordingly
+    const loadTimes = form.lines.map(() => Math.random() * 1000 + 500); // Random load times for each line
+    form.lines.forEach((line, index) => {
+      setTimeout(() => {
+        setLoadingStates(prevStates => {
+          const newStates = [...prevStates];
+          newStates[index] = false; // Set loading to false for this line
+          return newStates;
+        });
+      }, loadTimes[index]);
+    });
+  }, [form.lines]);
   
   return (
     <>
       <section className="flex justify-center w-full">
-        <Card className="w-full">
-          <CardHeader>
+        <Card className="w-full min-h-36">
+          <CardHeader className="p-3 pb-2">
             <CardTitle className="flex flex-row">
               <div
-                className="w-1/2"
+                className="w-2/3"
                 style={{
                   color: form.title.color,
                   fontSize: `${form.title.fontSize}px`,
                 }}
               >
-                {form.title.text ? form.title.text : "Title"}
+                {form.title.text ? (
+                  <div
+                    style={{
+                      color: form.title.color,
+                      fontSize: `${form.title.fontSize}px`,
+                    }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(form.title.text) }}
+                  />
+                ) : (
+                  <Skeleton className="h-8 w-auto" />
+                )}
               </div>
-              <div className="w-1/2 flex justify-end me-3">
-                {form.icon.text ? (
+              <div className="w-1/3 flex justify-end me-3">
+              {form.icon.text ? (
                   <div
                     dangerouslySetInnerHTML={{
                       __html: DOMPurify.sanitize(form.icon.text),
                     }}
                   />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                    style={{
-                      width: `${form.icon.iconSize}px`,
-                      height: `${form.icon.iconSize}px`,
-                    }}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                    />
-                  </svg>
+                  <Skeleton className="h-8 w-8" />
                 )}
               </div>
             </CardTitle>
           </CardHeader>
-        <CardContent>
+        <CardContent className="p-3">
             {form.lines.map((line, index) => (
                 <div key={index}>               
-                
-                    {line.lineType === "Text"
-                        ? 
-                        <ShowTextLine line={line} index={index}/>
-                        : ""}
-                    {line.lineType === "Data"
-                        ? 
-                        <ShowDataLine line={line} index={index}/>
-                     : ""}
-                     {line.lineType === "Table"
-                        ? 
-                        <ShowTable line={line} index={index}/>
-                     : ""}
-             
+                {!loadingStates[index] ? (
+                  line.lineType === "Text" ? <ShowTextLine line={line} index={index} /> :
+                  line.lineType === "Data" ? <ShowDataLine line={line} index={index} /> :
+                  line.lineType === "Table" ? <ShowTable line={line} index={index} /> :
+                  null
+                ) : (
+                  <div className="space-y-2">
+                  <Skeleton className="h-6 w-auto" />
+                  <Skeleton className="h-6 w-auto" />
+                  </div>
+                )}
                 </div>
             ))}
         </CardContent>

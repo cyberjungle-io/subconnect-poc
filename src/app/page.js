@@ -59,15 +59,19 @@ export default function Home() {
           />
         </div>
       )}
-      <div className="flex flex-col min-h-screen bg-gray-100">
+      <div className="flex flex-col min-h-screen ">
         <Navbar
           setPage={setPage}
           setIsAccountModalOpen={setIsAccountModalOpen}
           accountName={selectedAccount.name}
         />
-        <main className="flex-grow ">
+        <main className="flex-grow">
+  
           {page === "chart" && <ChartEditor />}
+         
+       
           {page === "dashboard" && <Dashboard />}
+          
           {page === "tileEditor" && <TileEditor />}
           {page === "registerHost" && <RegisterHost />}
         </main>

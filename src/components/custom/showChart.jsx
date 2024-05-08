@@ -49,7 +49,7 @@ const ShowChart = ({ chart }) => {
   }
 
   return (
-    <Card className="h-[350px] w-full">
+    <Card className="h-[350px] ">
       <CardHeader>
         <CardTitle>
           <div
@@ -65,12 +65,14 @@ const ShowChart = ({ chart }) => {
       </CardHeader>
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart width={500} height={300} data={data}>
+        <ComposedChart data={data}>
   {chart?.form?.chart?.showXAxis && (
     <XAxis
       dataKey="updatedTime"
+      
+      tick={{ fontSize: 12, angle: -20, dy: 14}}
       label={{ value: chart.form.chart.xAxisLabel, position: "insideBottomRight", offset: -20 }}
-      tick={{ fontSize: chart.form.axis?.xAxisFontSize || 10 }}
+      //tick={{ fontSize: chart.form.axis?.xAxisFontSize || 10 }}
     />
   )}
   {chart?.form?.chart?.showYAxis && chart.elements?.map((element, index) => (
@@ -79,7 +81,7 @@ const ShowChart = ({ chart }) => {
       key={element.elementId}
       
       
-      domain={['dataMin', 'dataMax']} // You might want to specify these domains dynamically
+      //domain={['dataMin', 'dataMax']} // You might want to specify these domains dynamically
       
     />
   ))}
@@ -104,6 +106,7 @@ const ShowChart = ({ chart }) => {
         dataKey={dtky} // Ensure you have a dataKey property that matches the data structure
         fill={element.color}
         fillOpacity={element.opacity}
+        dot={false}
       />
     );
   })}
