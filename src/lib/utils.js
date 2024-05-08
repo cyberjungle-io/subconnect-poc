@@ -6,8 +6,8 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs) {
   return twMerge(clsx(inputs))
 }
-const baseurl = "http://10.2.3.100:8002"
-//const baseurl = "https://w3s.cyberjungle.io"
+//const baseurl = "http://10.2.3.100:8002"
+const baseurl = "https://w3s.cyberjungle.io"
 export function generateGUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0,
