@@ -1,7 +1,7 @@
 "use client";
 import React, { useState,useEffect } from "react";
 import { Input } from "@/components/ui/input";
-
+import { Textarea } from "@/components/ui/textarea"
 
 
 export default function ConfigureTextLine({ line,index,handleLineUpdate }) {
@@ -30,13 +30,18 @@ export default function ConfigureTextLine({ line,index,handleLineUpdate }) {
       }, [newline]);
     return (
         <>
-            <Input
+            {/*<Input
                 name={`lineText`}
                 placeholder={`Enter Text`}
                 value={newline.text}
                 onChange={(e) => handleInputChange(e.target.value)}
                 className="w-80 me-4 "
-            />
+    />*/}
+            <Textarea
+            name={`lineText`} 
+            value={newline.text}
+                onChange={(e) => handleInputChange(e.target.value)}
+            placeholder="Type your message here." />
             <Input
                 name={`lineColor`}
                 type="color"

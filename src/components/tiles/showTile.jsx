@@ -70,7 +70,7 @@ export default function ShowTile(param) {
               </div>
             </CardTitle>
           </CardHeader>
-        <CardContent className="p-3">
+        <CardContent className="p-3 pt-2">
             {form.lines.map((line, index) => (
                 <div key={index}>               
                 {!loadingStates[index] ? (
