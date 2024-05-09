@@ -343,9 +343,10 @@ const handleDeleteLine = (index) => {
 
   return (
     <>
-    <div className="bg-gray-100">
+    <div className="bg-white w-full">
+      <div className="bg-gray-100 pb-16">
       <div className="flex justify-between items-center p-4 rounded-lg ">
-  <div className="flex space-x-2">
+  <div className="flex space-x-2 mb-12">
     <Button className="flex items-center justify-center bg-transparent border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out" onClick={() => setIsModalOpen(true)}>
       Select Content
     </Button>
@@ -392,7 +393,7 @@ const handleDeleteLine = (index) => {
           ))}
         </ul>
       </Modal>
-      <main>
+      
       <div className="flex justify-center relative">
             <div className={tileClass + "  relative"}>
                 <ShowTile key={JSON.stringify(form)} form={form} />
@@ -412,9 +413,9 @@ const handleDeleteLine = (index) => {
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <section className="mt-6 flex-auto">
+        </div></div>
+        <main>
+        <section className="pt-4 flex-auto ">
           <div className="flex flex-col items-center justify-center w-full px-0">
             {/* Tab Navigation */}
             <div className="w-full">
