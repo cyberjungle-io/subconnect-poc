@@ -407,7 +407,7 @@ const Dashboard = () => {
     };
   }, [selectButtonState.isOpen]); // Ensure the effect runs only when the dropdown state changes
   return (
-    <main className="bg-gray-100 h-screen">
+    <main className="bg-gray-100 w-full">
       <div className="flex justify-between items-center p-4">
       <div className="w-3/12"></div>
       <h1 className="text-xl font-bold flex-grow text-center w-6/12">
@@ -498,6 +498,7 @@ const Dashboard = () => {
             key={row.id}
             droppableId={`${row.id}`}
             direction="horizontal"
+            className=""
           >
             {(provided) => (
               <div
