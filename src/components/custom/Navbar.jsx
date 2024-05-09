@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect,useContext } from "react";
 
 import { Button } from "@/components/ui/button";
 import Dashboard from "@/app/dashboard";
@@ -11,16 +11,21 @@ import { GlobalStateContext } from "@/app/page";
 const Navbar = ({
   setPage,
   setIsAccountModalOpen,
-  accountName,
-  globalState,
+  _accountName,
+  _globalState,
 }) => {
+  const { globalState, setGlobalState } = useContext(GlobalStateContext);
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
   const toggleModal = () => setIsModalOpen(!isModalOpen);
+  const [accountName, setAccountName] = useState("");
 
-
+useEffect(() => {
+  console.log("Navbar: " + JSON.stringify(globalState));
+  setAccountName(globalState.account_name);
+}, [globalState]);
   const addDashboard = () => {
     const newDashboard = {
       name: `Dashboard ${globalState.data.dashboards.length + 1}`, // Simple naming strategy

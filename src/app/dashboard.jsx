@@ -129,6 +129,7 @@ const Dashboard = () => {
         if (!gs) {
           gs = {
             account_id: acct.address,
+            account_name: acct.name,
             key: "subconnect-poc",
             data: {
               tiles: [],
@@ -146,6 +147,7 @@ const Dashboard = () => {
         const updatedGlobalState = {
           ...globalState, // Preserve all existing state
           account_id: gs.account_id, // Update account_id
+          account_name: acct.name, // Update account_name
           key: gs.key,              // Update key
           data: gs.data          // Update data
         };

@@ -16,6 +16,7 @@ import { setStorageData, getStorageData } from "@/lib/utils";
 const initialState = {
   account_id: null,
   key: null,
+  account_name: null,
   data: {
     tiles: [],
     dashboards: [],
@@ -42,6 +43,7 @@ export default function Home() {
     console.log(globalState);
     setGlobalState(initialState)
     globalState["account_id"] = newacct.address;
+    
     //getStorageData(newacct.address);
     setSelectedAccount(newacct);
     setIsAccountModalOpen(false);
