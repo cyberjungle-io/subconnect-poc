@@ -69,15 +69,12 @@ export default function TileEditor() {
   const [activeTab, setActiveTab] = useState("tab1");
 
   const handleInputChange = (lineIndex, value) => {
-    console.log("lineIndex", lineIndex);
-    console.log("value", value);
     if (lineIndex === "icon") {
       setForm((prevForm) => ({
         ...prevForm,
         icon: { ...prevForm.icon, text: value },
       }));
-    }
-    if (lineIndex === "title") {
+    } else if (lineIndex === "title") {
       setForm((prevForm) => ({
         ...prevForm,
         title: { ...prevForm.title, text: value },
@@ -87,9 +84,6 @@ export default function TileEditor() {
         const newLines = [...prevForm.lines];
         if (newLines[lineIndex]) {
           newLines[lineIndex].text = value;
-        } else {
-          // Handle the case where newLines[lineIndex] is undefined
-          console.error(`Line index ${lineIndex} is out of bounds`);
         }
         return { ...prevForm, lines: newLines };
       });
@@ -124,28 +118,31 @@ export default function TileEditor() {
 
   const handleFontSizeChange = (lineIndex, value) => {
     setForm((prevForm) => {
-      if (lineIndex >= 0 && lineIndex < prevForm.lines.length) {
+      if (lineIndex === "title") {
+        return {
+          ...prevForm,
+          title: { ...prevForm.title, fontSize: parseInt(value, 10) },
+        };
+      } else if (lineIndex >= 0 && lineIndex < prevForm.lines.length) {
         const newLines = [...prevForm.lines];
-        newLines[lineIndex].fontSize = value;
+        newLines[lineIndex].fontSize = parseInt(value, 10);
         return { ...prevForm, lines: newLines };
-      } else {
-        // lineIndex is out of bounds, return the previous state
-        return prevForm;
       }
+      return prevForm;
     });
   };
 
-  function handleIconSizeChange(value) {
-    const minIconSize = 10; // Set your minimum font size
-    const maxIconSize = 60; // Set your maximum font size
+  const handleIconSizeChange = (value) => {
+    const minIconSize = 10;
+    const maxIconSize = 60;
 
-    // Ensure the new value is within the allowed range
     if (value >= minIconSize && value <= maxIconSize) {
-      setForm((prevForm) => {
-        return { ...prevForm, icon: { ...prevForm.icon, iconSize: value } };
-      });
+      setForm((prevForm) => ({
+        ...prevForm,
+        icon: { ...prevForm.icon, iconSize: parseInt(value, 10) },
+      }));
     }
-  }
+  };
 
   function addLine() {
     setForm((prevForm) => {
@@ -517,71 +514,75 @@ const handleDeleteLine = (index) => {
             </div>
           </div>
           <h3>Icon</h3>
-          <div className="flex">
-            <Input
-              name="icon"
-              type="textarea"
-              placeholder="Paste SVG"
-              value={form.icon.text}
-              onChange={(e) => handleInputChange("icon", e.target.value)}
-              className="w-2/3 me-4"
-            />
-            <div className="flex items-center">
-              <button
-                onClick={() =>
-                  handleIconSizeChange("icon", form.icon.iconSize - 1)
-                }
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-6 h-6 "
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 12h14"
-                  />
-                </svg>
-              </button>
-              <input
-                type="text"
-                className="mx-2 text-center w-12"
-                value={form.icon.iconSize}
-                onChange={(e) => {
-                  if (!isNaN(e.target.value)) {
-                    handleIconSizeChange("icon", e.target.value);
-                  }
-                }}
-              />
-              <button
-                onClick={() =>
-                  handleIconSizeChange("icon", form.icon.iconSize + 1)
-                }
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-                    
-                    
-                  </div>
+                      <div className="flex">
+                        <Input
+                          name="icon"
+                          type="textarea"
+                          placeholder="Paste SVG"
+                          value={form.icon.text}
+                          onChange={(e) =>
+                            handleInputChange("icon", e.target.value)
+                          }
+                          className="w-2/3 me-4"
+                        />
+                        <div className="flex items-center">
+                          <button
+                            onClick={() =>
+                              handleIconSizeChange(
+                                form.icon.iconSize - 1
+                              )
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="w-6 h-6"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 12h14"
+                              />
+                            </svg>
+                          </button>
+                          <input
+                            type="text"
+                            className="mx-2 text-center w-12"
+                            value={form.icon.iconSize}
+                            onChange={(e) => {
+                              if (!isNaN(e.target.value)) {
+                                handleIconSizeChange(e.target.value);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() =>
+                              handleIconSizeChange(
+                                form.icon.iconSize + 1
+                              )
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="w-6 h-6"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 4.5v15m7.5-7.5h-15"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                 ) : (
                   <div>
                      <div className="space-y-5 mt-3">

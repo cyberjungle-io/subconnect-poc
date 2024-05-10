@@ -32,6 +32,28 @@ export default function ShowTile(param) {
     });
   }, [form.lines]);
   
+  // Function to sanitize and modify the SVG content
+  const sanitizeAndModifySVG = (svgString, size) => {
+    // Create a DOM parser
+    const parser = new DOMParser();
+    // Parse the SVG string to a document
+    const doc = parser.parseFromString(svgString, "image/svg+xml");
+    const svg = doc.querySelector("svg");
+
+    if (svg) {
+      // Remove existing width and height attributes
+      svg.removeAttribute("width");
+      svg.removeAttribute("height");
+      // Set new width and height based on the size parameter
+      svg.setAttribute("width", `${size}px`);
+      svg.setAttribute("height", `${size}px`);
+    }
+
+    // Serialize the document back to a string
+    const serializer = new XMLSerializer();
+    return serializer.serializeToString(doc);
+  };
+  
   return (
     <>
       <section className="flex justify-center w-full">
@@ -58,10 +80,10 @@ export default function ShowTile(param) {
                 )}
               </div>
               <div className="w-1/3 flex justify-end me-3">
-              {form.icon.text ? (
+                {form.icon.text ? (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(form.icon.text),
+                      __html: sanitizeAndModifySVG(DOMPurify.sanitize(form.icon.text), form.icon.iconSize),
                     }}
                   />
                 ) : (
