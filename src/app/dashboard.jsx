@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext} from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { generateGUID } from "@/lib/utils";
 import ShowChart from "@/components/custom/showChart";
@@ -7,8 +7,6 @@ import ShowTile from "@/components/tiles/showTile";
 import { GlobalStateContext } from "@/app/page";
 import { setStorageData, getStorageData } from "@/lib/utils";
 import SelectContentModal from "@/components/chartModals/selectContentModal";
-import { data } from "autoprefixer";
-import Navbar from "@/components/custom/Navbar";
 
 const uniqueId = (() => {
   console.log("Generating unique ID..."); // Diagnostic log
@@ -54,7 +52,7 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("chart"); // or 'tile'
   const [currentRowId, setCurrentRowId] = useState(null);
-  
+  const dropdownRef = useRef(null);
   const [content, setContent] = useState([]);
   const [tileContent, setTileContent] = useState([]);
   const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
@@ -77,21 +75,18 @@ const Dashboard = () => {
     setIsTileModalOpen(true);
   };
   const handleSelectChart = (contentId) => {
-    //get content record from the content array using the contentId
-
     const selectedContent = content.find((item) => item.id === contentId);
-    addCell(selectedContent, "chart");
-    console.log(selectedContent);
-
+    if (currentRowId) {
+      addCell(currentRowId, selectedContent, "chart");
+    }
     setIsModalOpen(false);
   };
+
   const handleSelectTile = (contentId) => {
-    //get content record from the content array using the contentId
-    const selectedTileContent = tileContent.find(
-      (item) => item.id === contentId
-    );
-    console.log("selected Tile:", selectedTileContent);
-    addCell(selectedTileContent, "tile");
+    const selectedTileContent = tileContent.find((item) => item.id === contentId);
+    if (currentRowId) {
+      addCell(currentRowId, selectedTileContent, "tile");
+    }
     setIsModalOpen(false);
   };
   //Dashboard Name
@@ -165,86 +160,82 @@ const Dashboard = () => {
     }
   };
   const onDragEnd = (result) => {
-    if (!result.destination) {
-      return;
-    }
-
+    if (!result.destination) return;
+  
     const { source, destination } = result;
-
+  
     // Find the source and destination rows by ID
-    const sourceRow = rows.find(
-      (row) => row.id === parseInt(source.droppableId)
-    );
+    const sourceRow = rows.find((row) => row.id === parseInt(source.droppableId));
     const destinationRow = rows.find(
       (row) => row.id === parseInt(destination.droppableId)
     );
-
+  
+    // Ensure sourceRow and destinationRow are defined
+    if (!sourceRow || !destinationRow) {
+      console.error("Source or destination row not found");
+      return;
+    }
+  
     if (source.droppableId === destination.droppableId) {
       // Moving within the same row
-      const newRowcells = reorder(
+      const newRowCells = reorder(
         sourceRow.cells,
         source.index,
         destination.index
       );
       const newRows = rows.map((row) => {
         if (row.id === sourceRow.id) {
-          return { ...row, cells: newRowcells };
+          return { ...row, cells: newRowCells };
         }
         return row;
       });
       setRows(newRows);
     } else {
       // Moving to a different row
-      const sourcecells = Array.from(sourceRow.cells);
-      const [removed] = sourcecells.splice(source.index, 1);
-      const destinationcells = Array.from(destinationRow.cells);
-      destinationcells.splice(destination.index, 0, removed);
-
+      const sourceCells = Array.from(sourceRow.cells);
+      const [removed] = sourceCells.splice(source.index, 1);
+      const destinationCells = Array.from(destinationRow.cells);
+      destinationCells.splice(destination.index, 0, removed);
+  
       const newRows = rows.map((row) => {
-        console.log("Row:", row); // Diagnostic log
         if (row.id === sourceRow.id) {
-          return { ...row, cells: sourcecells };
+          return { ...row, cells: sourceCells };
         } else if (row.id === destinationRow.id) {
-          return { ...row, cells: destinationcells };
+          return { ...row, cells: destinationCells };
         }
         return row;
       });
-
+  
       setRows(newRows);
     }
   };
 
-  const addCell = (content, type) => {
-    console.log("Adding chart..."); // Diagnostic log
-
-    const currentRows = rows;
-    console.log("Current rows before adding:", currentRows); // Log current state before adding
-    const newRows = [...currentRows];
-    const lastRow = newRows[newRows.length - 1];
-    const totalColSpan = lastRow.cells.reduce(
-      (sum, chart) => sum + chart.colSpan,
-      0
-    );
-
-    if (totalColSpan + 2 <= 12) {
-      lastRow.cells.push({
-        id: generateGUID(),
-        colSpan: 2,
-        contentType: type,
-        content: content,
-      });
+  const addCell = (rowId, content, type) => {
+    console.log("Adding cell to row:", rowId);
+    const newRows = [...rows];
+    const targetRow = newRows.find((row) => row.id === rowId);
+    if (targetRow) {
+      const totalColSpan = targetRow.cells.reduce(
+        (sum, cell) => sum + cell.colSpan,
+        0
+      );
+      if (totalColSpan + 2 <= 12) {
+        targetRow.cells.push({
+          id: generateGUID(),
+          colSpan: 2,
+          contentType: type,
+          content: content,
+        });
+      } else {
+        console.warn(`Row ${rowId} is full, cannot add more cells`);
+      }
+      setRows(newRows);
     } else {
-      newRows.push({
-        id: uniqueId(),
-        cells: [{ id: generateGUID(), colSpan: 2, content: content }],
-      });
+      console.error(`Row with id ${rowId} not found`);
     }
-
-    console.log("New rows after adding:", newRows); // Log new state after adding
-    setRows(newRows);
-
-    console.log("Chart added."); // Diagnostic log
   };
+  
+  
 
   const addRow = () => {
     console.log("Adding row..."); // Diagnostic log
@@ -373,9 +364,9 @@ const Dashboard = () => {
   };
   // Toggle dropdown visibility
   const toggleDropdown = () => {
-    setSelectButtonState((prevState) => ({
+    setSelectButtonState(prevState => ({
       ...prevState,
-      isOpen: !prevState.isOpen,
+      isOpen: !prevState.isOpen
     }));
   };
 
@@ -383,31 +374,25 @@ const Dashboard = () => {
 
   // Function to close the dropdown
   const closeDropdown = () => {
-    setSelectButtonState((prevState) => ({ ...prevState, isOpen: false }));
+    setSelectButtonState(prevState => ({ ...prevState, isOpen: false }));
   };
 
   // Event listener to close the dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        selectButtonState.isOpen &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (selectButtonState.isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         closeDropdown();
       }
     };
 
     // Attach the listener
-    if (selectButtonState.isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("mousedown", handleClickOutside);
 
-    // Cleanup the listener
+    // Cleanup the listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [selectButtonState.isOpen]); // Ensure the effect runs only when the dropdown state changes
+  }, [selectButtonState.isOpen]);
   return (
     <main className="bg-gray-100 w-full">
       <div className="flex justify-between items-center p-4">
@@ -500,7 +485,6 @@ const Dashboard = () => {
             key={row.id}
             droppableId={`${row.id}`}
             direction="horizontal"
-            className=""
           >
             {(provided) => (
               <div
@@ -524,142 +508,108 @@ const Dashboard = () => {
                         )}`}
                       >
                         <div className="relative w-full rounded-lg overflow-hidden">
-                          {cell.contentType === "chart" ? (
-                            <ShowChart chart={cell.content} />
-                          ) : (
-                            ""
-                          )}
-                          {cell.contentType === "tile" ? (
-                            <ShowTile
-                              key={JSON.stringify(cell.content.form)}
-                              form={cell.content.form}
-                            />
-                          ) : (
-                            ""
-                          )}
-                          {editMode && (
-                            <div className="absolute inset-0 bg-black mx-auto bg-opacity-40 hover:bg-opacity-70 border-2 rounded-lg border-gray-600">
-                              <div className="flex justify-center items-center h-full text-white">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={1.5}
-                                  stroke="currentColor"
-                                  className="w-16 h-16"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
-                                  />
-                                </svg>
-                              </div>
-                            </div>
-                          )}
-                          {editMode ? (
-                            <div className="absolute top-0 right-0 p-2">
-                              {cell.colSpan < 12 && (
-                                <div
-                                  onClick={() => extendChart(row.id, cell.id)}
-                                  className="text-white hover:text-green-700 font-bold py-1 px-2 rounded"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="w-8 h-8"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M12 4.5v15m7.5-7.5h-15"
-                                    />
-                                  </svg>
-                                </div>
-                              )}
-                              {cell.colSpan > 2 && (
-                                <div
-                                  onClick={() => shrinkChart(row.id, cell.id)}
-                                  className="text-white hover:text-red-700 font-bold py-1 px-2 rounded"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="w-8 h-8"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M5 12h14"
-                                    />
-                                  </svg>
-                                </div>
-                              )}
-                              <button
-                                onClick={() => deleteChart(row.id, cell.id)}
-                                className=" hover:text-red-700 text-white font-bold py-1 px-2 rounded"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={1.5}
-                                  stroke="currentColor"
-                                  className="w-8 h-8"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          ) : (
-                            ""
-                          )}
-                        </div>
+                        {cell.contentType === "chart" ? <ShowChart chart={cell.content} /> : ""}
+                  {cell.contentType === "tile" ? <ShowTile key={JSON.stringify(cell.content.form)} form={cell.content.form} /> : ""}
+                  {editMode && (
+                    <div className="absolute inset-0 bg-black mx-auto bg-opacity-40 hover:bg-opacity-70 border-2 rounded-lg border-gray-600">
+                      <div className="flex justify-center items-center h-full text-white">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-16 h-16"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
+                          />
+                        </svg>
                       </div>
-                    )}
-                  </Draggable>
-                ))}
-
-                {editMode &&
-                  row.cells.reduce((sum, chart) => sum + chart.colSpan, 0) <=
-                    10 && (
-                    <button
-                      onClick={() => setIsModalOpen(true)} // This will only open the modal
-                      type="button"
-                      className="bg-black bg-opacity-40 hover:bg-opacity-70 text-white font-bold py-2 px-4 rounded w-1/12 flex justify-center items-center"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-12"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                      </svg>
-                    </button>
+                    </div>
                   )}
-                
+                          {editMode && (
+                    <div className="absolute top-0 right-0 p-2">
+                      {cell.colSpan < 12 && (
+                        <div
+                          onClick={() => extendChart(row.id, cell.id)}
+                          className="text-white hover:text-green-700 font-bold py-1 px-2 rounded"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-8 h-8"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 4.5v15m7.5-7.5h-15"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                      {cell.colSpan > 2 && (
+                        <div
+                          onClick={() => shrinkChart(row.id, cell.id)}
+                          className="text-white hover:text-red-700 font-bold py-1 px-2 rounded"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-8 h-8"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 12h14"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => deleteChart(row.id, cell.id)}
+                        className="hover:text-red-700 text-white font-bold py-1 px-2 rounded"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-8 h-8"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </Draggable>
+        ))}
 
-                {editMode && row.cells.length === 0 && (
-                  <div
-                    className="bg-transparent hover:bg-transparent hover:text-red-700 text-red-500 font-bold py-2 px-4 rounded cursor-pointer flex justify-center items-center "
-                    onClick={() => deleteRow(row.id)}
+{editMode &&
+                  row.cells.reduce((sum, chart) => sum + chart.colSpan, 0) <= 10 && (
+                  <button
+                    onClick={() => {
+                      setCurrentRowId(row.id);
+                      setIsModalOpen(true);
+                    }}
+                    type="button"
+                    className="bg-black bg-opacity-40 hover:bg-opacity-70 text-white font-bold py-2 px-4 rounded w-1/12 flex justify-center items-center"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -667,21 +617,44 @@ const Dashboard = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="w-8 h-8"
+                      className="w-12"
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                       />
                     </svg>
-                  </div>
+                  </button>
                 )}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        ))}
+                
+
+                {editMode && row.cells.length === 0 && (
+          <div
+            className="bg-transparent hover:bg-transparent hover:text-red-700 text-red-500 font-bold py-2 px-4 rounded cursor-pointer flex justify-center items-center"
+            onClick={() => deleteRow(row.id)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-8 h-8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+              />
+            </svg>
+          </div>
+        )}
+        {provided.placeholder}
+      </div>
+    )}
+  </Droppable>
+))}
         {editMode ? (
           <button
             onClick={addRow}
@@ -718,6 +691,7 @@ const Dashboard = () => {
           onClick={toggleDropdown}
           className="h-16 w-16 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 focus:outline-none"
           aria-label="Select Dashboard"
+          ref={dropdownRef}
         >
           {selectButtonState.isOpen ? (
             <svg
