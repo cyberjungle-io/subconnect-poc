@@ -11,19 +11,22 @@ import {
 import ShowTextLine from "./showTextLine";
 import ShowDataLine from "./showDataLine";
 import ShowTable from "./ShowTable";
+import ShowVideo from "./showVideo";
 import DOMPurify from "dompurify";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ShowTile(param) {
   const [form, setForm] = useState(param.form);
-  const [loadingStates, setLoadingStates] = useState(new Array(form.lines.length).fill(true));
+  const [loadingStates, setLoadingStates] = useState(
+    new Array(form.lines.length).fill(true)
+  );
 
   useEffect(() => {
     // Simulate fetching data and update loading states accordingly
     const loadTimes = form.lines.map(() => Math.random() * 1000 + 500); // Random load times for each line
     form.lines.forEach((line, index) => {
       setTimeout(() => {
-        setLoadingStates(prevStates => {
+        setLoadingStates((prevStates) => {
           const newStates = [...prevStates];
           newStates[index] = false; // Set loading to false for this line
           return newStates;
@@ -31,7 +34,7 @@ export default function ShowTile(param) {
       }, loadTimes[index]);
     });
   }, [form.lines]);
-  
+
   // Function to sanitize and modify the SVG content
   const sanitizeAndModifySVG = (svgString, size) => {
     // Create a DOM parser
@@ -53,7 +56,7 @@ export default function ShowTile(param) {
     const serializer = new XMLSerializer();
     return serializer.serializeToString(doc);
   };
-  
+
   return (
     <>
       <section className="flex justify-center w-full">
@@ -73,7 +76,9 @@ export default function ShowTile(param) {
                       color: form.title.color,
                       fontSize: `${form.title.fontSize}px`,
                     }}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(form.title.text) }}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(form.title.text),
+                    }}
                   />
                 ) : (
                   <Skeleton className="h-8 w-auto" />
@@ -83,7 +88,10 @@ export default function ShowTile(param) {
                 {form.icon.text ? (
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: sanitizeAndModifySVG(DOMPurify.sanitize(form.icon.text), form.icon.iconSize),
+                      __html: sanitizeAndModifySVG(
+                        DOMPurify.sanitize(form.icon.text),
+                        form.icon.iconSize
+                      ),
                     }}
                   />
                 ) : (
@@ -92,23 +100,25 @@ export default function ShowTile(param) {
               </div>
             </CardTitle>
           </CardHeader>
-        <CardContent className="p-3 pt-2">
+          <CardContent className="p-3 pt-2">
             {form.lines.map((line, index) => (
-                <div key={index}>               
+              <div key={index}>
                 {!loadingStates[index] ? (
-                  line.lineType === "Text" ? <ShowTextLine line={line} index={index} /> :
-                  line.lineType === "Data" ? <ShowDataLine line={line} index={index} /> :
-                  line.lineType === "Table" ? <ShowTable line={line} index={index} /> :
-                  null
+                  line.lineType === "Text" ? (
+                    <ShowTextLine line={line} index={index} />
+                  ) : line.lineType === "Data" ? (
+                    <ShowDataLine line={line} index={index} />
+                  ) : line.lineType === "Table" ? (
+                    <ShowTable line={line} index={index} />
+                  ) : line.lineType === "Video" ? (
+                    <ShowVideo line={line} index={index} />
+                  ) : null
                 ) : (
-                  <div className="space-y-2">
-                  <Skeleton className="h-6 w-auto" />
-                  <Skeleton className="h-6 w-auto" />
-                  </div>
+                  <Skeleton className="h-16 w-auto" />
                 )}
-                </div>
+              </div>
             ))}
-        </CardContent>
+          </CardContent>
         </Card>
       </section>
     </>

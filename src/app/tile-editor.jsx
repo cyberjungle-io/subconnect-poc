@@ -14,6 +14,7 @@ import ShowTile from "@/components/tiles/showTile";
 import ConfigureTextLine from "@/components/tiles/configureTextLine";
 import ConfigureDataLine from "@/components/tiles/configureDataLine";
 import ConfigureTable from "@/components/tiles/configureTable";
+import ConfigureVideo from "@/components/tiles/ConfigureVideo";
 import { generateGUID } from "@/lib/utils";
 import { setStorageData } from "@/lib/utils";
 import { GlobalStateContext } from "@/app/page";
@@ -623,6 +624,16 @@ const handleDeleteLine = (index) => {
                 )}
                 {line.lineType === "Table" ? (
                   <ConfigureTable
+                    key={index}
+                    line={line}
+                    index={index}
+                    handleLineUpdate={handleLineUpdate}
+                  />
+                ) : (
+                  ""
+                )}
+                {line.lineType === "Video" ? (
+                  <ConfigureVideo
                     key={index}
                     line={line}
                     index={index}
