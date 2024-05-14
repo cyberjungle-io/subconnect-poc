@@ -561,18 +561,17 @@ function formatDatesInArray(array, property, format) {
 }
 
 export const fetchElementData = async (elements) => {
-  //console.log(elements);
   const dataPromises = elements.map((element) =>
     fetchGraphDataDateSeries(element, "MM/DD/YYYY", 30).then((data) => {
       return data.map((item) => ({
         ...item,
-        elementId: element.elementId, // Assuming each element has an identifier 'id'
+        elementId: element.elementId, // Assuming each element has an identifier 'elementId'
         yAxis: element.yAxis, // Preserving the 'yAxis' property from the element
       }));
     })
   );
+  
   const results = await Promise.all(dataPromises);
-  console.log("results: ", results);
   let combinedData = [].concat(...results);
 
   combinedData.sort((a, b) =>
@@ -582,51 +581,41 @@ export const fetchElementData = async (elements) => {
   );
 
   let mergedData = combinedData.reduce((acc, data) => {
-    let existingEntryIndex = acc.findIndex(
+    let existingEntry = acc.find(
       (entry) => entry.updatedTime === data.updatedTime
     );
-    if (existingEntryIndex > -1) {
+
+    if (existingEntry) {
       Object.keys(data).forEach((key) => {
-        // Only process if key is not 'elementId' or 'yAxis' to avoid duplicating these properties
         if (key !== "elementId" && key !== "yAxis") {
           if (key === data.yAxis) {
             const uniqueKeyName = `${data.yAxis}_${data.elementId}`;
-            acc[existingEntryIndex][uniqueKeyName] = data[key];
-          } else {
-            // For properties other than yAxis, copy them if they don't exist in the acc entry
-            if (!acc[existingEntryIndex].hasOwnProperty(key)) {
-              acc[existingEntryIndex][key] = data[key];
-            }
+            existingEntry[uniqueKeyName] = data[key];
+          } else if (!existingEntry.hasOwnProperty(key)) {
+            existingEntry[key] = data[key];
           }
         }
       });
     } else {
-      // Constructing new data entry for unique updatedTime
-      const newData = Object.fromEntries(
-        Object.keys(data)
-          .map((key) => {
-            if (key !== "elementId" && key !== "yAxis") {
-              if (key === data.yAxis) {
-                const uniqueKeyName = `${data.yAxis}_${data.elementId}`;
-                return [uniqueKeyName, data[key]];
-              } else {
-                return [key, data[key]];
-              }
-            }
-            // Skip 'elementId' and 'yAxis' keys to avoid adding them directly to newData
-            return null;
-          })
-          .filter((entry) => entry !== null)
-      );
+      const newData = Object.keys(data).reduce((acc, key) => {
+        if (key !== "elementId" && key !== "yAxis") {
+          if (key === data.yAxis) {
+            const uniqueKeyName = `${data.yAxis}_${data.elementId}`;
+            acc[uniqueKeyName] = data[key];
+          } else {
+            acc[key] = data[key];
+          }
+        }
+        return acc;
+      }, {});
 
-      newData.updatedTime = data.updatedTime; // Ensure updatedTime is always added
-
+      newData.updatedTime = data.updatedTime;
       acc.push(newData);
     }
     return acc;
   }, []);
 
   mergedData = formatDatesInArray(mergedData, "updatedTime", "MM/DD/YYYY hh A");
-  //console.log(mergedData);
+  
   return mergedData;
 };
