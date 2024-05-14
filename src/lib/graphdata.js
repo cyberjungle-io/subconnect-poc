@@ -94,7 +94,7 @@ export const graphArray = [
     queryType: "time",
     queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
     query: `query {
-                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}, updatedTime_gt: "<<datetime>>"}, limit: 1000) {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}, updatedTime_gt: "<<datetime>>"}, limit: 1000, orderBy: updatedTime_ASC) {
                       updatedTime
                       totalValue
                     }
@@ -115,7 +115,7 @@ export const graphArray = [
     queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
     query: `
                 query {
-                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}, limit: 1000, orderBy: updatedTime_ASC) {
                       updatedTime
                       idleWorkerCount
                     }
@@ -137,7 +137,7 @@ export const graphArray = [
     queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
     query: `
                 query {
-                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}, limit: 1000, orderBy: updatedTime_ASC) {
                       updatedTime
                       workerCount
                     }
@@ -368,7 +368,7 @@ export const graphArray = [
     queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
     query: `
                 query {
-                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}, updatedTime_gt: "<<datetime>>"}, limit: 1000, orderBy: updatedTime_ASC) {
                       updatedTime
                       apr
                     }
@@ -390,7 +390,7 @@ export const graphArray = [
     queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
     query: `
                 query {
-                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>" }, updatedTime_gt: "<<datetime>>"}, limit: 1000, orderBy: updatedTime_ASC) {
                       updatedTime
                       delegatorCount
                     }
@@ -412,7 +412,7 @@ export const graphArray = [
     queryVars: [{ "Update Time": "String" }, { Limit: "Int" }],
     query: `
                 query {
-                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}}) {
+                    basePoolSnapshots(where: {basePool: {pid_eq: "<<pool number>>"}, updatedTime_gt: "<<datetime>>"}, limit: 1000, orderBy: updatedTime_ASC) {
                       updatedTime
                       commission
                     }
