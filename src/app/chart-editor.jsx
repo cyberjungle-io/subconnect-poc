@@ -146,6 +146,7 @@ const ChartEditor = () => {
       isEditingTitle: false,
       type: "",
       color: "",
+      strokeColor: "",
       dataKey: "",
       opacity: 1,
       seriesText: "New Series",
@@ -174,6 +175,7 @@ const ChartEditor = () => {
         mappings: [],
         type: "",
         color: "",
+        strokeColor: "",
         dataKey: "",
         opacity: 1,
         seriesText: "New Series",
@@ -448,6 +450,7 @@ const ChartEditor = () => {
         isEditingTitle: false,
         type: "",
         color: "",
+        strokeColor: "",
         dataKey: "",
         opacity: 1,
         seriesText: "New Series",
@@ -536,6 +539,15 @@ const ChartEditor = () => {
                 className="w-15"
                 value={element.color}
                 onChange={handleElementChange(index, "color")}
+              />
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label>Stroke Color:</Label>
+              <Input
+                type="color"
+                className="w-15"
+                value={element.strokeColor}
+                onChange={handleElementChange(index, "strokeColor")}
               />
             </div>
             <div className="flex flex-col space-y-1">
@@ -656,7 +668,8 @@ const ChartEditor = () => {
     setIsModalOpen(false); // Close the modal
   };
   return (
-    <>
+    <><div className="bg-white w-full">
+      <div className='bg-gray-100 pb-8 pt-4'>
       <div className="flex justify-between items-center p-4 mt-2 rounded-lg ">
         <div className="flex space-x-2">
           <Button
@@ -712,7 +725,7 @@ const ChartEditor = () => {
         </ul>
       </Modal>
 
-      <section className="w-2/3 mx-auto">
+      <section className="w-2/3 mx-auto mt-8">
         <Card className="h-[350px]">
           <CardHeader>
             <CardTitle>
@@ -733,10 +746,8 @@ const ChartEditor = () => {
                 {form.chart.showXAxis && (
                   <XAxis
                     dataKey="updatedTime"
-                    tickFormatter={(tick) =>
-                      new Date(tick).toLocaleDateString()
-                    }
-                    tick={{ fill: "gray", fontSize: 15, angle: -45 }}
+                    
+                    tick={{ fontSize: 12, angle: 0, dy: 14 }}
                     //label={form.chart.xAxisLabel}
                     //tick={{ fontSize: form.axis.xAxisFontSize }}
                   />
@@ -745,6 +756,7 @@ const ChartEditor = () => {
                   <YAxis
                     label={form.chart.yAxisLabel}
                     tick={{ fontSize: form.axis.yAxisFontSize }}
+                    
                   />
                 )}
                 <Tooltip
@@ -775,6 +787,7 @@ const ChartEditor = () => {
                       key={index}
                       name={element.seriesText}
                       dataKey={dk}
+                      stroke={element.strokeColor}
                       fill={false} //{element.color}
                       fillOpacity={element.opacity}
                       dot={false}
@@ -786,7 +799,7 @@ const ChartEditor = () => {
           </CardContent>
         </Card>
       </section>
-
+</div>
       <section className="ps-5 pt-5 space-y-4 bg-white">
         <div>
           <Input
@@ -1001,6 +1014,7 @@ const ChartEditor = () => {
           Add Series
         </Button>
       </section>
+      </div>
     </>
   );
 };

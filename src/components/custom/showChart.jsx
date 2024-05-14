@@ -72,28 +72,28 @@ const ShowChart = ({ chart }) => {
             {chart?.form?.chart?.showXAxis && (
               <XAxis
                 dataKey="updatedTime"
-                tick={{ fontSize: 12, angle: -20, dy: 14 }}
+                tick={{ fontSize: 12, angle: 0, dy: 14 }}
                 label={{
                   value: chart.form.chart.xAxisLabel,
                   position: "insideBottomRight",
                   offset: -20,
                 }}
-                //tick={{ fontSize: chart.form.axis?.xAxisFontSize || 10 }}
               />
             )}
-            {chart?.form?.chart?.showYAxis &&
-              chart.elements?.map((element, index) => (
-                <YAxis
-                  yAxisId={element.elementId}
-                  key={element.elementId}
-
-                  //domain={['dataMin', 'dataMax']} // You might want to specify these domains dynamically
-                />
-              ))}
+            {chart?.form?.chart?.showYAxis && (
+              <YAxis
+                label={chart.form.chart.yAxisLabel}
+                tick={{ fontSize: chart.form.axis.yAxisFontSize }}
+              />
+            )}
             <Tooltip
               contentStyle={{
                 display: chart?.form?.tooltip?.show ? "block" : "none",
-                // Tooltip style configuration
+                color: `rgba(${hexToRgb(chart.form.tooltip.color)}, ${chart.form.tooltip.textOpacity})`,
+                backgroundColor: `rgba(${hexToRgb(chart.form.tooltip.backgroundColor)}, ${chart.form.tooltip.backgroundOpacity})`,
+                borderRadius: `${chart.form.tooltip.borderRadius}px`,
+                border: `${chart.form.tooltip.borderWidth}px ${chart.form.tooltip.borderStyle} rgba(${hexToRgb(chart.form.tooltip.borderColor)}, ${chart.form.tooltip.borderOpacity})`,
+                fontSize: `${chart.form.tooltip.titlefontsize}px`,
               }}
             />
             {chart?.form?.chart?.showCartesianGrid && (
@@ -105,11 +105,11 @@ const ShowChart = ({ chart }) => {
               const dtky = element.yAxis + "_" + element.elementId;
               return (
                 <ChartComponent
-                  key={element.elementId} // Assuming elementId is unique
-                  yAxisId={element.elementId} // Make sure each element has a yAxisId corresponding to its YAxis component
+                  key={element.elementId}
                   name={element.seriesText}
-                  dataKey={dtky} // Ensure you have a dataKey property that matches the data structure
+                  dataKey={dtky}
                   fill={element.color}
+                  stroke={element.strokeColor}
                   fillOpacity={element.opacity}
                   dot={false}
                 />
