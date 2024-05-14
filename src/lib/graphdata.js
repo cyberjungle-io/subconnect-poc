@@ -563,7 +563,7 @@ function formatDatesInArray(array, property, format) {
 export const fetchElementData = async (elements) => {
   //console.log(elements);
   const dataPromises = elements.map((element) =>
-    fetchGraphDataDateSeries(element, "MM/DD/YYYY", 60).then((data) => {
+    fetchGraphDataDateSeries(element, "MM/DD/YYYY", 30).then((data) => {
       return data.map((item) => ({
         ...item,
         elementId: element.elementId, // Assuming each element has an identifier 'id'
