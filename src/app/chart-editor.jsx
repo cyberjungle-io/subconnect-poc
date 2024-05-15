@@ -90,6 +90,7 @@ const ChartEditor = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
+    
     getLocalStorage();
     //fetchGraphDataDateSeries("apr","MM/DD/YYYY");
   }, []);
@@ -146,7 +147,7 @@ const ChartEditor = () => {
       isEditingTitle: false,
       type: "",
       color: "",
-      strokeColor: "",
+      strokeColor: "#000000",
       dataKey: "",
       opacity: 1,
       seriesText: "New Series",
@@ -554,9 +555,10 @@ const ChartEditor = () => {
               <Label>Data Key:</Label>
               <select
                 className="w-80 form-select"
-                value={element.id} // Ensure this is set to the currently selected data key
+                value={element.dataKey} // Ensure this is set to the currently selected data key
                 onChange={handleGraphElementChange(index, "dataKey")}
               >
+                <option value="" disabled>Select Data Key</option> 
                 {graphArray
                   .filter((item) => item.queryType === "time")
                   .map((item, idx) => (
@@ -669,7 +671,7 @@ const ChartEditor = () => {
   };
   return (
     <><div className="bg-white w-full">
-      <div className='bg-gray-100 pb-8 pt-4'>
+      <div className='bg-gray-100 pb-8 pt-2'>
       <div className="flex justify-between items-center p-4 mt-2 rounded-lg ">
         <div className="flex space-x-2">
           <Button
@@ -800,7 +802,7 @@ const ChartEditor = () => {
         </Card>
       </section>
 </div>
-      <section className="ps-5 pt-5 space-y-4 bg-white">
+      <section className="ps-5 pt-5 space-y-4 bg-white mb-5">
         <div>
           <Input
             name="title"
