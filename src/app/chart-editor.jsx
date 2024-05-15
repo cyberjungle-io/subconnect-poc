@@ -463,6 +463,13 @@ const ChartEditor = () => {
     setCurrentContentIndex(content.length);
     console.log(content);
   };
+  const initializeNewChart = () => {
+    setForm(form);
+    setElements(elements);
+  };
+  useEffect(() => {
+    initializeNewChart();
+  }, []);
 
   // Render the chart elements and their customization sections
   const renderElements = () => {

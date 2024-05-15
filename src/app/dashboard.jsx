@@ -60,8 +60,9 @@ const Dashboard = () => {
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [selectButtonState, setSelectButtonState] = useState({
     isOpen: false,
-    buttonBottom: 28, // Initial bottom position
+    buttonBottom: 120, // Initial bottom position
   });
+  const menuRef = useRef(null);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   const [isTileModalOpen, setIsTileModalOpen] = useState(false);
   const [selectedChartId, setSelectedChartId] = useState(null);
@@ -262,6 +263,10 @@ const Dashboard = () => {
       });
     });
   };
+  const handleEditClick = () => {
+    setMenuOpen(false);
+    setEditMode(true);
+  };
   const addChartToRow = (rowId) => {
     setRows((currentRows) => {
       return currentRows.map((row) => {
@@ -335,6 +340,34 @@ const Dashboard = () => {
   useEffect(() => {
     console.log("rows: ", rows);
   }, [rows]);
+  useEffect(() => {
+    const footerHeight = 105; // height of the footer
+    const initialButtonBottom = 10; // initial bottom position of the button
+
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      if (windowHeight + scrollTop >= documentHeight - footerHeight) {
+        setSelectButtonState((prevState) => ({
+          ...prevState,
+          buttonBottom: footerHeight + initialButtonBottom,
+        }));
+      } else {
+        setSelectButtonState((prevState) => ({
+          ...prevState,
+          buttonBottom: initialButtonBottom,
+        }));
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const handleSaveClick = () => {
     saveLocalDashboard();
@@ -364,9 +397,9 @@ const Dashboard = () => {
   };
   // Toggle dropdown visibility
   const toggleDropdown = () => {
-    setSelectButtonState(prevState => ({
+    setSelectButtonState((prevState) => ({
       ...prevState,
-      isOpen: !prevState.isOpen
+      isOpen: !prevState.isOpen,
     }));
   };
 
@@ -374,23 +407,21 @@ const Dashboard = () => {
 
   // Function to close the dropdown
   const closeDropdown = () => {
-    setSelectButtonState(prevState => ({ ...prevState, isOpen: false }));
+    setSelectButtonState((prevState) => ({ ...prevState, isOpen: false }));
   };
 
   // Event listener to close the dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (selectButtonState.isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        closeDropdown();
+        setTimeout(() => closeDropdown(), 150); // Adding a slight delay
       }
     };
 
-    // Attach the listener
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
 
-    // Cleanup the listener on component unmount
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [selectButtonState.isOpen]);
   return (
@@ -682,9 +713,10 @@ const Dashboard = () => {
       <div
         style={{
           position: "fixed",
-          bottom: "70px",
+          bottom: `${selectButtonState.buttonBottom}px`,
           right: "10px",
           zIndex: 50,
+          transition: "bottom 0.3s ease",
         }}
       >
         <button
@@ -728,7 +760,7 @@ const Dashboard = () => {
 
         {selectButtonState.isOpen && (
           <div
-           
+          ref={dropdownRef}
             className="absolute right-0 bottom-20 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
           >
             <div
