@@ -526,7 +526,7 @@ const Dashboard = () => {
               {menuOpen && (
                 <div
                   ref={menuRef}
-                  className="absolute right-0 top-12 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  className="absolute right-0 top-12 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
                 >
                   <div
                     className="py-1"
