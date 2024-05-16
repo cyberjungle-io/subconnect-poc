@@ -344,7 +344,7 @@ const handleDeleteLine = (index) => {
     <div className="bg-white w-full">
       <div className="bg-gray-100 pb-16">
       <div className="flex justify-between items-center p-4 rounded-lg ">
-  <div className="flex space-x-2 mb-12">
+  <div className="flex space-x-2">
     <Button className="flex items-center justify-center bg-transparent border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out" onClick={() => setIsModalOpen(true)}>
       Select Content
     </Button>

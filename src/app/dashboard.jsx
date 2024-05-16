@@ -53,6 +53,8 @@ const Dashboard = () => {
   const [modalType, setModalType] = useState("chart"); // or 'tile'
   const [currentRowId, setCurrentRowId] = useState(null);
   const dropdownRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const [content, setContent] = useState([]);
   const [tileContent, setTileContent] = useState([]);
   const [currentTileContentIndex, setCurrentTileContentIndex] = useState(0);
@@ -61,6 +63,9 @@ const Dashboard = () => {
   const [selectButtonState, setSelectButtonState] = useState({
     isOpen: false,
     buttonBottom: 120, // Initial bottom position
+  });
+  const [menuButtonState, setMenuButtonState] = useState({
+    isOpen: false,
   });
   const menuRef = useRef(null);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
@@ -84,7 +89,9 @@ const Dashboard = () => {
   };
 
   const handleSelectTile = (contentId) => {
-    const selectedTileContent = tileContent.find((item) => item.id === contentId);
+    const selectedTileContent = tileContent.find(
+      (item) => item.id === contentId
+    );
     if (currentRowId) {
       addCell(currentRowId, selectedTileContent, "tile");
     }
@@ -144,8 +151,8 @@ const Dashboard = () => {
           ...globalState, // Preserve all existing state
           account_id: gs.account_id, // Update account_id
           account_name: acct.name, // Update account_name
-          key: gs.key,              // Update key
-          data: gs.data          // Update data
+          key: gs.key, // Update key
+          data: gs.data, // Update data
         };
         console.log("--------Updated Global State:", updatedGlobalState);
         setGlobalState(updatedGlobalState);
@@ -162,21 +169,23 @@ const Dashboard = () => {
   };
   const onDragEnd = (result) => {
     if (!result.destination) return;
-  
+
     const { source, destination } = result;
-  
+
     // Find the source and destination rows by ID
-    const sourceRow = rows.find((row) => row.id === parseInt(source.droppableId));
+    const sourceRow = rows.find(
+      (row) => row.id === parseInt(source.droppableId)
+    );
     const destinationRow = rows.find(
       (row) => row.id === parseInt(destination.droppableId)
     );
-  
+
     // Ensure sourceRow and destinationRow are defined
     if (!sourceRow || !destinationRow) {
       console.error("Source or destination row not found");
       return;
     }
-  
+
     if (source.droppableId === destination.droppableId) {
       // Moving within the same row
       const newRowCells = reorder(
@@ -197,7 +206,7 @@ const Dashboard = () => {
       const [removed] = sourceCells.splice(source.index, 1);
       const destinationCells = Array.from(destinationRow.cells);
       destinationCells.splice(destination.index, 0, removed);
-  
+
       const newRows = rows.map((row) => {
         if (row.id === sourceRow.id) {
           return { ...row, cells: sourceCells };
@@ -206,7 +215,7 @@ const Dashboard = () => {
         }
         return row;
       });
-  
+
       setRows(newRows);
     }
   };
@@ -235,8 +244,6 @@ const Dashboard = () => {
       console.error(`Row with id ${rowId} not found`);
     }
   };
-  
-  
 
   const addRow = () => {
     console.log("Adding row..."); // Diagnostic log
@@ -345,7 +352,8 @@ const Dashboard = () => {
     const initialButtonBottom = 10; // initial bottom position of the button
 
     const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
 
@@ -403,18 +411,33 @@ const Dashboard = () => {
     }));
   };
 
-  
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
 
   // Function to close the dropdown
   const closeDropdown = () => {
     setSelectButtonState((prevState) => ({ ...prevState, isOpen: false }));
   };
-
-  // Event listener to close the dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (selectButtonState.isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        selectButtonState.isOpen &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
         setTimeout(() => closeDropdown(), 150); // Adding a slight delay
+      }
+      if (
+        menuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        closeMenu();
       }
     };
 
@@ -423,12 +446,13 @@ const Dashboard = () => {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [selectButtonState.isOpen]);
+  }, [selectButtonState.isOpen, menuOpen]);
+
   return (
     <main className="bg-gray-100 w-full">
       <div className="flex justify-between items-center p-4">
-      <div className="w-3/12"></div>
-      <h1 className="text-xl font-bold flex-grow text-center w-6/12">
+        <div className="w-3/12"></div>
+        <h1 className="text-xl font-bold flex-grow text-center w-6/12">
           {currentDashboard ? currentDashboard.name : "No Dashboard Selected"}
         </h1>
 
@@ -477,27 +501,89 @@ const Dashboard = () => {
               Cancel
             </Button>
           ) : (
-            <div>
-              <Button
-                onClick={handleToggleEditMode}
-                className="flex items-center justify-center bg-transparent border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
+            <div className="flex justify-end w-3/12 relative">
+              <button
+                onClick={toggleMenu} // Added onClick handler to toggle menu
+                className="flex items-center justify-center bg-transparent text-black  hover:text-gray-600 py-2 px-4 rounded transition duration-150 ease-in-out"
+                aria-label="Menu"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={1.5}
+                  stroke-width="1.5"
                   stroke="currentColor"
-                  className="w-6 h-6 pe-1"
+                  class="w-8 h-8"
                 >
                   <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
                   />
                 </svg>
-                Edit
-              </Button>
+              </button>
+
+              {menuOpen && (
+                <div
+                  ref={menuRef}
+                  className="absolute right-0 top-12 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                >
+                  <div
+                    className="py-1"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="options-menu"
+                  >
+                    <button
+                      className="text-gray-700 flex items-center px-4 py-2 text-base w-full text-left"
+                      role="menuitem"
+                      onClick={handleEditClick}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-5 h-5 mr-2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
+                        />
+                      </svg>
+                      Edit
+                    </button>
+                    <button
+                      className="text-gray-700 flex items-center px-4 py-2 text-base w-full text-left"
+                      role="menuitem"
+                      //onClick={handleEditClick}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-5 h-5 mr-2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
+                        />
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
+                        />
+                      </svg>
+                      Capture
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -539,108 +625,142 @@ const Dashboard = () => {
                         )}`}
                       >
                         <div className="relative w-full rounded-lg overflow-hidden">
-                        {cell.contentType === "chart" ? <ShowChart chart={cell.content} /> : ""}
-                  {cell.contentType === "tile" ? <ShowTile key={JSON.stringify(cell.content.form)} form={cell.content.form} /> : ""}
-                  {editMode && (
-                    <div className="absolute inset-0 bg-black mx-auto bg-opacity-40 hover:bg-opacity-70 border-2 rounded-lg border-gray-600">
-                      <div className="flex justify-center items-center h-full text-white">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="w-16 h-16"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  )}
+                          {cell.contentType === "chart" ? (
+                            <ShowChart chart={cell.content} />
+                          ) : (
+                            ""
+                          )}
+                          {cell.contentType === "tile" ? (
+                            <ShowTile
+                              key={JSON.stringify(cell.content.form)}
+                              form={cell.content.form}
+                            />
+                          ) : (
+                            ""
+                          )}
                           {editMode && (
-                    <div className="absolute top-0 right-0 p-2">
-                      {cell.colSpan < 12 && (
-                        <div
-                          onClick={() => extendChart(row.id, cell.id)}
-                          className="text-white hover:text-green-700 font-bold py-1 px-2 rounded"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-8 h-8"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M12 4.5v15m7.5-7.5h-15"
-                            />
-                          </svg>
+                            <div className="absolute inset-0 bg-black mx-auto bg-opacity-40 hover:bg-opacity-70 border-2 rounded-lg border-gray-600">
+                              <div className="flex justify-center items-center h-full text-white">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="w-16 h-16"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                          )}
+                          {editMode && (
+                            <div className="absolute top-0 right-0 p-2">
+                              {cell.colSpan < 12 && (
+                                <div
+                                  onClick={() => extendChart(row.id, cell.id)}
+                                  className="text-white hover:text-green-700 font-bold py-1 px-2 rounded"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="w-8 h-8"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M12 4.5v15m7.5-7.5h-15"
+                                    />
+                                  </svg>
+                                </div>
+                              )}
+                              {cell.colSpan > 2 && (
+                                <div
+                                  onClick={() => shrinkChart(row.id, cell.id)}
+                                  className="text-white hover:text-red-700 font-bold py-1 px-2 rounded"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="w-8 h-8"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M5 12h14"
+                                    />
+                                  </svg>
+                                </div>
+                              )}
+                              <button
+                                onClick={() => deleteChart(row.id, cell.id)}
+                                className="hover:text-red-700 text-white font-bold py-1 px-2 rounded"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="w-8 h-8"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {cell.colSpan > 2 && (
-                        <div
-                          onClick={() => shrinkChart(row.id, cell.id)}
-                          className="text-white hover:text-red-700 font-bold py-1 px-2 rounded"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-8 h-8"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 12h14"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                      <button
-                        onClick={() => deleteChart(row.id, cell.id)}
-                        className="hover:text-red-700 text-white font-bold py-1 px-2 rounded"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="w-8 h-8"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </Draggable>
-        ))}
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
 
-{editMode &&
-                  row.cells.reduce((sum, chart) => sum + chart.colSpan, 0) <= 10 && (
-                  <button
-                    onClick={() => {
-                      setCurrentRowId(row.id);
-                      setIsModalOpen(true);
-                    }}
-                    type="button"
-                    className="bg-black bg-opacity-40 hover:bg-opacity-70 text-white font-bold py-2 px-4 rounded w-1/12 flex justify-center items-center"
+                {editMode &&
+                  row.cells.reduce((sum, chart) => sum + chart.colSpan, 0) <=
+                    10 && (
+                    <button
+                      onClick={() => {
+                        setCurrentRowId(row.id);
+                        setIsModalOpen(true);
+                      }}
+                      type="button"
+                      className="bg-black bg-opacity-40 hover:bg-opacity-70 text-white font-bold py-2 px-4 rounded w-1/12 flex justify-center items-center"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-12"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                        />
+                      </svg>
+                    </button>
+                  )}
+
+                {editMode && row.cells.length === 0 && (
+                  <div
+                    className="bg-transparent hover:bg-transparent hover:text-red-700 text-red-500 font-bold py-2 px-4 rounded cursor-pointer flex justify-center items-center"
+                    onClick={() => deleteRow(row.id)}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -648,44 +768,21 @@ const Dashboard = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="w-12"
+                      className="w-8 h-8"
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
                       />
                     </svg>
-                  </button>
+                  </div>
                 )}
-                
-
-                {editMode && row.cells.length === 0 && (
-          <div
-            className="bg-transparent hover:bg-transparent hover:text-red-700 text-red-500 font-bold py-2 px-4 rounded cursor-pointer flex justify-center items-center"
-            onClick={() => deleteRow(row.id)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-8 h-8"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-              />
-            </svg>
-          </div>
-        )}
-        {provided.placeholder}
-      </div>
-    )}
-  </Droppable>
-))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        ))}
         {editMode ? (
           <button
             onClick={addRow}
@@ -760,7 +857,7 @@ const Dashboard = () => {
 
         {selectButtonState.isOpen && (
           <div
-          ref={dropdownRef}
+            ref={dropdownRef}
             className="absolute right-0 bottom-20 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
           >
             <div

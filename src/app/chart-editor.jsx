@@ -90,7 +90,6 @@ const ChartEditor = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    
     getLocalStorage();
     //fetchGraphDataDateSeries("apr","MM/DD/YYYY");
   }, []);
@@ -540,7 +539,7 @@ const ChartEditor = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col space-y-1">
+           {/*  <div className="flex flex-col space-y-1">
               <Label>Color:</Label>
               <Input
                 type="color"
@@ -548,9 +547,9 @@ const ChartEditor = () => {
                 value={element.color}
                 onChange={handleElementChange(index, "color")}
               />
-            </div>
+            </div>*/}
             <div className="flex flex-col space-y-1">
-              <Label>Stroke Color:</Label>
+              <Label>Color:</Label>
               <Input
                 type="color"
                 className="w-15"
@@ -565,7 +564,9 @@ const ChartEditor = () => {
                 value={element.dataKey} // Ensure this is set to the currently selected data key
                 onChange={handleGraphElementChange(index, "dataKey")}
               >
-                <option value="" disabled>Select Data Key</option> 
+                <option value="" disabled>
+                  Select Data Key
+                </option>
                 {graphArray
                   .filter((item) => item.queryType === "time")
                   .map((item, idx) => (
@@ -677,352 +678,358 @@ const ChartEditor = () => {
     setIsModalOpen(false); // Close the modal
   };
   return (
-    <><div className="bg-white w-full">
-      <div className='bg-gray-100 pb-8 pt-2'>
-      <div className="flex justify-between items-center p-4 mt-2 rounded-lg ">
-        <div className="flex space-x-2">
-          <Button
-            className="flex items-center justify-center bg-transparent border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Select Content
-          </Button>
-          <Button
-            className="flex items-center justify-center bg-transparent border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
-            onClick={handleNewClick}
-          >
-            New
-          </Button>
+    <>
+      <div className="bg-white w-full">
+        <div className="bg-gray-100 pb-8 pt-2">
+          <div className="flex justify-between items-center p-4 mt-2 rounded-lg ">
+            <div className="flex space-x-2">
+              <Button
+                className="flex items-center justify-center bg-transparent border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Select Content
+              </Button>
+              <Button
+                className="flex items-center justify-center bg-transparent border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white py-2 px-4 rounded transition duration-150 ease-in-out"
+                onClick={handleNewClick}
+              >
+                New
+              </Button>
+            </div>
+            <div>
+              <Button
+                className="flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out"
+                onClick={handleSaveClick}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+            <ul>
+              {content.map((item, index) => (
+                <li key={index} className="flex justify-between items-center">
+                  <button onClick={() => handleSelectContent(index)}>
+                    {item.form.title.text}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteContent(index)}
+                    className="ml-4"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-red-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Modal>
+
+          <section className="w-2/3 mx-auto mt-8">
+            <Card className="h-[350px]">
+              <CardHeader>
+                <CardTitle>
+                  <div
+                    className="w-1/2"
+                    style={{
+                      color: form.title.color,
+                      fontSize: `${form.title.fontSize}px`,
+                    }}
+                  >
+                    {form.title.text ? form.title.text : "Title"}
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart width={500} height={300} data={data}>
+                    {form.chart.showXAxis && (
+                      <XAxis
+                        dataKey="updatedTime"
+                        tick={{ fontSize: 12, angle: 0, dy: 14 }}
+                        //label={form.chart.xAxisLabel}
+                        //tick={{ fontSize: form.axis.xAxisFontSize }}
+                      />
+                    )}
+                    {form.chart.showYAxis && (
+                      <YAxis
+                        label={form.chart.yAxisLabel}
+                        tick={{ fontSize: form.axis.yAxisFontSize }}
+                      />
+                    )}
+                    <Tooltip
+                      contentStyle={{
+                        display: form.tooltip.show ? "block" : "none",
+                        color: `rgba(${hexToRgb(form.tooltip.color)}, ${
+                          form.tooltip.textOpacity
+                        })`,
+                        backgroundColor: `rgba(${hexToRgb(
+                          form.tooltip.backgroundColor
+                        )}, ${form.tooltip.backgroundOpacity})`,
+                        borderRadius: `${form.tooltip.borderRadius}px`,
+                        border: `${form.tooltip.borderWidth}px ${
+                          form.tooltip.borderStyle
+                        } rgba(${hexToRgb(form.tooltip.borderColor)}, ${
+                          form.tooltip.borderOpacity
+                        })`,
+                        fontSize: `${form.tooltip.titlefontsize}px`, // Add this line
+                      }}
+                    />
+                    {form.chart.CartesianGrid && (
+                      <CartesianGrid stroke="#f5f5f5" />
+                    )}
+                    <Legend />
+                    {elements.map((element, index) => {
+                      const ChartComponent =
+                        element.type === "Bar" ? Bar : Line;
+                      const dk = element.yAxis + "_" + element.elementId;
+                      return (
+                        <ChartComponent
+                          key={index}
+                          name={element.seriesText}
+                          dataKey={dk}
+                          stroke={element.strokeColor}
+                          fill={false} //{element.color}
+                          fillOpacity={element.opacity}
+                          dot={false}
+                        />
+                      );
+                    })}
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </section>
         </div>
-        <div>
-          <Button
-            className="flex items-center justify-center bg-green-500 border-2 border-green-500 text-white hover:bg-transparent hover:text-green-500 py-2 px-4 rounded transition duration-150 ease-in-out"
-            onClick={handleSaveClick}
-          >
-            Save
-          </Button>
-        </div>
-      </div>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <ul>
-          {content.map((item, index) => (
-            <li key={index} className="flex justify-between items-center">
-              <button onClick={() => handleSelectContent(index)}>
-                {item.form.title.text}
-              </button>
+        <section className="ps-5 pt-5 space-y-4 bg-white mb-5">
+          <div>
+            <Input
+              name="title"
+              placeholder="Title"
+              value={form.title.text}
+              onChange={(e) =>
+                handleInputChange("title", "text", e.target.value)
+              }
+              className="w-80 me-4"
+            />
+            <div className="space-x-3 my-2">
+              <Toggle onClick={() => handleToggleElement("CartesianGrid")}>
+                {form.chart.CartesianGrid ? "Remove Grid" : "Add Grid"}
+              </Toggle>
+              <Toggle onClick={() => handleToggleElement("showXAxis")}>
+                {form.chart.showXAxis ? "Hide X Axis" : "Show X Axis"}
+              </Toggle>
+
+              <Toggle onClick={() => handleToggleElement("showYAxis")}>
+                {form.chart.showYAxis ? "Hide Y Axis" : "Show Y Axis"}
+              </Toggle>
               <button
-                onClick={() => handleDeleteContent(index)}
-                className="ml-4"
+                onClick={() =>
+                  updateTooltipProperty("show", !form.tooltip.show)
+                }
+                className="btn btn-primary"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-red-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                {form.tooltip.show ? "Hide Tooltip" : "Show Tooltip"}
               </button>
-            </li>
-          ))}
-        </ul>
-      </Modal>
 
-      <section className="w-2/3 mx-auto mt-8">
-        <Card className="h-[350px]">
-          <CardHeader>
-            <CardTitle>
-              <div
-                className="w-1/2"
-                style={{
-                  color: form.title.color,
-                  fontSize: `${form.title.fontSize}px`,
-                }}
-              >
-                {form.title.text ? form.title.text : "Title"}
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart width={500} height={300} data={data}>
-                {form.chart.showXAxis && (
-                  <XAxis
-                    dataKey="updatedTime"
-                    
-                    tick={{ fontSize: 12, angle: 0, dy: 14 }}
-                    //label={form.chart.xAxisLabel}
-                    //tick={{ fontSize: form.axis.xAxisFontSize }}
-                  />
-                )}
-                {form.chart.showYAxis && (
-                  <YAxis
-                    label={form.chart.yAxisLabel}
-                    tick={{ fontSize: form.axis.yAxisFontSize }}
-                    
-                  />
-                )}
-                <Tooltip
-                  contentStyle={{
-                    display: form.tooltip.show ? "block" : "none",
-                    color: `rgba(${hexToRgb(form.tooltip.color)}, ${
-                      form.tooltip.textOpacity
-                    })`,
-                    backgroundColor: `rgba(${hexToRgb(
-                      form.tooltip.backgroundColor
-                    )}, ${form.tooltip.backgroundOpacity})`,
-                    borderRadius: `${form.tooltip.borderRadius}px`,
-                    border: `${form.tooltip.borderWidth}px ${
-                      form.tooltip.borderStyle
-                    } rgba(${hexToRgb(form.tooltip.borderColor)}, ${
-                      form.tooltip.borderOpacity
-                    })`,
-                    fontSize: `${form.tooltip.titlefontsize}px`, // Add this line
-                  }}
-                />
-                {form.chart.CartesianGrid && <CartesianGrid stroke="#f5f5f5" />}
-                <Legend />
-                {elements.map((element, index) => {
-                  const ChartComponent = element.type === "Bar" ? Bar : Line;
-                  const dk = element.yAxis + "_" + element.elementId;
-                  return (
-                    <ChartComponent
-                      key={index}
-                      name={element.seriesText}
-                      dataKey={dk}
-                      stroke={element.strokeColor}
-                      fill={false} //{element.color}
-                      fillOpacity={element.opacity}
-                      dot={false}
-                    />
-                  );
-                })}
-              </ComposedChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </section>
-</div>
-      <section className="ps-5 pt-5 space-y-4 bg-white mb-5">
-        <div>
-          <Input
-            name="title"
-            placeholder="Title"
-            value={form.title.text}
-            onChange={(e) => handleInputChange("title", "text", e.target.value)}
-            className="w-80 me-4"
-          />
-          <div className="space-x-3 my-2">
-            <Toggle onClick={() => handleToggleElement("CartesianGrid")}>
-              {form.chart.CartesianGrid ? "Remove Grid" : "Add Grid"}
-            </Toggle>
-            <Toggle onClick={() => handleToggleElement("showXAxis")}>
-              {form.chart.showXAxis ? "Hide X Axis" : "Show X Axis"}
-            </Toggle>
+              {form.tooltip.show && (
+                <div className="flex">
+                  <div className="flex flex-col space-x-10">
+                    <h3>Title</h3>
+                    <div className="flex space-x-2">
+                      <ColorControl
+                        label="Color"
+                        value={form.tooltip.color}
+                        onChange={(newValue) =>
+                          updateTooltipProperty("color", newValue)
+                        }
+                      />
 
-            <Toggle onClick={() => handleToggleElement("showYAxis")}>
-              {form.chart.showYAxis ? "Hide Y Axis" : "Show Y Axis"}
-            </Toggle>
-            <button
-              onClick={() => updateTooltipProperty("show", !form.tooltip.show)}
-              className="btn btn-primary"
-            >
-              {form.tooltip.show ? "Hide Tooltip" : "Show Tooltip"}
-            </button>
+                      <Label>
+                        <div className="flex items-center ms-4">
+                          <OpacityControl
+                            label="Opacity"
+                            value={form.tooltip.textOpacity}
+                            onDecrease={() =>
+                              updateTooltipProperty(
+                                "textOpacity",
+                                Math.max(
+                                  0,
+                                  parseFloat(form.tooltip.textOpacity) - 0.1
+                                ).toFixed(1)
+                              )
+                            }
+                            onIncrease={() =>
+                              updateTooltipProperty(
+                                "textOpacity",
+                                Math.min(
+                                  1,
+                                  parseFloat(form.tooltip.textOpacity) + 0.1
+                                ).toFixed(1)
+                              )
+                            }
+                          />
+                        </div>
+                      </Label>
+                      <FontSizeControl
+                        label="Font Size"
+                        value={form.tooltip.titlefontsize}
+                        onChange={(newValue) =>
+                          updateTooltipProperty("titlefontsize", newValue)
+                        }
+                        onDecrease={() =>
+                          updateTooltipProperty(
+                            "titlefontsize",
+                            Math.max(0, form.tooltip.titlefontsize - 1)
+                          )
+                        }
+                        onIncrease={() =>
+                          updateTooltipProperty(
+                            "titlefontsize",
+                            form.tooltip.titlefontsize + 1
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col space-x-10">
+                    <h3>Background</h3>
+                    <div className="flex">
+                      <ColorControl
+                        label="Color"
+                        value={form.tooltip.backgroundColor}
+                        onChange={(newValue) =>
+                          updateTooltipProperty("backgroundColor", newValue)
+                        }
+                      />
 
-            {form.tooltip.show && (
-              <div className="flex">
-                <div className="flex flex-col space-x-10">
-                  <h3>Title</h3>
-                  <div className="flex space-x-2">
-                    <ColorControl
-                      label="Color"
-                      value={form.tooltip.color}
-                      onChange={(newValue) =>
-                        updateTooltipProperty("color", newValue)
-                      }
-                    />
-
-                    <Label>
-                      <div className="flex items-center ms-4">
-                        <OpacityControl
-                          label="Opacity"
-                          value={form.tooltip.textOpacity}
+                      <OpacityControl
+                        label="Opacity"
+                        value={form.tooltip.backgroundOpacity}
+                        onDecrease={() =>
+                          updateTooltipProperty(
+                            "backgroundOpacity",
+                            Math.max(
+                              0,
+                              parseFloat(form.tooltip.backgroundOpacity) - 0.1
+                            ).toFixed(1)
+                          )
+                        }
+                        onIncrease={() =>
+                          updateTooltipProperty(
+                            "backgroundOpacity",
+                            Math.min(
+                              1,
+                              parseFloat(form.tooltip.backgroundOpacity) + 0.1
+                            ).toFixed(1)
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col space-x-10 ">
+                    <h3>Border</h3>
+                    <div className="flex">
+                      <ColorControl
+                        label="Color"
+                        value={form.tooltip.borderColor}
+                        onChange={(newValue) =>
+                          updateTooltipProperty("borderColor", newValue)
+                        }
+                      />
+                      <OpacityControl
+                        label="Opacity"
+                        value={form.tooltip.borderOpacity}
+                        onDecrease={() =>
+                          updateTooltipProperty(
+                            "borderOpacity",
+                            Math.max(
+                              0,
+                              parseFloat(form.tooltip.borderOpacity) - 0.1
+                            ).toFixed(1)
+                          )
+                        }
+                        onIncrease={() =>
+                          updateTooltipProperty(
+                            "borderOpacity",
+                            Math.min(
+                              1,
+                              parseFloat(form.tooltip.borderOpacity) + 0.1
+                            ).toFixed(1)
+                          )
+                        }
+                      />
+                      <BorderStyleSelect
+                        updateTooltipProperty={updateTooltipProperty}
+                      />
+                      <div className="flex flex-col">
+                        <WidthControl
+                          label="Width"
+                          value={form.tooltip.borderWidth}
                           onDecrease={() =>
                             updateTooltipProperty(
-                              "textOpacity",
+                              "borderWidth",
                               Math.max(
                                 0,
-                                parseFloat(form.tooltip.textOpacity) - 0.1
+                                parseFloat(form.tooltip.borderWidth) - 0.5
                               ).toFixed(1)
                             )
                           }
                           onIncrease={() =>
                             updateTooltipProperty(
-                              "textOpacity",
-                              Math.min(
-                                1,
-                                parseFloat(form.tooltip.textOpacity) + 0.1
+                              "borderWidth",
+                              (
+                                parseFloat(form.tooltip.borderWidth) + 0.5
                               ).toFixed(1)
                             )
                           }
                         />
                       </div>
-                    </Label>
-                    <FontSizeControl
-                      label="Font Size"
-                      value={form.tooltip.titlefontsize}
-                      onChange={(newValue) =>
-                        updateTooltipProperty("titlefontsize", newValue)
-                      }
-                      onDecrease={() =>
-                        updateTooltipProperty(
-                          "titlefontsize",
-                          Math.max(0, form.tooltip.titlefontsize - 1)
-                        )
-                      }
-                      onIncrease={() =>
-                        updateTooltipProperty(
-                          "titlefontsize",
-                          form.tooltip.titlefontsize + 1
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col space-x-10">
-                  <h3>Background</h3>
-                  <div className="flex">
-                    <ColorControl
-                      label="Color"
-                      value={form.tooltip.backgroundColor}
-                      onChange={(newValue) =>
-                        updateTooltipProperty("backgroundColor", newValue)
-                      }
-                    />
-
-                    <OpacityControl
-                      label="Opacity"
-                      value={form.tooltip.backgroundOpacity}
-                      onDecrease={() =>
-                        updateTooltipProperty(
-                          "backgroundOpacity",
-                          Math.max(
-                            0,
-                            parseFloat(form.tooltip.backgroundOpacity) - 0.1
-                          ).toFixed(1)
-                        )
-                      }
-                      onIncrease={() =>
-                        updateTooltipProperty(
-                          "backgroundOpacity",
-                          Math.min(
-                            1,
-                            parseFloat(form.tooltip.backgroundOpacity) + 0.1
-                          ).toFixed(1)
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col space-x-10 ">
-                  <h3>Border</h3>
-                  <div className="flex">
-                    <ColorControl
-                      label="Color"
-                      value={form.tooltip.borderColor}
-                      onChange={(newValue) =>
-                        updateTooltipProperty("borderColor", newValue)
-                      }
-                    />
-                    <OpacityControl
-                      label="Opacity"
-                      value={form.tooltip.borderOpacity}
-                      onDecrease={() =>
-                        updateTooltipProperty(
-                          "borderOpacity",
-                          Math.max(
-                            0,
-                            parseFloat(form.tooltip.borderOpacity) - 0.1
-                          ).toFixed(1)
-                        )
-                      }
-                      onIncrease={() =>
-                        updateTooltipProperty(
-                          "borderOpacity",
-                          Math.min(
-                            1,
-                            parseFloat(form.tooltip.borderOpacity) + 0.1
-                          ).toFixed(1)
-                        )
-                      }
-                    />
-                    <BorderStyleSelect
-                      updateTooltipProperty={updateTooltipProperty}
-                    />
-                    <div className="flex flex-col">
-                      <WidthControl
-                        label="Width"
-                        value={form.tooltip.borderWidth}
-                        onDecrease={() =>
-                          updateTooltipProperty(
-                            "borderWidth",
-                            Math.max(
-                              0,
-                              parseFloat(form.tooltip.borderWidth) - 0.5
-                            ).toFixed(1)
-                          )
-                        }
-                        onIncrease={() =>
-                          updateTooltipProperty(
-                            "borderWidth",
-                            (
-                              parseFloat(form.tooltip.borderWidth) + 0.5
-                            ).toFixed(1)
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <RadiusControl
-                        label="Radius"
-                        value={form.tooltip.borderRadius}
-                        onDecrease={() =>
-                          updateTooltipProperty(
-                            "borderRadius",
-                            Math.max(
-                              0,
-                              parseFloat(form.tooltip.borderRadius) - 0.5
-                            ).toFixed(1)
-                          )
-                        }
-                        onIncrease={() =>
-                          updateTooltipProperty(
-                            "borderRadius",
-                            (
-                              parseFloat(form.tooltip.borderRadius) + 0.5
-                            ).toFixed(1)
-                          )
-                        }
-                      />
+                      <div className="flex flex-col">
+                        <RadiusControl
+                          label="Radius"
+                          value={form.tooltip.borderRadius}
+                          onDecrease={() =>
+                            updateTooltipProperty(
+                              "borderRadius",
+                              Math.max(
+                                0,
+                                parseFloat(form.tooltip.borderRadius) - 0.5
+                              ).toFixed(1)
+                            )
+                          }
+                          onIncrease={() =>
+                            updateTooltipProperty(
+                              "borderRadius",
+                              (
+                                parseFloat(form.tooltip.borderRadius) + 0.5
+                              ).toFixed(1)
+                            )
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-        {renderElements()}
-        <Button variant="outline" onClick={handleAddElement}>
-          Add Series
-        </Button>
-      </section>
+          {renderElements()}
+          <Button variant="outline" onClick={handleAddElement}>
+            Add Series
+          </Button>
+        </section>
       </div>
     </>
   );
