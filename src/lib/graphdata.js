@@ -378,7 +378,7 @@ export const graphArray = [
     basePath: "basePoolSnapshots",
     xAxis: "updatedTime",
     yAxis: "apr",
-    postProcess: [{"multiplyBy": 100}, {"round": 2}],
+    postProcess: [{ multiplyBy: 100 }, { round: 2 }],
     variables: ["pool number"],
   },
   {
@@ -400,7 +400,7 @@ export const graphArray = [
     basePath: "basePoolSnapshots",
     xAxis: "updatedTime",
     yAxis: "delegatorCount",
-    postProcess: [{}, {"round": 2}],
+    postProcess: [{}, { round: 2 }],
     variables: ["pool number"],
   },
   {
@@ -422,7 +422,7 @@ export const graphArray = [
     basePath: "basePoolSnapshots",
     xAxis: "updatedTime",
     yAxis: "commission",
-    postProcess: [{"multiplyBy": 100}, {"round": 2}],
+    postProcess: [{ multiplyBy: 100 }, { round: 2 }],
     variables: ["pool number"],
   },
 ];
@@ -447,20 +447,28 @@ export const fetchGraphDataDateSeries = async (element, dateformat, days) => {
     newquery = newquery.replace(subs, map[keys[0]]);
   }
   console.log("New Query: ", newquery);
-  const { data } = await client.query({
-    query: gql(newquery),
-  });
   let newArray = [];
-  for (let i = 0; i < data[element.basePath].length; i++) {
-    let record = data[element.basePath][i];
+  try {
+    const { data } = await client.query({
+      query: gql(newquery),
+    });
 
-    record = {
-      ...record,
-      [element.yAxis]: postProcess(record[element.yAxis], element.postProcess),
-    };
-    newArray.push(record);
+    for (let i = 0; i < data[element.basePath].length; i++) {
+      let record = data[element.basePath][i];
+
+      record = {
+        ...record,
+        [element.yAxis]: postProcess(
+          record[element.yAxis],
+          element.postProcess
+        ),
+      };
+      newArray.push(record);
+    }
+  } catch (error) {
+    console.log("Error: ", error);
+    return [];
   }
-
   return newArray;
 };
 function postProcess(data, processArray) {
@@ -500,33 +508,43 @@ export const daysFromNow = (days) => {
 
 export const fetchValueData = async (graphquery) => {
   console.log("fetchValueData: ", graphquery);
+  let tdata = null;
+  try {
   const client = new ApolloClient({
     uri: graphquery.dataQuery.URI[0],
     cache: new InMemoryCache(),
   });
-  let newquery = graphquery.dataQuery.query;
-  for (let i = 0; i < graphquery.mappings.length; i++) {
-    let map = graphquery.mappings[i];
-    let keys = Object.keys(map);
-    console.log("Map keys: ", keys[0]);
-    let subs = "<<" + keys[0] + ">>";
-    console.log("Subs: ", subs);
-    newquery = newquery.replace(subs, map[keys[0]]);
-  }
-  console.log("New Query: ", newquery);
-  const { data } = await client.query({
-    query: gql(newquery),
-  });
+  
+  
+    let newquery = graphquery.dataQuery.query;
+    for (let i = 0; i < graphquery.mappings.length; i++) {
+      let map = graphquery.mappings[i];
+      let keys = Object.keys(map);
+      console.log("Map keys: ", keys[0]);
+      let subs = "<<" + keys[0] + ">>";
+      console.log("Subs: ", subs);
+      newquery = newquery.replace(subs, map[keys[0]]);
+    }
+    console.log("New Query: ", newquery);
+    const { data } = await client.query({
+      query: gql(newquery),
+    });
 
-  //console.log("Data", data[graphquery.basePath][0][graphquery.value]);
-  const tdata = postProcess(
-    data[graphquery.dataQuery.basePath][0][graphquery.dataQuery.value],
-    graphquery.dataQuery.postProcess
-  );
+    //console.log("Data", data[graphquery.basePath][0][graphquery.value]);
+    tdata = postProcess(
+      data[graphquery.dataQuery.basePath][0][graphquery.dataQuery.value],
+      graphquery.dataQuery.postProcess
+    );
+  } catch (error) {
+    console.log("Error: ", error);
+    return null;
+  }
   return tdata;
 };
 export const fetchTableData = async (graphquery) => {
   console.log("fetchTableData: ", graphquery);
+  let result = [];
+  try {
   const client = new ApolloClient({
     uri: graphquery.dataQuery.URI[0],
     cache: new InMemoryCache(),
@@ -550,7 +568,12 @@ export const fetchTableData = async (graphquery) => {
     data[graphquery.dataQuery.basePath][0][graphquery.dataQuery.value],
     graphquery.dataQuery.postProcess
   ); */
-  return data[graphquery.dataQuery.basePath];
+  result = data[graphquery.dataQuery.basePath];
+  } catch (error) {
+    console.log("Error: ", error);
+    return [];
+  }
+  return result
 };
 function formatDatesInArray(array, property, format) {
   return array.map((item) => {
@@ -570,7 +593,7 @@ export const fetchElementData = async (elements) => {
       }));
     })
   );
-  
+
   const results = await Promise.all(dataPromises);
   let combinedData = [].concat(...results);
 
@@ -616,6 +639,6 @@ export const fetchElementData = async (elements) => {
   }, []);
 
   mergedData = formatDatesInArray(mergedData, "updatedTime", "MM/DD/YYYY hh A");
-  
+
   return mergedData;
 };
