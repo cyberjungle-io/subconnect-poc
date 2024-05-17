@@ -17,7 +17,7 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
   const [graphQuery, setGraphQuery] = useState(
     graphArray.reduce((acc, item) => {
       if (item.queryType === "value") {
-        return { ...acc, [item]: "" };
+        return { ...acc, [item.id]: "" };
       }
       return acc;
     }, {})
@@ -32,51 +32,47 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
   function handleColorChange(value) {
     setNewLine({ ...newline, label: { ...newline.label, color: value } });
   }
+
   const handleFontSizeChange = (value) => {
     setNewLine({ ...newline, label: { ...newline.label, fontSize: value } });
   };
+
   useEffect(() => {
     handleLineUpdate(index, newline);
   }, [newline]);
 
-  const handleGraphElementChange = (index, field) => async (event) => {
-    console.log("field", field);
-    console.log("event", event.target.value);
-    console.log("index", index);
-    const dta = graphArray.find((item) => item.id === event.target.value);
-    console.log("dta", dta);
-    let newmappings = [];
-    //input alert a string
-    for (let i = 0; i < dta.variables.length; i++) {
-      let v = dta.variables[i];
-
-      const prmpt = `please enter ${v}`;
+  const handleGraphElementChange = (event) => {
+    const selectedId = event.target.value;
+    const selectedData = graphArray.find((item) => item.id === selectedId);
+    
+    let newMappings = [];
+    for (let i = 0; i < selectedData.variables.length; i++) {
+      let v = selectedData.variables[i];
+      const prmpt = `Please enter ${v}`;
       let userInput = prompt(prmpt, "");
       if (userInput == null || userInput == "") {
         alert("User cancelled the prompt.");
+        return;
       } else {
         let m = {};
-        m[dta.variables[i]] = userInput;
-        newmappings.push(m);
-        //let rplc = "<<" + selectedObject.variables[i] + ">>";
-        //qry = qry.replace(rplc, userInput);
+        m[selectedData.variables[i]] = userInput;
+        newMappings.push(m);
       }
-      console.log("mappings", newmappings);
     }
+
     const updatedNewline = {
       ...newline,
       value: {
         ...newline.value,
-        dataQuery: dta,
-        mappings: newmappings,
+        id: selectedId,
+        dataQuery: selectedData,
+        mappings: newMappings,
       },
     };
-    console.log("updatedNewline", updatedNewline);
-    setNewLine(updatedNewline);
 
-    console.log("newline", newline);
-    console.log("after fetch data");
+    setNewLine(updatedNewline);
   };
+
   return (
     <>
       <div className="bg-white p-3 shadow-md rounded-lg border-2 border-gray-300">
@@ -112,7 +108,7 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
                 stroke="currentColor"
-                className="w-6 h-6 "
+                className="w-6 h-6"
               >
                 <path
                   strokeLinecap="round"
@@ -155,24 +151,27 @@ export default function ConfigureTable({ line, index, handleLineUpdate }) {
         
         <div className="flex flex-wrap items-center space-x-4 p-3">
           <div className="flex-row">
-          <Label >Data Key:</Label>
-          <div className="flex-row">
-          <select
-            className="w-64 py-1 px-2 text-sm border-gray-300 border rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            value={newline.value.id}
-            onChange={handleGraphElementChange(index)}
-          >
-            {graphArray
-              .filter((item) => item.queryType === "value")
-              .map((item, idx) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-          </select>
+            <Label>Data Key:</Label>
+            <div className="flex-row">
+              <select
+                id="dataKey"
+                className="w-64 py-1 px-2 text-sm border-gray-300 border rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                value={newline.value.id || ""}
+                onChange={handleGraphElementChange}
+              >
+                <option value="" disabled>Select Data Key</option>
+                {graphArray
+                  .filter((item) => item.queryType === "value")
+                  .map((item, idx) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
           </div>
         </div>
-      </div></div>
+      </div>
     </>
   );
 }
